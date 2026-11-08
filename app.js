@@ -1,0 +1,813 @@
+window.MN_LOCAL=true;window.MN_CFG={"feedbackEmail": "", "donateUrl": ""};
+(function(){
+'use strict';
+
+/*#JAL-START*/
+function div(a,b){return ~~(a/b)}
+function mod(a,b){return a-~~(a/b)*b}
+var BREAKS=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+function jalCal(jy,withoutLeap){
+  var bl=BREAKS.length,gy=jy+621,leapJ=-14,jp=BREAKS[0],jm,jump=0,leap,leapG,march,n,i;
+  if(jy<jp||jy>=BREAKS[bl-1])throw new Error('Invalid Jalaali year '+jy);
+  for(i=1;i<bl;i+=1){
+    jm=BREAKS[i];jump=jm-jp;
+    if(jy<jm)break;
+    leapJ=leapJ+div(jump,33)*8+div(mod(jump,33),4);
+    jp=jm;
+  }
+  n=jy-jp;
+  leapJ=leapJ+div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4&&jump-n===4)leapJ+=1;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(withoutLeap)return {gy:gy,march:march};
+  if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);
+  if(leap===-1)leap=4;
+  return {leap:leap,gy:gy,march:march};
+}
+function g2d(gy,gm,gd){
+  var d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;
+  d=d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;
+  return d;
+}
+function d2g(jdn){
+  var j,i,gd,gm,gy;
+  j=4*jdn+139361631;
+  j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;
+  i=div(mod(j,1461),4)*5+308;
+  gd=div(mod(i,153),5)+1;
+  gm=mod(div(i,153),12)+1;
+  gy=div(j,1461)-100100+div(8-gm,6);
+  return {gy:gy,gm:gm,gd:gd};
+}
+function j2d(jy,jm,jd){
+  var r=jalCal(jy,true);
+  return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;
+}
+function d2j(jdn){
+  var gy=d2g(jdn).gy,jy=gy-621,r=jalCal(jy,false),jdn1f=g2d(gy,3,r.march),jd,jm,k;
+  k=jdn-jdn1f;
+  if(k>=0){
+    if(k<=185){jm=1+div(k,31);jd=mod(k,31)+1;return {jy:jy,jm:jm,jd:jd};}
+    k-=186;
+  }else{
+    jy-=1;k+=179;
+    if(r.leap===1)k+=1;
+  }
+  jm=7+div(k,30);jd=mod(k,30)+1;
+  return {jy:jy,jm:jm,jd:jd};
+}
+/*#JAL-END*/
+
+var MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+var KINDS={service:'سرویس دوره‌ای',repair:'تعمیر',consumable:'لوازم مصرفی',document:'بیمه و اسناد',other:'سایر'};
+var PD='۰۱۲۳۴۵۶۷۸۹';
+var nf=new Intl.NumberFormat('fa-IR',{maximumFractionDigits:0});
+var nf2=new Intl.NumberFormat('fa-IR',{maximumFractionDigits:2});
+function fa(n){return isFinite(n)?nf.format(Math.round(n)):'—'}
+function faDigits(s){return String(s).replace(/\d/g,function(d){return PD[d]})}
+function mult(){return S.unit==='rial'?10:1}
+function unitName(){return S.unit==='rial'?'ریال':'تومان'}
+function money(n){return fa(n*mult())+' '+unitName()}
+function parseNum(s){
+  if(s==null)return NaN;
+  s=String(s).replace(/[۰-۹]/g,function(d){return PD.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)})
+    .replace(/[٬,،\s]/g,'').replace('٫','.');
+  return s===''?NaN:Number(s);
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pad(n){return String(n).padStart(2,'0')}
+function isoOf(y,m,d){return y+'-'+pad(m)+'-'+pad(d)}
+function isoToJdn(iso){var p=iso.split('-');return g2d(+p[0],+p[1],+p[2])}
+function jdnToIso(j){var g=d2g(j);return isoOf(g.gy,g.gm,g.gd)}
+function isoToJ(iso){return d2j(isoToJdn(iso))}
+function jToIso(y,m,d){return jdnToIso(j2d(y,m,d))}
+function jMonthLen(y,m){return m<=6?31:(m<=11?30:(jalCal(y,false).leap===0?30:29))}
+function todayIso(){var d=new Date();return isoOf(d.getFullYear(),d.getMonth()+1,d.getDate())}
+function fmtDate(iso){var j=isoToJ(iso);return faDigits(j.jd)+' '+MONTHS[j.jm-1]+' '+faDigits(j.jy)}
+function addMonths(iso,n){
+  var j=isoToJ(iso),m=j.jm-1+n,y=j.jy+Math.floor(m/12);
+  m=((m%12)+12)%12;
+  return jToIso(y,m+1,Math.min(j.jd,jMonthLen(y,m+1)));
+}
+function daysBetween(a,b){return isoToJdn(b)-isoToJdn(a)}
+function durText(d){
+  if(d<45)return faDigits(d)+' روز';
+  var m=Math.floor(d/30.44),r=Math.round(d-m*30.44);
+  return faDigits(m)+' ماه'+(r>0&&m<12?' و '+faDigits(r)+' روز':'');
+}
+function agoText(d){return d<=0?'امروز':(d===1?'دیروز':faDigits(d)+' روز پیش')}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+/* ---------- state ---------- */
+var KEY='carservice.v2',OWNER_KEY='carservice.owner',USER_KEY='carservice.user';
+var PROVINCES=["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
+function T(id,name,kind,km,months,on){return {id:id,name:name,kind:kind,km:km,months:months,on:on!==false}}
+function defaultTpls(){return [
+  T('oil','روغن موتور','service',5000,6),T('oilf','فیلتر روغن','service',5000,6),
+  T('airf','فیلتر هوا','service',20000,12),T('fuelf','فیلتر بنزین','service',20000,24),
+  T('plug','شمع','service',20000,24),T('brakef','روغن ترمز','service',40000,24),
+  T('cool','ضدیخ (مایع خنک‌کننده)','service',40000,24),T('gear','روغن گیربکس','service',60000,48),
+  T('timing','تسمه تایم و تسمه‌ی دینام','service',60000,60),T('align','بالانس و ترازبندی چرخ','service',15000,12),
+  T('cabf','فیلتر کابین (در صورت وجود)','service',15000,12,false),
+  T('pads','لنت ترمز جلو','consumable',30000,0),T('padsr','کفشک ترمز عقب','consumable',60000,0),
+  T('tires','لاستیک','consumable',50000,48),T('battery','باتری','consumable',0,36),
+  T('wiper','تیغه برف‌پاک‌کن','consumable',0,12),
+  T('inspect','معاینه فنی','document',0,12),T('ins3','بیمه شخص ثالث','document',0,12),
+  T('insb','بیمه بدنه','document',0,12,false),T('toll','عوارض سالیانه','document',0,12)
+]}
+function blank(){return {v:1,tplVer:2,unit:'toman',updated:0,car:{name:'',plate:'',year:''},calDays:21,fallbackRate:40,readings:[],templates:defaultTpls(),logs:[]}}
+function migrate(o){var b=blank();for(var k in o){if(Object.prototype.hasOwnProperty.call(o,k))b[k]=o[k]}
+  if(!b.car)b.car=blank().car;if(!Array.isArray(b.readings))b.readings=[];if(!Array.isArray(b.logs))b.logs=[];if(!Array.isArray(b.templates))b.templates=defaultTpls();
+  if(!o.tplVer){if(!b.logs.length&&!b.readings.length&&!b.car.name)b.templates=defaultTpls();b.tplVer=2}
+  if(!b.unit)b.unit='toman';return b}
+function loadLocal(){try{var r=localStorage.getItem(KEY);if(r)return migrate(JSON.parse(r))}catch(e){}return blank()}
+var S=loadLocal();
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
+function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
+
+/* ---------- account and cloud sync ---------- */
+var APP_VERSION='1.0',LOCAL_ONLY=!!window.MN_LOCAL,cfg={feedbackEmail:'',donateUrl:''};
+var me=null,booted=false,sync={mode:'init'},pushTimer=null,retryTimer=null,pushing=false,pending=false,dirty=false,lastPull=0;
+var auth={mode:'login',msg:'',recovery:null,busy:false,email:'',prov:''};
+var SYNC_TEXT={init:'در حال اتصال…',on:'ذخیره‌ی ابری فعال',off:'آفلاین',slow:'اتصال کند است',err:'همگام‌سازی ناموفق',local:'فقط روی این دستگاه'};
+function api(method,url,body){
+  return fetch(url,{method:method,credentials:'same-origin',headers:body?{'content-type':'application/json'}:{},body:body?JSON.stringify(body):undefined})
+    .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {status:r.status,ok:r.ok,data:j}})});
+}
+function setSync(m){sync.mode=m;renderHeader();var el=$('syncNote');if(el)el.innerHTML=syncNote()}
+function schedulePush(now){
+  if(!me||LOCAL_ONLY)return;
+  dirty=true;clearTimeout(pushTimer);pushTimer=setTimeout(push,now?0:800);
+}
+function push(){
+  if(!me)return;
+  if(pushing){pending=true;return}
+  pushing=true;
+  var snap=JSON.parse(JSON.stringify(S));
+  api('PUT','/api/state',{state:snap}).then(function(r){
+    if(r.status===200){if(snap.updated===S.updated)dirty=false;setSync('on')}
+    else if(r.status===409&&r.data&&r.data.state){adoptRemote(r.data.state);setSync('on')}
+    else if(r.status===401){sessionLost()}
+    else setSync('err');
+  },function(){
+    setSync('off');clearTimeout(retryTimer);retryTimer=setTimeout(function(){schedulePush(true)},15000);
+  }).catch(function(){setSync('err')}).then(function(){pushing=false;if(pending){pending=false;schedulePush(false)}});
+}
+function adoptRemote(remote){
+  S=migrate(remote);saveLocal();dirty=false;
+  if(view==='add'||view==='setup'){renderHeader()}else{render()}
+}
+function pull(){
+  lastPull=Date.now();
+  var t=setTimeout(function(){if(sync.mode==='init')setSync('slow')},10000);
+  return api('GET','/api/state').then(function(r){
+    clearTimeout(t);
+    if(r.status===401){sessionLost();return}
+    if(r.status!==200){setSync('err');return}
+    var rs=r.data.state,ru=r.data.updated||0;
+    if(rs&&ru>(S.updated||0)){adoptRemote(rs)}
+    else if(hasData()&&(S.updated||0)>ru){schedulePush(true)}
+    setSync('on');
+  },function(){clearTimeout(t);setSync('off')});
+}
+function startSession(u){
+  var prev=null;try{prev=localStorage.getItem(OWNER_KEY)}catch(e){}
+  if(prev!==u.email){S=blank();saveLocal()}
+  try{localStorage.setItem(OWNER_KEY,u.email);localStorage.setItem(USER_KEY,JSON.stringify(u))}catch(e){}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  me=u;booted=true;render();
+  return pull();
+}
+function sessionLost(){me=null;auth.mode='login';auth.msg='نشست شما تمام شد. دوباره وارد شوید.';render()}
+function clearLocalAll(){try{localStorage.removeItem(KEY);localStorage.removeItem(OWNER_KEY);localStorage.removeItem(USER_KEY)}catch(e){}S=blank();dirty=false}
+function doLogout(){
+  var fin=function(){clearLocalAll();me=null;auth.mode='login';auth.msg='';auth.recovery=null;try{location.hash=''}catch(e){}view='home';render()};
+  api('POST','/api/logout').then(fin,fin);
+}
+function boot(){
+  loadConfig();
+  if(LOCAL_ONLY){me={email:'local',province:'',admin:false,local:true};booted=true;sync.mode='local';render();return}
+  render();
+  api('GET','/api/me').then(function(r){
+    if(r.status===200){startSession(r.data.user)}
+    else{booted=true;me=null;render()}
+  },function(){
+    var cu=null;try{cu=JSON.parse(localStorage.getItem(USER_KEY)||'null')}catch(e){}
+    booted=true;
+    if(cu&&cu.email){me=cu;setSync('off');render()}
+    else{me=null;auth.msg='برای اولین ورود باید به اینترنت وصل باشید.';render()}
+  });
+}
+window.addEventListener('online',function(){if(me&&!LOCAL_ONLY){pull();if(dirty)schedulePush(true)}});
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&me&&!LOCAL_ONLY&&!dirty&&Date.now()-lastPull>60000)pull();
+});
+function syncNote(){
+  if(LOCAL_ONLY)return 'داده‌های شما فقط روی همین گوشی ذخیره می‌شوند و به هیچ سرور یا شخصی فرستاده نمی‌شوند. اگر گوشی گم شود، عوض شود یا اطلاعات مرورگر پاک شود، داده‌ها از بین می‌روند. پس مرتب فایل پشتیبان بگیرید.';
+  if(sync.mode==='on')return 'داده‌های شما علاوه بر این دستگاه، به‌صورت خصوصی روی سرور هم ذخیره می‌شوند. اگر گوشی گم شود یا عوض کنید، با ورود به حساب همه چیز برمی‌گردد.';
+  if(sync.mode==='init')return 'در حال اتصال به سرور…';
+  if(sync.mode==='off')return 'اینترنت وصل نیست. داده‌ها روی گوشی ذخیره می‌شوند و بعد از اتصال به سرور می‌روند.';
+  return 'ارتباط با سرور برقرار نشد. داده‌ها فعلاً روی گوشی هستند و بعد از اتصال دوباره همگام می‌شوند.';
+}
+
+/* ---------- feedback and support ---------- */
+function loadConfig(){
+  if(LOCAL_ONLY){var c0=window.MN_CFG||{};cfg={feedbackEmail:String(c0.feedbackEmail||''),donateUrl:String(c0.donateUrl||'')};return Promise.resolve()}
+  return fetch('/config.json',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(j){
+    cfg={feedbackEmail:String(j.feedbackEmail||''),donateUrl:String(j.donateUrl||'')};
+    if(booted&&!auth.recovery&&view!=='add')render();
+  }).catch(function(){});
+}
+function mailLink(kind,label){
+  var subj='ماشین‌نامه: '+label;
+  var body='\n\n---\nنسخه‌ی برنامه: '+APP_VERSION+(kind==='bug'?'\nمرورگر: '+navigator.userAgent:'');
+  return 'mailto:'+encodeURIComponent(cfg.feedbackEmail).replace('%40','@')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+}
+function feedbackCard(withDonate){
+  if(!cfg.feedbackEmail)return '';
+  var h='<section class="card pad fbcard"><h2>نظر، پیشنهاد یا انتقاد دارید؟</h2><p class="muted">پیام شما مستقیم به سازنده‌ی برنامه می‌رسد و برای بهتر شدن دفترچه خیلی کمک می‌کند.</p>'+
+    '<div class="fb-actions"><a class="btn" href="'+esc(mailLink('idea','پیشنهاد'))+'">پیشنهاد</a><a class="btn" href="'+esc(mailLink('crit','انتقاد'))+'">انتقاد</a><a class="btn" href="'+esc(mailLink('bug','گزارش مشکل'))+'">گزارش مشکل</a></div>'+
+    '<div class="fbmail"><small>یا مستقیم به این ایمیل بنویسید:</small><span class="ltr" dir="ltr">'+esc(cfg.feedbackEmail)+'</span><button class="btn small" type="button" data-act="copyMail">کپی</button></div>';
+  if(withDonate){
+    h+='<div class="fbdonate"><p class="muted">اگر برنامه به کارتان آمد، می‌توانید از ادامه‌ی راه حمایت کنید.</p>'+
+      (/^https:\/\//.test(cfg.donateUrl)?'<a class="btn gold" href="'+esc(cfg.donateUrl)+'" target="_blank" rel="noopener">حمایت از برنامه</a>':'<button class="btn gold" type="button" data-act="donateSoon">حمایت از برنامه</button>')+'</div>';
+  }
+  return h+'</section>';
+}
+
+/* ---------- install tip ---------- */
+var deferredInstall=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;if(me&&view==='home'&&!auth.recovery)render()});
+function isStandalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}
+function isIos(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
+function tipDismissed(){try{return localStorage.getItem('carservice.tip')==='1'}catch(e){return false}}
+function lastBackup(){try{return Number(localStorage.getItem('carservice.lastBackup'))||0}catch(e){return 0}}
+function markBackup(){try{localStorage.setItem('carservice.lastBackup',String(Date.now()))}catch(e){}}
+function backupTip(){
+  if(!LOCAL_ONLY||!hasData())return '';
+  var lb=lastBackup();
+  if(lb&&Date.now()-lb<30*864e5)return '';
+  return '<div class="banner tip"><span>'+(lb?'بیش از ۳۰ روز از آخرین پشتیبان‌گیری گذشته است.':'اطلاعات شما فقط روی این گوشی است و هنوز از آن پشتیبان نگرفته‌اید.')+'</span><button class="btn small primary" data-go="setup">پشتیبان‌گیری</button></div>';
+}
+function installTip(){
+  if(isStandalone()||tipDismissed())return '';
+  if(deferredInstall)return '<div class="banner tip"><span>این برنامه را روی صفحه‌ی اصلی گوشی نصب کنید.</span><span class="actions"><button class="btn small primary" data-act="installApp">نصب</button><button class="btn small" data-act="dismissTip">بعداً</button></span></div>';
+  if(isIos())return '<div class="banner tip"><span>برای نصب روی آیفون: در Safari دکمه‌ی اشتراک‌گذاری را بزنید و «Add to Home Screen» را انتخاب کنید.</span><button class="btn small" data-act="dismissTip">فهمیدم</button></div>';
+  return '';
+}
+
+/* ---------- auth views ---------- */
+function provOptions(sel){
+  return '<option value="">انتخاب کنید</option>'+PROVINCES.map(function(p){return '<option value="'+esc(p)+'"'+(p===sel?' selected':'')+'>'+esc(p)+'</option>'}).join('');
+}
+function vAuth(){
+  var a=auth,h='';
+  if(a.recovery){
+    return '<section class="card pad"><h2>کد بازیابی شما</h2><p class="muted">اگر رمز عبور را فراموش کنید، فقط با این کد می‌توانید دوباره وارد شوید. همین حالا آن را جایی امن بنویسید یا از صفحه عکس بگیرید. این کد دوباره نشان داده نمی‌شود.</p>'+
+      '<p class="reccode" id="reccode">'+esc(a.recovery)+'</p>'+
+      '<div class="actions"><button class="btn" type="button" data-act="copyRec">کپی کد</button></div>'+
+      '<label class="chk"><input type="checkbox" id="rec_ok"><span>کد را ذخیره کردم</span></label>'+
+      '<button class="btn primary" type="button" data-act="recDone">ادامه</button></section>';
+  }
+  var msg=a.msg?'<p class="banner bad" role="alert">'+esc(a.msg)+'</p>':'';
+  var dis=a.busy?' disabled':'';
+  if(a.mode==='signup'){
+    h='<section class="card pad"><h2>ساخت حساب</h2><p class="muted">با حساب کاربری، اطلاعات شما با گم‌شدن یا عوض‌کردن گوشی از بین نمی‌رود.</p>'+msg+'<form data-form="signup" class="stack">'+
+      '<label>ایمیل<input id="a_email" class="ltr" type="email" inputmode="email" autocomplete="username" value="'+esc(a.email)+'" required></label>'+
+      '<label>رمز عبور<input id="a_pass" class="ltr" type="password" autocomplete="new-password" minlength="8" required><small>دست‌کم ۸ نویسه</small></label>'+
+      '<label>استان محل زندگی<select id="a_prov" required>'+provOptions(a.prov)+'</select><small>فقط برای آمار کلی استفاده می‌شود.</small></label>'+
+      '<label class="chk"><input type="checkbox" id="a_terms"><span><a href="/privacy" target="_blank" rel="noopener">حریم خصوصی</a> را خوانده‌ام و می‌پذیرم</span></label>'+
+      '<button class="btn primary" type="submit"'+dis+'>ساخت حساب</button></form>'+
+      '<div class="linkrow"><button class="lnk" data-act="authMode" data-m="login">حساب دارم، وارد می‌شوم</button></div></section>';
+  }else if(a.mode==='recover'){
+    h='<section class="card pad"><h2>بازیابی حساب</h2><p class="muted">ایمیل و کد بازیابی‌ای که هنگام ساخت حساب گرفتید را وارد کنید و رمز تازه بسازید.</p>'+msg+'<form data-form="recover" class="stack">'+
+      '<label>ایمیل<input id="a_email" class="ltr" type="email" inputmode="email" autocomplete="username" value="'+esc(a.email)+'" required></label>'+
+      '<label>کد بازیابی<input id="a_rec" class="ltr" type="text" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX-XXXX" required></label>'+
+      '<label>رمز عبور تازه<input id="a_pass" class="ltr" type="password" autocomplete="new-password" minlength="8" required></label>'+
+      '<button class="btn primary" type="submit"'+dis+'>بازیابی و ورود</button></form>'+
+      '<div class="linkrow"><button class="lnk" data-act="authMode" data-m="login">بازگشت به ورود</button></div></section>';
+  }else{
+    h='<section class="card pad"><h2>ورود</h2><p class="muted">دفترچه‌ی ماشین خود را با ایمیل و رمز عبور باز کنید.</p>'+msg+'<form data-form="login" class="stack">'+
+      '<label>ایمیل<input id="a_email" class="ltr" type="email" inputmode="email" autocomplete="username" value="'+esc(a.email)+'" required></label>'+
+      '<label>رمز عبور<input id="a_pass" class="ltr" type="password" autocomplete="current-password" required></label>'+
+      '<button class="btn primary" type="submit"'+dis+'>ورود</button></form>'+
+      '<div class="linkrow"><button class="lnk" data-act="authMode" data-m="signup">ساخت حساب تازه</button><button class="lnk" data-act="authMode" data-m="recover">رمز را فراموش کرده‌ام</button></div></section>';
+  }
+  return h+feedbackCard(false);
+}
+function authCall(url,body){
+  if(auth.busy)return;
+  auth.busy=true;auth.msg='';
+  api('POST',url,body).then(function(r){
+    auth.busy=false;
+    if(r.status===200){auth.recovery=r.data.recovery||null;auth.msg='';auth.mode='login';startSession(r.data.user)}
+    else{auth.msg=(r.data&&r.data.error)||'خطا در ارتباط با سرور';render()}
+  },function(){auth.busy=false;auth.msg='ارتباط با سرور برقرار نشد. اینترنت را بررسی کنید.';render()});
+}
+function accountCard(){
+  if(!me)return '';
+  if(LOCAL_ONLY)return '<section class="card pad"><h2>درباره‌ی ماشین‌نامه</h2><p class="muted">نسخه‌ی '+APP_VERSION+'. اطلاعات شما فقط روی همین دستگاه ذخیره می‌شود.</p>'+
+    '<details><summary>حریم خصوصی</summary><p class="muted">این برنامه هیچ داده‌ای را به سرور نمی‌فرستد و هیچ حسابی از شما نمی‌خواهد. مشخصات خودرو، کیلومتر، سرویس‌ها و هزینه‌هایی که وارد می‌کنید فقط در حافظه‌ی مرورگر همین گوشی می‌ماند و سازنده‌ی برنامه به آن‌ها دسترسی ندارد. هر زمان بخواهید می‌توانید در همین صفحه همه‌ی داده‌ها را پاک کنید. اگر ایمیلی برای نظر و پیشنهاد می‌فرستید، آن پیام را خودتان از برنامه‌ی ایمیل می‌فرستید.</p></details></section>';
+  return '<section class="card pad"><h2>حساب کاربری</h2><p class="acct-mail">'+esc(me.email)+'</p>'+
+    '<form data-form="prof" class="stack"><label>استان<select id="p_prov">'+provOptions(me.province)+'</select></label><button class="btn" type="submit">ذخیره‌ی استان</button></form>'+
+    '<div class="actions"><button class="btn" data-act="logout">خروج از حساب</button><a class="btn" href="/privacy" target="_blank" rel="noopener">حریم خصوصی</a>'+(me.admin?'<a class="btn primary" href="/admin">گزارش مدیر</a>':'')+'</div>'+
+    '<details><summary>تغییر رمز عبور</summary><form data-form="pw" class="stack"><label>رمز فعلی<input id="pw_cur" class="ltr" type="password" autocomplete="current-password"></label><label>رمز تازه<input id="pw_new" class="ltr" type="password" autocomplete="new-password" minlength="8"></label><button class="btn" type="submit">تغییر رمز</button></form></details>'+
+    '<details><summary>حذف حساب و همه‌ی داده‌ها</summary><p class="muted">با این کار حساب شما و همه‌ی اطلاعات ثبت‌شده برای همیشه از سرور پاک می‌شود.</p><form data-form="del" class="stack"><label>رمز عبور<input id="del_pass" class="ltr" type="password" autocomplete="current-password"></label><button class="btn danger" type="submit">حذف حساب</button></form></details></section>';
+}
+
+/* ---------- estimation ---------- */
+function points(){
+  var m={};
+  S.readings.forEach(function(r){m[r.date]=Math.max(m[r.date]||0,r.km)});
+  S.logs.forEach(function(l){if(l.km!=null)m[l.date]=Math.max(m[l.date]||0,l.km)});
+  return Object.keys(m).sort().map(function(d){return {date:d,km:m[d]}});
+}
+function estimate(){
+  var pts=points(),today=todayIso(),prior=S.fallbackRate>0?S.fallbackRate:40;
+  if(!pts.length)return {km:null,rate:prior,last:null,elapsed:0,days:0};
+  var last=pts[pts.length-1],num=prior*14,den=14,days=0,i;
+  for(i=1;i<pts.length;i++){
+    var dd=daysBetween(pts[i-1].date,pts[i].date),dk=pts[i].km-pts[i-1].km;
+    if(dd<=0||dk<0)continue;
+    var age=Math.max(0,daysBetween(pts[i].date,today)),w=Math.pow(0.5,age/90);
+    num+=dk*w;den+=dd*w;days+=dd;
+  }
+  var rate=num/den,elapsed=Math.max(0,daysBetween(last.date,today));
+  return {km:Math.round(last.km+rate*elapsed),rate:rate,last:last,elapsed:elapsed,days:days};
+}
+function lastDone(id){
+  var best=null;
+  S.logs.forEach(function(l){
+    if((l.tpls||[]).indexOf(id)>=0&&(!best||l.date>best.date||(l.date===best.date&&(l.km||0)>(best.km||0))))best=l;
+  });
+  return best;
+}
+function statusFor(t,est){
+  var ld=lastDone(t.id),today=todayIso();
+  if(!ld)return {t:t,ld:null,state:'none',frac:-1};
+  var fk=-Infinity,fd=-Infinity,kmLeft=null,daysLeft=null;
+  if(t.km>0&&ld.km!=null&&est.km!=null){kmLeft=ld.km+t.km-est.km;fk=(est.km-ld.km)/t.km}
+  if(t.months>0){
+    var due=addMonths(ld.date,t.months);daysLeft=daysBetween(today,due);
+    var tot=daysBetween(ld.date,due);fd=tot>0?(tot-daysLeft)/tot:1;
+  }
+  var frac=Math.max(fk,fd);
+  if(!isFinite(frac))return {t:t,ld:ld,state:'none',frac:-1};
+  var state='ok';
+  if(frac>=1)state='bad';
+  else if((kmLeft!=null&&kmLeft<=Math.max(300,t.km*0.1))||(daysLeft!=null&&daysLeft<=30))state='warn';
+  return {t:t,ld:ld,state:state,frac:frac,kmLeft:kmLeft,daysLeft:daysLeft};
+}
+function intervalText(t){
+  var p=[];
+  if(t.km>0)p.push('هر '+fa(t.km)+' کیلومتر');
+  if(t.months>0)p.push(t.months===12?'هر سال':(t.months%12===0?'هر '+faDigits(t.months/12)+' سال':'هر '+faDigits(t.months)+' ماه'));
+  return p.length?p.join(' یا '):'بدون بازه';
+}
+function remainText(st){
+  var p=[];
+  if(st.kmLeft!=null)p.push(st.kmLeft>=0?fa(st.kmLeft)+' کیلومتر دیگر':fa(-st.kmLeft)+' کیلومتر از موعد گذشته');
+  if(st.daysLeft!=null)p.push(st.daysLeft>0?durText(st.daysLeft)+' دیگر':(st.daysLeft===0?'موعد امروز است':durText(-st.daysLeft)+' از موعد گذشته'));
+  return p.join(' · ');
+}
+
+/* ---------- ui helpers ---------- */
+var VIEWS=['home','add','history','report','setup'];
+var view='home',lastView=null,form=null,tplEdit=null,hf={kind:'all',q:''};
+var curJ=isoToJ(todayIso());
+var rep={mode:'month',y:curJ.jy,m:curJ.jm,from:jToIso(curJ.jy,1,1),to:todayIso()};
+var toastTimer=null;
+function $(id){return document.getElementById(id)}
+function val(id){var e=$(id);return e?e.value:''}
+function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true},4200)}
+function confirmTwice(btn,text){
+  if(btn.dataset.armed==='1')return true;
+  btn.dataset.armed='1';btn.dataset.orig=btn.textContent;btn.textContent=text;
+  setTimeout(function(){if(btn.isConnected){btn.dataset.armed='';btn.textContent=btn.dataset.orig}},4000);
+  return false;
+}
+function dateField(id,iso){
+  var j=isoToJ(iso),cj=isoToJ(todayIso()),lo=Math.min(cj.jy-15,j.jy),hi=Math.max(cj.jy+2,j.jy),i,d='',m='',y='';
+  for(i=1;i<=31;i++)d+='<option value="'+i+'"'+(i===j.jd?' selected':'')+'>'+faDigits(i)+'</option>';
+  for(i=1;i<=12;i++)m+='<option value="'+i+'"'+(i===j.jm?' selected':'')+'>'+MONTHS[i-1]+'</option>';
+  for(i=hi;i>=lo;i--)y+='<option value="'+i+'"'+(i===j.jy?' selected':'')+'>'+faDigits(i)+'</option>';
+  return '<div class="datef" id="'+id+'"><select data-df="'+id+'" data-p="d" aria-label="روز">'+d+'</select><select data-df="'+id+'" data-p="m" aria-label="ماه">'+m+'</select><select data-df="'+id+'" data-p="y" aria-label="سال">'+y+'</select></div>';
+}
+function readDate(id){
+  var box=$(id),q=function(p){return +box.querySelector('[data-p='+p+']').value};
+  var y=q('y'),m=q('m'),d=Math.min(q('d'),jMonthLen(y,m));
+  return jToIso(y,m,d);
+}
+function clampDay(id){
+  var box=$(id);if(!box)return;
+  var y=+box.querySelector('[data-p=y]').value,m=+box.querySelector('[data-p=m]').value,ds=box.querySelector('[data-p=d]');
+  var len=jMonthLen(y,m);if(+ds.value>len)ds.value=String(len);
+}
+function plateHtml(p){return p?'<span class="plate" aria-label="پلاک"><b><i class="flag"></i>ایران</b><span class="no">'+esc(faDigits(p))+'</span></span>':''}
+function logoSvg(){return '<svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect class="lg-a" x="13" y="13" width="38" height="38" rx="3"/><rect class="lg-t" x="13" y="13" width="38" height="38" rx="3" transform="rotate(45 32 32)"/><circle class="lg-s" cx="32" cy="32" r="15"/><circle class="lg-r" cx="32" cy="32" r="15"/><path class="lg-g" d="M22.5 38a11 11 0 0 1 19 0"/><path class="lg-n" d="M32 38l5.5-9"/><circle class="lg-d" cx="32" cy="38" r="2.2"/></svg>'}
+
+/* ---------- header ---------- */
+function renderHeader(){
+  var c=S.car,sub=me?(c.name?esc(c.name)+(c.year?' · '+faDigits(esc(c.year)):''):'ماشین خود را معرفی کنید'):'دفترچه‌ی هوشمند سرویس و هزینه‌ی خودرو';
+  $('hdr').innerHTML='<header class="top"><div class="brand">'+logoSvg()+'<div><h1>ماشین<span class="nm">‌نامه</span></h1><p class="sub">'+sub+'</p></div></div>'+
+    (me?'<div class="top-end">'+plateHtml(c.plate)+'<span class="chip '+sync.mode+'" title="'+esc(syncNote())+'"><i></i>'+SYNC_TEXT[sync.mode]+'</span></div>':'')+
+    '</header><div class="tilestrip" aria-hidden="true"></div>';
+}
+
+/* ---------- home ---------- */
+function drums(km){
+  var s=String(Math.max(0,Math.round(km))).padStart(6,'0'),h='',i;
+  for(i=0;i<s.length;i++)h+='<span class="d">'+PD[s[i]]+'</span>';
+  return '<div class="drums" role="img" aria-label="'+fa(km)+' کیلومتر">'+h+'</div>';
+}
+function vOnboard(){
+  return '<section class="card pad"><h2>شروع کنیم</h2><p class="muted">برای تخمین کیلومتر و یادآوری سرویس‌ها فقط چند مورد لازم است. همه‌ی آن‌ها بعداً در تنظیمات قابل تغییر است.</p>'+
+  '<form data-form="onboard" class="stack">'+
+  '<div class="grid2"><label>نام یا مدل ماشین<input id="ob_name" type="text" autocomplete="off" value="پراید"></label><label>سال ساخت<input id="ob_year" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(1389)+'"></label></div>'+
+  '<label>پلاک (اختیاری)<input id="ob_plate" type="text" autocomplete="off" placeholder="۱۲ ب ۳۴۵ - ۶۷"></label>'+
+  '<label>عدد فعلی کیلومترشمار<input id="ob_km" type="text" inputmode="numeric" autocomplete="off" placeholder="مثلاً ۸۵٬۴۰۰"></label>'+
+  '<label>میانگین رانندگی روزانه (حدودی)<input id="ob_rate" type="text" inputmode="numeric" autocomplete="off" placeholder="مثلاً ۴۰"><small>فقط برای شروع است. با هر بار ثبت کیلومتر، برنامه میانگین واقعی شما را یاد می‌گیرد.</small></label>'+
+  '<button class="btn primary" type="submit">شروع</button></form></section>';
+}
+function vHome(){
+  if(!S.car.name&&!S.readings.length&&!S.logs.length)return vOnboard();
+  var est=estimate(),today=todayIso(),lastP=est.last,html=installTip()+backupTip();
+  var needCal=!lastP||daysBetween(lastP.date,today)>=S.calDays;
+  html+='<section class="odo card"><div class="odo-top"><span class="eyebrow">کیلومتر امروز (تخمینی)</span><span class="pill none">'+(est.days>=7?'بر پایه‌ی ثبت‌های شما':'تخمین اولیه')+'</span></div>';
+  html+=est.km==null?'<p class="odo-meta">هنوز کیلومتری ثبت نشده است.</p>':drums(est.km);
+  if(est.km!=null)html+='<p class="odo-meta">میانگین ≈ '+fa(est.rate)+' کیلومتر در روز · آخرین ثبت: '+fa(lastP.km)+' ('+agoText(est.elapsed)+')</p>';
+  if(needCal&&lastP)html+='<p class="banner">'+faDigits(est.elapsed)+' روز از آخرین ثبت گذشته. عدد واقعی کیلومترشمار را وارد کنید تا تخمین دقیق‌تر شود.</p>';
+  html+='<form data-form="odo" class="row"><input id="qodo" type="text" inputmode="numeric" autocomplete="off" aria-label="عدد کیلومترشمار" placeholder="عدد کیلومترشمار الان"><button class="btn primary" type="submit">ثبت کیلومتر</button></form></section>';
+
+  var all=S.templates.filter(function(t){return t.on}).map(function(t){return statusFor(t,est)});
+  var due=all.filter(function(s){return s.state!=='none'}).sort(function(a,b){return b.frac-a.frac});
+  var none=all.filter(function(s){return s.state==='none'});
+  html+='<section class="stack"><div class="sec-title"><h2>سرویس‌های پیش‌رو</h2>'+(due.length?'<small>به ترتیب فوریت</small>':'')+'</div>';
+  if(!due.length)html+='<div class="empty">هنوز سرویسی ثبت نشده. آخرین زمان انجام هر مورد را از فهرست پایین وارد کنید تا موعدها محاسبه شود.</div>';
+  else html+='<div class="svcs">'+due.map(function(s){return svcRow(s,false)}).join('')+'</div>';
+  html+='</section>';
+  if(none.length){
+    html+='<section class="stack"><div class="sec-title"><h2>هنوز ثبت نشده</h2><small>آخرین بار را وارد کنید</small></div><div class="svcs">'+none.map(function(s){return svcRow(s,true)}).join('')+'</div></section>';
+  }
+  var cm=isoToJ(today),ms=jToIso(cm.jy,cm.jm,1),ys=jToIso(cm.jy,1,1);
+  var mt=sumCost(S.logs.filter(function(l){return l.date>=ms})),yt=sumCost(S.logs.filter(function(l){return l.date>=ys}));
+  html+='<section class="card pad"><div class="sec-title"><h2>هزینه‌ها</h2><button class="fbtn" data-go="report">گزارش کامل</button></div><dl class="kv"><div><dt>'+MONTHS[cm.jm-1]+' '+faDigits(cm.jy)+'</dt><dd>'+money(mt)+'</dd></div><div><dt>سال '+faDigits(cm.jy)+'</dt><dd>'+money(yt)+'</dd></div></dl></section>';
+  html+=feedbackCard(true);
+  return html;
+}
+function sumCost(a){return a.reduce(function(s,l){return s+(l.cost||0)},0)}
+function svcRow(s,isNone){
+  var t=s.t,label={bad:'عقب‌افتاده',warn:'نزدیک موعد',ok:'خوب',none:'ثبت نشده'}[s.state];
+  var h='<article class="svc '+s.state+'"><div class="svc-head"><div><h3>'+esc(t.name)+'</h3><span class="pill '+s.state+'">'+label+'</span></div>'+
+    '<button class="btn small" data-act="done" data-id="'+t.id+'">'+(isNone?'ثبت آخرین انجام':'انجام شد')+'</button></div>';
+  if(!isNone){
+    h+='<div class="bar"><i style="width:'+Math.min(100,Math.max(2,s.frac*100)).toFixed(0)+'%"></i></div><p class="svc-meta">'+remainText(s)+'</p>'+
+    '<small>آخرین بار: '+fmtDate(s.ld.date)+(s.ld.km!=null?' · '+fa(s.ld.km)+' کیلومتر':'')+' · '+intervalText(t)+(t.km>0&&t.months>0?' (هرکدام زودتر)':'')+'</small>';
+  }else h+='<small>'+intervalText(t)+'</small>';
+  return h+'</article>';
+}
+
+/* ---------- add / edit log ---------- */
+function makeForm(o){
+  var est=estimate();
+  return Object.assign({id:null,kind:'service',date:todayIso(),km:est.km,tpls:[],title:'',cost:'',place:'',note:'',touched:false},o||{});
+}
+function openAdd(o){form=makeForm(o);go('add')}
+function tplName(id){var t=S.templates.filter(function(x){return x.id===id})[0];return t?t.name:''}
+function vAdd(){
+  if(!form)form=makeForm();
+  var f=form,h='<section class="card pad"><h2>'+(f.id?'ویرایش ثبت':'ثبت سرویس یا هزینه')+'</h2><form data-form="log" class="stack">';
+  h+='<div class="seg" role="radiogroup" aria-label="نوع">'+Object.keys(KINDS).map(function(k){
+    return '<label><input type="radio" name="kind" value="'+k+'"'+(f.kind===k?' checked':'')+'><span>'+KINDS[k]+'</span></label>'}).join('')+'</div>';
+  h+='<label>تاریخ'+dateField('fd',f.date)+'</label>';
+  h+='<label>کیلومتر<input id="f_km" type="text" inputmode="numeric" autocomplete="off" value="'+(f.km!=null?esc(fa(f.km)):'')+'"><small>اگر عدد کیلومترشمار را می‌بینید همان را بنویسید. مقدار پیش‌فرض تخمینی است.</small></label>';
+  h+='<div class="stack"><span style="font-size:14px;font-weight:500">چه مواردی انجام شد؟ (می‌توانید چند مورد انتخاب کنید)</span><div class="tchips">'+
+    S.templates.map(function(t){return '<label class="tchip"><input type="checkbox" data-tpl="'+t.id+'"'+(f.tpls.indexOf(t.id)>=0?' checked':'')+'><span>'+esc(t.name)+'</span></label>'}).join('')+'</div></div>';
+  h+='<label>شرح<input id="f_title" type="text" autocomplete="off" value="'+esc(f.title)+'" placeholder="مثلاً تعویض روغن و فیلتر"></label>';
+  h+='<div class="grid2"><label>هزینه ('+unitName()+')<input id="f_cost" type="text" inputmode="numeric" autocomplete="off" value="'+(f.cost?esc(fa(f.cost*mult())):'')+'" placeholder="مثلاً ۱٬۲۵۰٬۰۰۰"></label>'+
+     '<label>مکان<input id="f_place" type="text" autocomplete="off" value="'+esc(f.place)+'" placeholder="مثلاً تعمیرگاه مرکزی"></label></div>';
+  h+='<label>یادداشت<input id="f_note" type="text" autocomplete="off" value="'+esc(f.note)+'" placeholder="مثلاً روغن ۱۰W40، فاکتور شماره…"></label>';
+  h+='<div class="actions"><button class="btn primary" type="submit">ذخیره</button><button class="btn" type="button" data-act="cancelLog">انصراف</button>'+
+     (f.id?'<button class="btn danger" type="button" data-act="delLog">حذف</button>':'')+'</div></form></section>';
+  return h;
+}
+function saveLog(){
+  var f=form,date=readDate('fd');
+  var kind=(document.querySelector('input[name=kind]:checked')||{}).value||'other';
+  var tpls=[].map.call(document.querySelectorAll('[data-tpl]:checked'),function(i){return i.dataset.tpl});
+  var title=val('f_title').trim();
+  if(!title&&tpls.length)title=tpls.map(tplName).join('، ');
+  if(!title){toast('شرح یا مورد انجام‌شده را مشخص کنید');return}
+  var est=estimate(),km=parseNum(val('f_km'));
+  km=isFinite(km)?Math.round(km):(est.km!=null?est.km:null);
+  if(!f.id&&km!=null&&est.last&&date>=est.last.date&&km<est.last.km){toast('کیلومتر کمتر از آخرین ثبت ('+fa(est.last.km)+') است. دوباره بررسی کنید.');return}
+  var cost=parseNum(val('f_cost'));
+  var log={id:f.id||uid(),date:date,km:km,kind:kind,title:title,tpls:tpls,cost:isFinite(cost)?cost/mult():0,place:val('f_place').trim(),note:val('f_note').trim()};
+  if(f.id)S.logs=S.logs.map(function(l){return l.id===f.id?log:l});else S.logs.push(log);
+  var wasEdit=!!f.id;
+  form=null;commit();toast(wasEdit?'تغییرات ذخیره شد':'ثبت شد');go(wasEdit?'history':'home');
+}
+
+/* ---------- history ---------- */
+function logRow(l){
+  return '<button class="log" data-act="editLog" data-id="'+l.id+'"><span class="log-main"><small>'+fmtDate(l.date)+'</small><b>'+esc(l.title)+'</b><small>'+KINDS[l.kind]+(l.place?' · '+esc(l.place):'')+(l.km!=null?' · '+fa(l.km)+' کیلومتر':'')+'</small></span><span class="log-cost">'+(l.cost?money(l.cost):'')+'</span></button>';
+}
+function vHistory(){
+  var h='<section class="stack"><h2>سوابق سرویس و تعمیر</h2><div class="seg" style="gap:6px">';
+  h+=[['all','همه']].concat(Object.keys(KINDS).map(function(k){return [k,KINDS[k]]})).map(function(p){return '<button class="fbtn'+(hf.kind===p[0]?' on':'')+'" data-act="hfilter" data-k="'+p[0]+'">'+p[1]+'</button>'}).join('');
+  h+='</div><input id="hq" type="search" placeholder="جستجو در شرح، مکان و یادداشت" value="'+esc(hf.q)+'" aria-label="جستجو"><div id="hlist" class="list"></div></section>';
+  return h;
+}
+function fillHistory(){
+  var q=hf.q.trim(),arr=S.logs.filter(function(l){
+    if(hf.kind!=='all'&&l.kind!==hf.kind)return false;
+    return !q||(l.title+' '+l.place+' '+l.note).indexOf(q)>=0;
+  }).sort(function(a,b){return a.date<b.date?1:(a.date>b.date?-1:0)});
+  $('hlist').innerHTML=arr.length?arr.map(logRow).join(''):'<div class="empty">'+(S.logs.length?'موردی با این فیلتر پیدا نشد.':'هنوز چیزی ثبت نشده. با دکمه‌ی «ثبت» پایین صفحه اولین سرویس را اضافه کنید.')+'</div>';
+}
+
+/* ---------- report ---------- */
+function repRange(){
+  if(rep.mode==='month')return [jToIso(rep.y,rep.m,1),jToIso(rep.y,rep.m,jMonthLen(rep.y,rep.m)),MONTHS[rep.m-1]+' '+faDigits(rep.y)];
+  if(rep.mode==='year')return [jToIso(rep.y,1,1),jToIso(rep.y,12,jMonthLen(rep.y,12)),'سال '+faDigits(rep.y)];
+  if(rep.mode==='range'){var a=rep.from<=rep.to?rep.from:rep.to,b=rep.from<=rep.to?rep.to:rep.from;return [a,b,'از '+fmtDate(a)+' تا '+fmtDate(b)]}
+  return ['0000-01-01','9999-12-31','از ابتدا تا امروز'];
+}
+function vReport(){
+  var r=repRange(),a=r[0],b=r[1],label=r[2],i;
+  var logs=S.logs.filter(function(l){return l.date>=a&&l.date<=b}).sort(function(x,y){return x.date<y.date?1:-1});
+  var total=sumCost(logs);
+  var h='<section class="stack"><h2>گزارش هزینه‌ها</h2><div class="seg">'+
+    [['month','ماهانه'],['year','سالانه'],['range','بازه‌ی دلخواه'],['all','همه']].map(function(p){return '<button class="fbtn'+(rep.mode===p[0]?' on':'')+'" data-act="rmode" data-m="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div>';
+  var ys='';for(i=curJ.jy;i>=curJ.jy-10;i--)ys+='<option value="'+i+'"'+(i===rep.y?' selected':'')+'>'+faDigits(i)+'</option>';
+  if(!ys.match('value="'+rep.y+'"'))ys+='<option value="'+rep.y+'" selected>'+faDigits(rep.y)+'</option>';
+  var ms='';for(i=1;i<=12;i++)ms+='<option value="'+i+'"'+(i===rep.m?' selected':'')+'>'+MONTHS[i-1]+'</option>';
+  if(rep.mode==='month')h+='<div class="grid2"><select id="rep_m" aria-label="ماه">'+ms+'</select><select id="rep_y" aria-label="سال">'+ys+'</select></div>';
+  if(rep.mode==='year')h+='<select id="rep_y" aria-label="سال">'+ys+'</select>';
+  if(rep.mode==='range')h+='<div class="grid2"><label>از'+dateField('rf',rep.from)+'</label><label>تا'+dateField('rt',rep.to)+'</label></div>';
+  h+='</section>';
+
+  var pts=points().filter(function(p){return p.date>=a&&p.date<=b}),span=pts.length>=2?pts[pts.length-1].km-pts[0].km:0;
+  h+='<section class="card pad"><p class="eyebrow">'+label+'</p><p class="big">'+fa(total*mult())+' <span>'+unitName()+'</span></p><dl class="kv"><div><dt>تعداد ثبت</dt><dd>'+fa(logs.length)+'</dd></div>';
+  if(span>0)h+='<div><dt>مسافت ثبت‌شده</dt><dd>'+fa(span)+' کیلومتر</dd></div>';
+  if(span>=100&&total>0)h+='<div><dt>هزینه‌ی هر کیلومتر</dt><dd>'+money(total/span)+'</dd></div>';
+  h+='</dl></section>';
+  if(!logs.length)return h+'<div class="empty">در این بازه چیزی ثبت نشده است.</div>';
+
+  var cat={};logs.forEach(function(l){cat[l.kind]=(cat[l.kind]||0)+(l.cost||0)});
+  var ck=Object.keys(cat).filter(function(k){return cat[k]>0}).sort(function(x,y){return cat[y]-cat[x]});
+  if(ck.length&&total>0){
+    h+='<section class="card pad"><h2>به تفکیک نوع</h2><div class="hb">'+ck.map(function(k){
+      var p=cat[k]/total*100;
+      return '<div class="hb-row"><div><span>'+KINDS[k]+'</span><span>'+money(cat[k])+' · '+faDigits(Math.round(p))+'٪</span></div><div class="hb-bar"><i style="width:'+p.toFixed(1)+'%"></i></div></div>'}).join('')+'</div></section>';
+  }
+  if(rep.mode!=='month'){
+    var mm={},first=null,lastK=null;
+    logs.forEach(function(l){var j=isoToJ(l.date),k=j.jy*100+j.jm;mm[k]=(mm[k]||0)+(l.cost||0);if(first===null||k<first)first=k;if(lastK===null||k>lastK)lastK=k});
+    var cols=[],y=Math.floor(first/100),m=first%100;
+    if(rep.mode==='year'){y=rep.y;m=1;lastK=rep.y*100+12}
+    while(y*100+m<=lastK){cols.push({y:y,m:m,s:mm[y*100+m]||0});m++;if(m>12){m=1;y++}}
+    cols=cols.slice(-24);
+    var mx=Math.max.apply(null,cols.map(function(c){return c.s}))||1;
+    if(cols.length>1)h+='<section class="card pad"><h2>روند ماهانه</h2><div class="cols-wrap"><div class="cols">'+cols.map(function(c){
+      var hp=c.s/mx*100;
+      return '<div class="col" title="'+MONTHS[c.m-1]+' '+faDigits(c.y)+': '+money(c.s)+'"><div class="cap"><small>'+(c.s?nf2.format(Math.round(c.s*mult()/10000)/100):'')+'</small></div><div class="stick'+(c.s?'':' z')+'" style="height:'+Math.max(2,Math.round(hp*1.1))+'px"></div><small>'+MONTHS[c.m-1]+'</small></div>'}).join('')+'</div></div><small>ارقام به میلیون '+unitName()+'</small></section>';
+  }
+  h+='<section class="stack"><h2>ثبت‌های این بازه</h2><div class="list">'+logs.slice(0,40).map(logRow).join('')+'</div>'+(logs.length>40?'<small>۴۰ مورد آخر نمایش داده شد. بقیه در بخش سوابق است.</small>':'')+'</section>';
+  return h;
+}
+
+/* ---------- setup ---------- */
+function vSetup(){
+  var c=S.car,h='<h2>تنظیمات</h2>';
+  h+='<section class="card pad"><h2>مشخصات ماشین</h2><form data-form="car" class="stack"><label>نام یا مدل<input id="c_name" type="text" autocomplete="off" value="'+esc(c.name)+'"></label>'+
+    '<div class="grid2"><label>سال ساخت<input id="c_year" type="text" inputmode="numeric" autocomplete="off" value="'+esc(c.year)+'"></label><label>پلاک<input id="c_plate" type="text" autocomplete="off" value="'+esc(c.plate)+'"></label></div>'+
+    '<button class="btn primary" type="submit">ذخیره</button></form></section>';
+  h+='<section class="card pad"><h2>واحد پول</h2><p class="muted">همه‌ی مبلغ‌ها و گزارش‌ها با این واحد نشان داده می‌شوند. عددهای قبلی خودکار تبدیل می‌شوند (هر تومان ۱۰ ریال).</p><div class="seg">'+
+    [['toman','تومان'],['rial','ریال']].map(function(p){return '<button class="fbtn'+(S.unit===p[0]?' on':'')+'" data-act="unit" data-u="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div></section>';
+  var rd=S.readings.slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
+  h+='<section class="card pad"><h2>تخمین کیلومتر</h2><p class="muted">برنامه از فاصله‌ی ثبت‌های کیلومتر، میانگین رانندگی روزانه را حساب می‌کند. ثبت‌های تازه‌تر وزن بیشتری دارند.</p><form data-form="est" class="stack">'+
+    '<div class="grid2"><label>یادآوری ثبت کیلومتر<select id="e_cal">'+[7,14,21,30].map(function(d){return '<option value="'+d+'"'+(S.calDays===d?' selected':'')+'>هر '+faDigits(d)+' روز</option>'}).join('')+'</select></label>'+
+    '<label>میانگین اولیه (کیلومتر در روز)<input id="e_rate" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(S.fallbackRate)+'"></label></div>'+
+    '<button class="btn primary" type="submit">ذخیره</button></form>'+
+    (rd.length?'<div><h3>آخرین ثبت‌های کیلومتر</h3>'+rd.map(function(r){return '<div class="trow"><div class="trow-main"><b>'+fa(r.km)+' کیلومتر</b><small>'+fmtDate(r.date)+'</small></div><button class="btn small danger" data-act="delRead" data-d="'+r.date+'">حذف</button></div>'}).join('')+'</div>':'')+'</section>';
+  h+='<section class="card pad"><h2>سرویس‌ها و بازه‌ی تعویض</h2><p class="muted">بازه‌های پیش‌فرض، مقادیر رایج برای پراید ۱۱۱ و ۱۳۱ است و عین دفترچه‌ی سازنده نیست. با جدول دفترچه‌ی ماشین خودتان مطابقت بدهید و هر مورد را ویرایش، خاموش یا حذف کنید.</p><div>';
+  S.templates.forEach(function(t){
+    if(tplEdit===t.id)h+=tplForm(t);
+    else h+='<div class="trow"><div class="trow-main'+(t.on?'':' off')+'"><b>'+esc(t.name)+'</b><small>'+KINDS[t.kind]+' · '+intervalText(t)+'</small></div><div class="tools">'+
+      '<button class="btn small" data-act="tplToggle" data-id="'+t.id+'">'+(t.on?'خاموش':'روشن')+'</button><button class="btn small" data-act="tplEdit" data-id="'+t.id+'">ویرایش</button></div></div>';
+  });
+  h+='</div>'+(tplEdit==='new'?tplForm({id:'',name:'',kind:'service',km:0,months:0}):'<div class="actions"><button class="btn" data-act="tplNew">افزودن مورد جدید</button><button class="btn" data-act="applyPride">اعمال الگوی پراید</button></div>')+'</section>';
+  h+='<section class="card pad"><h2>پشتیبان‌گیری و حفظ اطلاعات</h2><p class="muted" id="syncNote">'+syncNote()+'</p>'+
+    '<div class="actions"><button class="btn" data-act="dlBackup">ذخیره‌ی فایل پشتیبان</button><button class="btn" data-act="copyBackup">کپی متن پشتیبان</button></div>'+
+    '<label>متن پشتیبان (برای کپی یا چسباندن)<textarea id="bkText" spellcheck="false" placeholder="برای بازیابی، متن پشتیبان را اینجا بچسبانید"></textarea></label>'+
+    '<label>یا فایل پشتیبان را انتخاب کنید<input id="bkFile" type="file" accept=".json,application/json"></label>'+
+    '<div class="actions"><button class="btn" data-act="restoreText">بازیابی از متن</button><button class="btn danger" data-act="resetAll">پاک‌کردن همه‌ی داده‌ها</button></div></section>';
+  h+=accountCard();
+  h+=feedbackCard(true);
+  return h;
+}
+function tplForm(t){
+  return '<form class="tpl-edit" data-form="tpl"><label>نام<input id="tf_name" type="text" autocomplete="off" value="'+esc(t.name)+'"></label>'+
+    '<div class="grid2"><label>نوع<select id="tf_kind">'+Object.keys(KINDS).map(function(k){return '<option value="'+k+'"'+(t.kind===k?' selected':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select></label>'+
+    '<span></span><label>هر چند کیلومتر (۰ یعنی ندارد)<input id="tf_km" type="text" inputmode="numeric" value="'+faDigits(t.km||0)+'"></label>'+
+    '<label>هر چند ماه (۰ یعنی ندارد)<input id="tf_months" type="text" inputmode="numeric" value="'+faDigits(t.months||0)+'"></label></div>'+
+    '<div class="actions"><button class="btn primary" type="submit">ذخیره</button><button class="btn" type="button" data-act="tplCancel">انصراف</button>'+(t.id?'<button class="btn danger" type="button" data-act="tplDel" data-id="'+t.id+'">حذف</button>':'')+'</div></form>';
+}
+
+/* ---------- render / routing ---------- */
+function navActive(){
+  [].forEach.call(document.querySelectorAll('[data-nav]'),function(b){b.classList.toggle('on',b.dataset.nav===view)});
+}
+function render(){
+  var gate=!booted||!me||auth.recovery,navEl=document.querySelector('.nav');
+  if(navEl)navEl.hidden=gate;
+  if(gate){
+    $('view').innerHTML=!booted?'<div class="empty">در حال بارگذاری…</div>':vAuth();
+    renderHeader();return;
+  }
+  var fn={home:vHome,add:vAdd,history:vHistory,report:vReport,setup:vSetup}[view]||vHome;
+  $('view').innerHTML=fn();
+  renderHeader();navActive();
+  if(view==='history')fillHistory();
+  if(lastView!==view){try{window.scrollTo(0,0)}catch(e){}lastView=view}
+}
+function route(){var h=location.hash.slice(1);view=VIEWS.indexOf(h)>=0?h:'home';render()}
+function go(v){if(location.hash.slice(1)===v){view=v;render()}else{location.hash=v}}
+window.addEventListener('hashchange',route);
+
+/* ---------- actions ---------- */
+function addReading(km){
+  var d=todayIso();
+  S.readings=S.readings.filter(function(r){return r.date!==d});
+  S.readings.push({date:d,km:km});
+  S.readings.sort(function(a,b){return a.date<b.date?-1:1});
+  if(S.readings.length>400)S.readings=S.readings.slice(-400);
+}
+function saveOdo(raw){
+  var km=parseNum(raw);
+  if(!isFinite(km)||km<0){toast('یک عدد معتبر وارد کنید');return}
+  km=Math.round(km);
+  var est=estimate(),lp=est.last;
+  if(lp&&lp.date<todayIso()&&km<lp.km){toast('این عدد کمتر از آخرین ثبت ('+fa(lp.km)+') است.');return}
+  addReading(km);commit();
+  var e2=estimate();
+  toast(est.km!=null?'تخمین قبلی '+fa(est.km)+' بود (اختلاف '+fa(Math.abs(km-est.km))+' کیلومتر). میانگین جدید: '+fa(e2.rate)+' در روز':'کیلومتر ثبت شد');
+  render();
+}
+function importState(text){
+  var o;try{o=JSON.parse(text)}catch(e){toast('متن پشتیبان معتبر نیست');return}
+  if(!o||!Array.isArray(o.logs)||!Array.isArray(o.templates)){toast('این متن، پشتیبان این برنامه نیست');return}
+  S=migrate(o);commit();toast('بازیابی شد');render();
+}
+function backupJson(){return JSON.stringify(S,null,1)}
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-go]');
+  if(g){go(g.dataset.go);return}
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var a=b.dataset.act,id=b.dataset.id;
+  if(a==='copyMail'){
+    var em=cfg.feedbackEmail,okm=function(){toast('ایمیل کپی شد')},selm=function(){toast('ایمیل را انتخاب و کپی کنید: '+em)};
+    try{navigator.clipboard.writeText(em).then(okm,selm)}catch(er){selm()}
+    return;
+  }
+  if(a==='donateSoon'){toast('راه حمایت مالی به‌زودی اضافه می‌شود. از محبت شما ممنونیم.');return}
+  if(a==='authMode'){auth.mode=b.dataset.m;auth.msg='';render();return}
+  if(a==='copyRec'){
+    var rc=auth.recovery||'',okc=function(){toast('کد کپی شد')},sel=function(){var el=$('reccode');if(el){var rg=document.createRange();rg.selectNodeContents(el);var sl=getSelection();sl.removeAllRanges();sl.addRange(rg)}toast('کد را انتخاب و کپی کنید')};
+    try{navigator.clipboard.writeText(rc).then(okc,sel)}catch(er){sel()}
+    return;
+  }
+  if(a==='recDone'){var ck=$('rec_ok');if(!ck||!ck.checked){toast('اول کد را ذخیره کنید و تیک را بزنید');return}auth.recovery=null;render();return}
+  if(a==='logout'){if(dirty&&!confirmTwice(b,'تغییرات همگام‌نشده از بین می‌رود. تأیید خروج؟'))return;doLogout();return}
+  if(a==='installApp'){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;render()}return}
+  if(a==='dismissTip'){try{localStorage.setItem('carservice.tip','1')}catch(er){}render();return}
+  if(a==='newLog'){form=null;openAdd();return}
+  if(a==='done'){var t=S.templates.filter(function(x){return x.id===id})[0];openAdd({kind:t.kind,tpls:[id],title:t.name});return}
+  if(a==='cancelLog'){form=null;go('home');return}
+  if(a==='editLog'){var l=S.logs.filter(function(x){return x.id===id})[0];if(l){form=Object.assign({},l,{tpls:(l.tpls||[]).slice(),touched:true});go('add')}return}
+  if(a==='delLog'){if(!confirmTwice(b,'تأیید حذف؟'))return;S.logs=S.logs.filter(function(x){return x.id!==form.id});form=null;commit();toast('حذف شد');go('history');return}
+  if(a==='hfilter'){hf.kind=b.dataset.k;render();return}
+  if(a==='rmode'){rep.mode=b.dataset.m;render();return}
+  if(a==='unit'){S.unit=b.dataset.u;commit();render();toast('واحد پول: '+unitName());return}
+  if(a==='applyPride'){
+    if(!confirmTwice(b,'جایگزین فهرست فعلی شود؟'))return;
+    var ids={};defaultTpls().forEach(function(t){ids[t.id]=1});
+    S.templates=defaultTpls().concat(S.templates.filter(function(t){return !ids[t.id]&&t.id.charAt(0)==='c'}));
+    commit();render();toast('الگوی پراید اعمال شد');return;
+  }
+  if(a==='tplToggle'){S.templates.forEach(function(t){if(t.id===id)t.on=!t.on});commit();render();return}
+  if(a==='tplEdit'){tplEdit=id;render();return}
+  if(a==='tplNew'){tplEdit='new';render();return}
+  if(a==='tplCancel'){tplEdit=null;render();return}
+  if(a==='tplDel'){if(!confirmTwice(b,'تأیید حذف؟'))return;S.templates=S.templates.filter(function(t){return t.id!==id});tplEdit=null;commit();render();return}
+  if(a==='delRead'){S.readings=S.readings.filter(function(r){return r.date!==b.dataset.d});commit();render();return}
+  if(a==='dlBackup'){
+    try{
+      var blob=new Blob([backupJson()],{type:'application/json'}),url=URL.createObjectURL(blob),an=document.createElement('a');
+      an.href=url;an.download='mashinnameh-backup-'+todayIso()+'.json';document.body.appendChild(an);an.click();an.remove();
+      setTimeout(function(){URL.revokeObjectURL(url)},4000);toast('فایل پشتیبان آماده شد');markBackup();
+    }catch(er){toast('ذخیره‌ی فایل ممکن نشد. از «کپی متن پشتیبان» استفاده کنید.')}
+    return;
+  }
+  if(a==='copyBackup'){
+    var ta=$('bkText'),txt=backupJson();ta.value=txt;
+    var done=function(){markBackup();toast('متن پشتیبان کپی شد. آن را در یادداشت یا پیام به خودتان نگه دارید.')};
+    var fallback=function(){ta.focus();ta.select();toast('متن پشتیبان در کادر آماده است. آن را انتخاب و کپی کنید.')};
+    try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(er){fallback()}
+    return;
+  }
+  if(a==='restoreText'){var tx=val('bkText').trim();if(!tx){toast('اول متن پشتیبان را بچسبانید');return}if(!confirmTwice(b,'جایگزین داده‌های فعلی شود؟'))return;importState(tx);return}
+  if(a==='resetAll'){if(!confirmTwice(b,'مطمئنید؟ همه چیز پاک می‌شود'))return;S=blank();commit();form=null;toast('همه‌ی داده‌ها پاک شد');go('home');return}
+});
+document.addEventListener('submit',function(e){
+  var f=e.target.closest('[data-form]');if(!f)return;
+  e.preventDefault();
+  var k=f.dataset.form;
+  if(k==='login'){auth.email=val('a_email').trim();authCall('/api/login',{email:auth.email,password:val('a_pass')});return}
+  if(k==='signup'){
+    auth.email=val('a_email').trim();auth.prov=val('a_prov');
+    if(!auth.prov){toast('استان را انتخاب کنید');return}
+    if(!$('a_terms').checked){toast('برای ساخت حساب، حریم خصوصی را بپذیرید');return}
+    authCall('/api/signup',{email:auth.email,password:val('a_pass'),province:auth.prov});return;
+  }
+  if(k==='recover'){auth.email=val('a_email').trim();authCall('/api/recover',{email:auth.email,recovery:val('a_rec'),password:val('a_pass')});return}
+  if(k==='prof'){
+    var pv=val('p_prov');if(!pv){toast('استان را انتخاب کنید');return}
+    api('PUT','/api/profile',{province:pv}).then(function(r){if(r.status===200){me=r.data.user;try{localStorage.setItem(USER_KEY,JSON.stringify(me))}catch(er){}toast('ذخیره شد')}else toast((r.data&&r.data.error)||'ذخیره نشد')},function(){toast('ارتباط با سرور برقرار نشد')});
+    return;
+  }
+  if(k==='pw'){
+    api('POST','/api/password',{password:val('pw_cur'),newPassword:val('pw_new')}).then(function(r){
+      if(r.status===200){auth.recovery=r.data.recovery;render()}else toast((r.data&&r.data.error)||'تغییر نکرد');
+    },function(){toast('ارتباط با سرور برقرار نشد')});
+    return;
+  }
+  if(k==='del'){
+    var btn=f.querySelector('button[type=submit]');
+    if(!confirmTwice(btn,'مطمئنید؟ دوباره بزنید'))return;
+    api('DELETE','/api/account',{password:val('del_pass')}).then(function(r){
+      if(r.status===200){clearLocalAll();me=null;auth.mode='login';auth.msg='حساب شما حذف شد.';view='home';render()}
+      else toast((r.data&&r.data.error)||'حذف نشد');
+    },function(){toast('ارتباط با سرور برقرار نشد')});
+    return;
+  }
+  if(k==='onboard'){
+    var km=parseNum(val('ob_km'));
+    if(!isFinite(km)||km<0){toast('عدد کیلومترشمار را وارد کنید');return}
+    S.car.name=val('ob_name').trim()||'ماشین من';S.car.year=val('ob_year').trim();S.car.plate=val('ob_plate').trim();
+    var r=parseNum(val('ob_rate'));if(isFinite(r)&&r>0)S.fallbackRate=Math.round(r);
+    addReading(Math.round(km));commit();render();toast('آماده است. حالا آخرین زمان سرویس‌ها را ثبت کنید.');return;
+  }
+  if(k==='odo'){saveOdo(val('qodo'));return}
+  if(k==='log'){saveLog();return}
+  if(k==='car'){S.car.name=val('c_name').trim();S.car.year=val('c_year').trim();S.car.plate=val('c_plate').trim();commit();renderHeader();toast('ذخیره شد');return}
+  if(k==='est'){var rt=parseNum(val('e_rate'));S.calDays=+val('e_cal')||21;if(isFinite(rt)&&rt>0)S.fallbackRate=Math.round(rt);commit();toast('ذخیره شد');render();return}
+  if(k==='tpl'){
+    var name=val('tf_name').trim();if(!name){toast('نام را وارد کنید');return}
+    var km2=parseNum(val('tf_km')),mo=parseNum(val('tf_months'));
+    var o={name:name,kind:val('tf_kind'),km:isFinite(km2)&&km2>0?Math.round(km2):0,months:isFinite(mo)&&mo>0?Math.round(mo):0};
+    if(tplEdit==='new')S.templates.push(Object.assign({id:'c'+uid(),on:true},o));
+    else S.templates.forEach(function(t){if(t.id===tplEdit)Object.assign(t,o)});
+    tplEdit=null;commit();render();toast('ذخیره شد');return;
+  }
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.dataset&&t.dataset.df){
+    clampDay(t.dataset.df);
+    if(t.dataset.df==='rf'||t.dataset.df==='rt'){rep.from=readDate('rf');rep.to=readDate('rt');render()}
+    return;
+  }
+  if(t.id==='rep_y'||t.id==='rep_m'){rep.y=+val('rep_y');if($('rep_m'))rep.m=+val('rep_m');render();return}
+  if(t.id==='bkFile'&&t.files&&t.files[0]){
+    var rd=new FileReader();
+    rd.onload=function(){$('bkText').value=String(rd.result||'');toast('فایل خوانده شد. برای بازیابی، دکمه‌ی «بازیابی از متن» را بزنید.')};
+    rd.readAsText(t.files[0]);return;
+  }
+  if(t.name==='kind'&&form)form.kind=t.value;
+  if(t.dataset&&t.dataset.tpl&&form){
+    var ids=[].map.call(document.querySelectorAll('[data-tpl]:checked'),function(i){return i.dataset.tpl});
+    if(!form.touched){
+      $('f_title').value=ids.map(tplName).join('، ');
+      var first=S.templates.filter(function(x){return x.id===ids[0]})[0];
+      if(first){var r=document.querySelector('input[name=kind][value='+first.kind+']');if(r)r.checked=true}
+    }
+  }
+  if(t.id==='a_prov')auth.prov=t.value;
+  if(t.id==='f_cost'||t.id==='f_km'){var n=parseNum(t.value);if(isFinite(n))t.value=fa(n)}
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='f_title'&&form)form.touched=true;
+  if(t.id==='hq'){hf.q=t.value;fillHistory()}
+  if(t.id==='a_email')auth.email=t.value;
+});
+
+(function(){var h=location.hash.slice(1);if(VIEWS.indexOf(h)>=0)view=h})();
+if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})});
+boot();
+})();
