@@ -224,6 +224,7 @@ body{padding-top:max(16px,env(safe-area-inset-top,0px))}
 details{border-top:1px solid var(--line);padding-top:8px}
 details summary{cursor:pointer;font-weight:700;padding:6px 0}
 details form{margin-top:8px}
+details.more .svcs{margin-top:8px}
 .acct-mail{direction:ltr;text-align:right;font-weight:700;overflow-wrap:anywhere}
 .fbcard{border:1px dashed var(--gold)}
 .fb-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -696,14 +697,17 @@ function vHome(){
   html+='<form data-form="odo" class="row"><input id="qodo" type="text" inputmode="numeric" autocomplete="off" aria-label="عدد کیلومترشمار" placeholder="عدد کیلومترشمار الان"><button class="btn primary" type="submit">ثبت کیلومتر</button></form></section>';
 
   var all=S.templates.filter(function(t){return t.on}).map(function(t){return statusFor(t,est)});
-  var due=all.filter(function(s){return s.state!=='none'}).sort(function(a,b){return b.frac-a.frac});
+  var urgent=all.filter(function(s){return s.state==='bad'||s.state==='warn'}).sort(function(a,b){return b.frac-a.frac});
+  var okl=all.filter(function(s){return s.state==='ok'}).sort(function(a,b){return b.frac-a.frac});
   var none=all.filter(function(s){return s.state==='none'});
-  html+='<section class="stack"><div class="sec-title"><h2>سرویس‌های پیش‌رو</h2>'+(due.length?'<small>به ترتیب فوریت</small>':'')+'</div>';
-  if(!due.length)html+='<div class="empty">هنوز سرویسی ثبت نشده. آخرین زمان انجام هر مورد را از فهرست پایین وارد کنید تا موعدها محاسبه شود.</div>';
-  else html+='<div class="svcs">'+due.map(function(s){return svcRow(s,false)}).join('')+'</div>';
+  html+='<section class="stack"><div class="sec-title"><h2>نزدیک موعد</h2>'+(urgent.length?'<small>به ترتیب فوریت</small>':'')+'</div>';
+  if(urgent.length)html+='<div class="svcs">'+urgent.map(function(s){return svcRow(s,false)}).join('')+'</div>';
+  else if(okl.length)html+='<div class="empty">فعلاً هیچ سرویسی نزدیک موعد نیست.</div>';
+  else html+='<div class="empty">هنوز سرویسی ثبت نشده. «همه‌ی سرویس‌ها» را باز کنید و آخرین زمان انجام هر مورد را وارد کنید تا موعدها محاسبه شود.</div>';
   html+='</section>';
-  if(none.length){
-    html+='<section class="stack"><div class="sec-title"><h2>هنوز ثبت نشده</h2><small>آخرین بار را وارد کنید</small></div><div class="svcs">'+none.map(function(s){return svcRow(s,true)}).join('')+'</div></section>';
+  if(okl.length+none.length){
+    html+='<details id="moreSvc" class="more"'+(moreOpen||(!urgent.length&&!okl.length)?' open':'')+'><summary>همه‌ی سرویس‌ها ('+faDigits(okl.length+none.length)+')</summary><div class="svcs">'+
+      okl.map(function(s){return svcRow(s,false)}).join('')+none.map(function(s){return svcRow(s,true)}).join('')+'</div></details>';
   }
   var offN=S.templates.filter(function(t){return !t.on}).length;
   if(offN)html+='<p class="muted" style="margin:0">'+faDigits(offN)+' مورد دیگر (مثل شمع، تسمه‌ی تایم و لاستیک) فعلاً خاموش است. اگر لازم دارید، از <button class="fbtn" data-go="setup">تنظیمات</button> روشنش کنید.</p>';
@@ -1055,6 +1059,8 @@ document.addEventListener('change',function(e){
   if(t.id==='a_prov')auth.prov=t.value;
   if(t.id==='f_cost'||t.id==='f_km'){var n=parseNum(t.value);if(isFinite(n))t.value=fa(n)}
 });
+var moreOpen=false;
+document.addEventListener('toggle',function(e){if(e.target&&e.target.id==='moreSvc')moreOpen=e.target.open},true);
 var GROUPED=['ob_km','ob_rate','qodo','f_km','f_cost','tf_km','e_rate'];
 document.addEventListener('input',function(e){
   var t=e.target;
