@@ -400,9 +400,23 @@ function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
 function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
 
 /* ---------- account and cloud sync ---------- */
-var APP_VERSION='1.1.0',SEEN_KEY='carservice.seen',newsSeen=false;
+var APP_VERSION='1.2.0',SEEN_KEY='carservice.seen',newsSeen=false;
 /* نسخه‌گذاری: عدد اول = تغییر بنیادین، عدد دوم = قابلیت تازه، عدد سوم = رفع ایراد و بهبود کوچک. مهم‌ترین مورد اول بیاید. */
-var CHANGES=[{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var CHANGES=[{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var updAvail=null,lastUpd=0;
+function vcmp(a,b){a=a.split('.').map(Number);b=b.split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
+function checkUpdate(){
+  if(!LOCAL_ONLY||!/^https?:/.test(location.protocol)||Date.now()-lastUpd<30*60*1000||!navigator.onLine)return;
+  lastUpd=Date.now();
+  try{fetch(location.origin+location.pathname,{cache:'reload'}).then(function(r){return r.ok?r.text():''}).then(function(t){
+    var m=/APP_VERSION='([0-9.]+)'/.exec(t);
+    if(m&&vcmp(m[1],APP_VERSION)>0&&!updAvail){updAvail=m[1];if(view==='home')render()}
+  }).catch(function(){})}catch(e){}
+}
+function updCard(){
+  if(!updAvail)return '';
+  return '<div class="banner tip"><span>نسخه‌ی تازه‌ی '+verFa(updAvail)+' آماده است. اطلاعات شما حفظ می‌شود.</span><button class="btn small primary" data-act="doUpdate">به‌روزرسانی</button></div>';
+}
 function verFa(v){return faDigits(v).replace(/\./g,'٫')}
 function newsPending(){
   if(newsSeen)return false;
@@ -476,7 +490,7 @@ function doLogout(){
 }
 function boot(){
   loadConfig();
-  if(LOCAL_ONLY){me={email:'local',province:'',admin:false,local:true};booted=true;sync.mode='local';render();return}
+  if(LOCAL_ONLY){me={email:'local',province:'',admin:false,local:true};booted=true;sync.mode='local';render();checkUpdate();document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate()});return}
   render();
   api('GET','/api/me').then(function(r){
     if(r.status===200){startSession(r.data.user)}
@@ -542,7 +556,7 @@ function backupTip(){
 function installTip(){
   if(isStandalone()||tipDismissed())return '';
   if(deferredInstall)return '<div class="banner tip"><span>این برنامه را روی صفحه‌ی اصلی گوشی نصب کنید.</span><span class="actions"><button class="btn small primary" data-act="installApp">نصب</button><button class="btn small" data-act="dismissTip">بعداً</button></span></div>';
-  if(isIos())return '<div class="banner tip"><span>برای نصب روی آیفون: در Safari دکمه‌ی اشتراک‌گذاری را بزنید و «Add to Home Screen» را انتخاب کنید.</span><button class="btn small" data-act="dismissTip">فهمیدم</button></div>';
+  if(isIos())return '<div class="banner tip"><span>برای نصب روی آیفون: در Safari دکمه‌ی اشتراک‌گذاری را بزنید و «Add to Home Screen» را انتخاب کنید. توجه: برنامه‌ی نصب‌شده روی آیفون اطلاعاتش را جدا از Safari نگه می‌دارد؛ پیش از نصب از تنظیمات «کپی متن پشتیبان» را بزنید و بعد از نصب در تنظیمات برنامه بچسبانید.</span><button class="btn small" data-act="dismissTip">فهمیدم</button></div>';
   return '';
 }
 
@@ -713,7 +727,8 @@ function drums(km){
   return '<div class="drums" role="img" aria-label="'+fa(km)+' کیلومتر">'+h+'</div>';
 }
 function vOnboard(){
-  return '<section class="card pad"><h2>شروع کنیم</h2><p class="muted">برای تخمین کیلومتر و یادآوری سرویس‌ها فقط چند مورد لازم است. همه‌ی آن‌ها بعداً در تنظیمات قابل تغییر است.</p>'+
+  return '<div class="banner tip"><span>قبلاً اطلاعات وارد کرده‌اید؟ مثلاً در مرورگر، پیش از نصب روی صفحه‌ی اصلی.</span><button class="btn small" data-go="setup">بازیابی از پشتیبان</button></div>'+
+  '<section class="card pad"><h2>شروع کنیم</h2><p class="muted">برای تخمین کیلومتر و یادآوری سرویس‌ها فقط چند مورد لازم است. همه‌ی آن‌ها بعداً در تنظیمات قابل تغییر است.</p>'+
   '<form data-form="onboard" class="stack">'+
   '<div class="grid2"><label>نام یا مدل ماشین<input id="ob_name" type="text" autocomplete="off" value="پراید"></label><label>سال ساخت<input id="ob_year" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(1389)+'"></label></div>'+
   '<label>پلاک (اختیاری)<input id="ob_plate" type="text" autocomplete="off" placeholder="۱۲ ب ۳۴۵ - ۶۷"></label>'+
@@ -723,7 +738,7 @@ function vOnboard(){
 }
 function vHome(){
   if(!S.car.name&&!S.readings.length&&!S.logs.length)return vOnboard();
-  var est=estimate(),today=todayIso(),lastP=est.last,html=newsCard()+installTip()+backupTip();
+  var est=estimate(),today=todayIso(),lastP=est.last,html=updCard()+newsCard()+installTip()+backupTip();
   var needCal=!lastP||daysBetween(lastP.date,today)>=S.calDays;
   html+='<section class="odo card"><div class="odo-top"><span class="eyebrow">کیلومتر امروز (تخمینی)</span><span class="pill none">'+(est.days>=7?'بر پایه‌ی ثبت‌های شما':'تخمین اولیه')+'</span></div>';
   html+=est.km==null?'<p class="odo-meta">هنوز کیلومتری ثبت نشده است.</p>':drums(est.km);
@@ -1010,6 +1025,7 @@ document.addEventListener('click',function(e){
   if(a==='cancelYes'){leaveForm();return}
   if(a==='cancelNo'){form.confirmCancel=false;render();return}
   if(a==='addItem'){addItem();return}
+  if(a==='doUpdate'){location.reload();return}
   if(a==='newsOk'){try{localStorage.setItem(SEEN_KEY,APP_VERSION)}catch(e){}newsSeen=true;render();return}
   if(a==='editLog'){var l=S.logs.filter(function(x){return x.id===id})[0];if(l){form=makeForm(l);go('add')}return}
   if(a==='delLog'){if(!confirmTwice(b,'تأیید حذف؟'))return;S.logs=S.logs.filter(function(x){return x.id!==form.id});form=null;commit();toast('حذف شد');go('history');return}
