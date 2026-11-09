@@ -251,6 +251,7 @@ details.dd[data-off] summary{opacity:.55;pointer-events:none}
 .news ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
 .log-cost{display:flex;flex-direction:column;align-items:flex-end}.log-cost small{font-weight:400;color:var(--muted);font-size:11.5px}
 .dd-foot{padding:8px 12px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+.fuelbox{gap:10px}.fuel-init{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface2,var(--surface))}.tier-ed{border-top:1px solid var(--line);padding-top:8px}
 </style>
 </head>
 <body>
@@ -333,7 +334,10 @@ function d2j(jdn){
 /*#JAL-END*/
 
 var MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-var KINDS={service:'سرویس دوره‌ای',repair:'تعمیر',consumable:'لوازم مصرفی',document:'بیمه و اسناد',other:'سایر'};
+var KINDS={service:'🔧 سرویس دوره‌ای',repair:'🛠️ تعمیر',consumable:'🧰 لوازم مصرفی',fuel:'⛽ سوخت‌گیری',document:'📄 بیمه و اسناد',other:'📦 سایر'};
+var KEMO={service:'🔧',repair:'🛠️',consumable:'🧰',fuel:'⛽',document:'📄',other:'📦'};
+var EM={wash:'🚿',oil:'🛢️',oilf:'🔩',airf:'🌬️',fuelf:'⛽',plug:'⚡',brakef:'🛑',cool:'❄️',gear:'⚙️',timing:'⛓️',align:'⚖️',cabf:'🍃',pads:'🛑',padsr:'🛑',tires:'🛞',battery:'🔋',wiper:'🌧️',inspect:'✅',ins3:'🛡️',insb:'🛡️',toll:'🛣️',r_brake:'🛑',r_susp:'🔧',r_batt:'🔋',r_clutch:'⚙️',r_cool:'❄️',r_fuel:'⛽',r_engine:'🔩',r_gear:'⚙️',r_steer:'🛞',r_exh:'💨',r_ac:'🌡️',r_elec:'💡',r_body:'🚗',r_diag:'🔍',fu_t1500:'🟢',fu_t3000:'🟡',fu_t10000:'🟠',fu_free:'🔴',fu_supp:'🧪'};
+function emoOf(id,kind){return EM[id]||(String(id).indexOf('oth_')===0?'📝':(KEMO[kind]||''))}
 var PD='۰۱۲۳۴۵۶۷۸۹';
 function groupsOf(l){return l.groups&&l.groups.length?l.groups:[{kind:l.kind,tpls:l.tpls||[],gcost:null,icost:{}}]}
 function kindLabel(l){var ks=[];groupsOf(l).forEach(function(g){if(ks.indexOf(g.kind)<0)ks.push(g.kind)});return ks.map(function(k){return KINDS[k]||''}).join(' + ')}
@@ -410,14 +414,21 @@ function defaultTpls(){return [
 ].concat(extraTpls())}
 function extraTpls(){var R=[['r_brake','ترمز (دیسک، کالیپر، پمپ)'],['r_susp','جلوبندی و تعلیق (کمک‌فنر، سیبک، بوش)'],['r_batt','باتری، استارت و دینام'],['r_clutch','کلاچ'],['r_cool','سیستم خنک‌کننده (رادیاتور، واترپمپ)'],['r_fuel','سیستم سوخت (انژکتور، پمپ بنزین)'],['r_engine','موتور (جزئی یا اساسی)'],['r_gear','گیربکس'],['r_steer','فرمان'],['r_exh','اگزوز'],['r_ac','کولر و بخاری'],['r_elec','برق و چراغ‌ها'],['r_body','بدنه، رنگ و شیشه'],['r_diag','سنسورها و عیب‌یابی']],o=[];
   R.forEach(function(r,i){o.push(T(r[0],r[1],'repair',0,0,true,0,i+1))});
-  Object.keys(KINDS).forEach(function(k){o.push(T('oth_'+k,'سایر',k,0,0,true,0,9999))});return o}
+  Object.keys(KINDS).forEach(function(k){if(k!=='fuel')o.push(T('oth_'+k,'سایر',k,0,0,true,0,9999))});o.push(T('fu_supp','مکمل سوخت','fuel',3000,0,true,0,1));return o}
 function isOtherTpl(id){return String(id).indexOf('oth_')===0}
-function blank(){return {v:1,tplVer:4,unit:'toman',updated:0,car:{name:'',plate:'',year:''},calDays:21,fallbackRate:40,readings:[],templates:defaultTpls(),logs:[]}}
+function defaultFuel(){return {init:false,none:false,initDate:'',bal:{},tiers:[
+  {id:'fu_t1500',name:'بنزین ۱۵۰۰',price:1500,quota:60,cap:180},
+  {id:'fu_t3000',name:'بنزین ۳۰۰۰',price:3000,quota:50,cap:50},
+  {id:'fu_t10000',name:'بنزین ۱۰۰۰۰',price:10000,quota:50,cap:50},
+  {id:'fu_free',name:'بنزین آزاد',price:10000,free:true}]}}
+function blank(){return {v:1,tplVer:5,fuel:defaultFuel(),unit:'toman',updated:0,car:{name:'',plate:'',year:''},calDays:21,fallbackRate:40,readings:[],templates:defaultTpls(),logs:[]}}
 function migrate(o){var b=blank();for(var k in o){if(Object.prototype.hasOwnProperty.call(o,k))b[k]=o[k]}
   if(!b.car)b.car=blank().car;if(!Array.isArray(b.readings))b.readings=[];if(!Array.isArray(b.logs))b.logs=[];if(!Array.isArray(b.templates))b.templates=defaultTpls();
   if(!o.tplVer){if(!b.logs.length&&!b.readings.length&&!b.car.name)b.templates=defaultTpls();b.tplVer=2}
   if(b.tplVer<3){if(!b.templates.some(function(t){return t.id==='wash'}))b.templates.push(T('wash','کارواش','service',0,0,true,15));b.tplVer=3}
   if(b.tplVer<4){extraTpls().forEach(function(t){if(!b.templates.some(function(x){return x.id===t.id}))b.templates.push(t)});b.tplVer=4}
+  if(b.tplVer<5){if(!b.templates.some(function(t){return t.id==='fu_supp'}))b.templates.push(T('fu_supp','مکمل سوخت','fuel',3000,0,true,0,1));b.tplVer=5}
+  if(!b.fuel||!Array.isArray(b.fuel.tiers))b.fuel=defaultFuel();
   if(!b.unit)b.unit='toman';return b}
 function loadLocal(){try{var r=localStorage.getItem(KEY);if(r)return migrate(JSON.parse(r))}catch(e){}return blank()}
 var S=loadLocal();
@@ -426,9 +437,9 @@ function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
 function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
 
 /* ---------- account and cloud sync ---------- */
-var APP_VERSION='1.3.2',SEEN_KEY='carservice.seen',newsSeen=false;
+var APP_VERSION='1.4.1',SEEN_KEY='carservice.seen',newsSeen=false;
 /* نسخه‌گذاری: عدد اول = تغییر بنیادین، عدد دوم = قابلیت تازه، عدد سوم = رفع ایراد و بهبود کوچک. مهم‌ترین مورد اول بیاید. */
-var CHANGES=[{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var CHANGES=[{v:'1.4.1',items:['کسانی که کارت سوخت ندارند می‌توانند «کارت سوخت ندارم» را بزنند و فقط بنزین آزاد ثبت کنند','برای مکمل سوخت، فاصله‌ی پیشنهادی سازنده را (مثلاً ۳٬۰۰۰ کیلومتر) برای هر بار وارد می‌کنید']},{v:'1.4.0',items:['سوخت‌گیری: ثبت بنزین ۱۵۰۰، ۳۰۰۰، ۱۰۰۰۰ و آزاد با لیتر هر پله، موجودی خودکار کارت و شارژ اول هر ماه شمسی','مکمل سوخت با برند و قیمت؛ هر ۳۰۰۰ کیلومتر دوباره در صفحه‌ی اصلی پیشنهاد می‌شود','مصرف سوخت در ۱۰۰ کیلومتر و هزینه‌ی هر کیلومتر در گزارش','ایموجی کنار همه‌ی دسته‌ها و موضوع‌ها']},{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
 var updAvail=null,lastUpd=0;
 function vcmp(a,b){a=a.split('.').map(Number);b=b.split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
 function checkUpdate(){
@@ -675,8 +686,8 @@ function lastDone(id){
 function statusFor(t,est){
   var ld=lastDone(t.id),today=todayIso();
   if(!ld)return {t:t,ld:null,state:'none',frac:-1};
-  var fk=-Infinity,fd=-Infinity,kmLeft=null,daysLeft=null;
-  if(t.km>0&&ld.km!=null&&est.km!=null){kmLeft=ld.km+t.km-est.km;fk=(est.km-ld.km)/t.km}
+  var fk=-Infinity,fd=-Infinity,kmLeft=null,daysLeft=null,evg=groupsOf(ld).filter(function(g){return g.every&&(g.tpls||[]).indexOf(t.id)>=0})[0],kmI=evg?evg.every:t.km;
+  if(kmI>0&&ld.km!=null&&est.km!=null){kmLeft=ld.km+kmI-est.km;fk=(est.km-ld.km)/kmI}
   var dueIso=null;
   if(t.months>0)dueIso=addMonths(ld.date,t.months);
   if(t.days>0){var d2=jdnToIso(isoToJdn(ld.date)+t.days);if(!dueIso||d2<dueIso)dueIso=d2}
@@ -686,7 +697,7 @@ function statusFor(t,est){
   if(!isFinite(frac))return {t:t,ld:ld,state:'none',frac:-1};
   var state='ok';
   if(frac>=1)state='bad';
-  else if((kmLeft!=null&&kmLeft<=Math.max(300,t.km*0.1))||(daysLeft!=null&&daysLeft<=Math.min(30,Math.max(2,Math.round(tot*0.25)))))state='warn';
+  else if((kmLeft!=null&&kmLeft<=Math.max(300,kmI*0.1))||(daysLeft!=null&&daysLeft<=Math.min(30,Math.max(2,Math.round(tot*0.25)))))state='warn';
   return {t:t,ld:ld,state:state,frac:frac,kmLeft:kmLeft,daysLeft:daysLeft};
 }
 function intervalText(t){
@@ -787,6 +798,7 @@ function vHome(){
   }
   var offN=S.templates.filter(function(t){return !t.on}).length;
   if(offN)html+='<p class="muted" style="margin:0">'+faDigits(offN)+' مورد دیگر (مثل شمع، تسمه‌ی تایم و لاستیک) فعلاً خاموش است. اگر لازم دارید، از <button class="fbtn" data-go="setup">تنظیمات</button> روشنش کنید.</p>';
+  if(S.fuel.init&&!S.fuel.none){var fc=fuelCalc();html+='<details class="more"><summary>⛽ موجودی کارت سوخت</summary><dl class="kv" style="margin-top:8px">'+S.fuel.tiers.filter(function(t){return !t.free}).map(function(t){return '<div><dt>'+esc(emoOf(t.id,'fuel')+' '+t.name)+'</dt><dd>'+nf2.format(fc.bal[t.id]||0)+' لیتر</dd></div>'}).join('')+'</dl></details>'}
   var cm=isoToJ(today),ms=jToIso(cm.jy,cm.jm,1),ys=jToIso(cm.jy,1,1);
   var mt=sumCost(S.logs.filter(function(l){return l.date>=ms})),yt=sumCost(S.logs.filter(function(l){return l.date>=ys}));
   html+='<section class="card pad"><div class="sec-title"><h2>هزینه‌ها</h2><button class="fbtn" data-go="report">گزارش کامل</button></div><dl class="kv"><div><dt>'+MONTHS[cm.jm-1]+' '+faDigits(cm.jy)+'</dt><dd>'+money(mt)+'</dd></div><div><dt>سال '+faDigits(cm.jy)+'</dt><dd>'+money(yt)+'</dd></div></dl></section>';
@@ -796,7 +808,7 @@ function vHome(){
 function sumCost(a){return a.reduce(function(s,l){return s+(l.cost||0)},0)}
 function svcRow(s,isNone){
   var t=s.t,label={bad:'عقب‌افتاده',warn:'نزدیک موعد',ok:'خوب',none:'ثبت نشده'}[s.state];
-  var h='<article class="svc '+s.state+'"><div class="svc-head"><div><h3>'+esc(t.name)+'</h3><span class="pill '+s.state+'">'+label+'</span></div>'+
+  var h='<article class="svc '+s.state+'"><div class="svc-head"><div><h3>'+esc(itemLabel(t))+'</h3><span class="pill '+s.state+'">'+label+'</span></div>'+
     '<button class="btn small" data-act="done" data-id="'+t.id+'">'+(isNone?'ثبت آخرین انجام':'انجام شد')+'</button></div>';
   if(!isNone){
     h+='<div class="bar"><i style="width:'+Math.min(100,Math.max(2,s.frac*100)).toFixed(0)+'%"></i></div><p class="svc-meta">'+remainText(s)+'</p>'+
@@ -807,9 +819,71 @@ function svcRow(s,isNone){
 
 /* ---------- add / edit log ---------- */
 function lifeScore(t){var c=[];if(t.km>0)c.push(t.km/40);if(t.months>0)c.push(t.months*30);if(t.days>0)c.push(t.days);return c.length?Math.min.apply(null,c):1e9}
-function itemsFor(kind){return S.templates.filter(function(t){return t.kind===kind}).sort(function(a,b){return lifeScore(a)-lifeScore(b)||(a.ord||500)-(b.ord||500)||a.name.localeCompare(b.name,'fa')})}
-function newBlock(kind){return {kind:kind||'',tpls:[],gcostTxt:'',icost:{},newTxt:'',ddOpen:false,costOpen:false}}
-function snapOf(f){return JSON.stringify([f.date,f.kmTxt,f.costTxt,f.title,f.place,f.note,f.blocks.map(function(b){return [b.kind,b.tpls,b.gcostTxt,b.icost]})])}
+function fuelItems(){return S.fuel.tiers.filter(function(t){return t.free||!S.fuel.none}).map(function(t){return {id:t.id,name:t.name,kind:'fuel',km:0,months:0,days:0,on:true,tier:t}}).concat(S.templates.filter(function(t){return t.kind==='fuel'}))}
+function tplObj(id){var f=S.fuel.tiers.filter(function(t){return t.id===id})[0];if(f)return {id:f.id,name:f.name,kind:'fuel',tier:f};return S.templates.filter(function(x){return x.id===id})[0]}
+function tplLabel(id){var t=tplObj(id);return t?emoOf(t.id,t.kind)+' '+t.name:''}
+function itemLabel(t){return emoOf(t.id,t.kind)+' '+t.name}
+function monthIdx(iso){var j=isoToJ(iso);return j.jy*12+j.jm-1}
+function fuelCalc(opt){
+  var F=S.fuel,res={ok:!!F.init,bal:{},over:{}};if(!F.init)return res;
+  opt=opt||{};var paid=F.tiers.filter(function(t){return !t.free}),byM={},mNow=monthIdx(todayIso()),m0=monthIdx(F.initDate);
+  paid.forEach(function(t){res.bal[t.id]=F.bal[t.id]||0});
+  function add(date,lit){if(date<F.initDate)return;var m=monthIdx(date);if(m>mNow)return;(byM[m]=byM[m]||[]).push(lit)}
+  S.logs.forEach(function(l){if(l.id===opt.skipId)return;groupsOf(l).forEach(function(g){if(g.kind==='fuel'&&g.liters)add(l.date,g.liters)})});
+  if(opt.extra)add(opt.extra.date,opt.extra.lit);
+  for(var m=m0;m<=mNow;m++){
+    if(m>m0)paid.forEach(function(t){res.bal[t.id]=Math.min(t.cap||t.quota||0,res.bal[t.id]+(t.quota||0))});
+    (byM[m]||[]).forEach(function(lit){Object.keys(lit).forEach(function(id){if(res.bal[id]!==undefined)res.bal[id]-=lit[id]})});
+    paid.forEach(function(t){if(res.bal[t.id]<-1e-9){if(m===mNow)res.over[t.id]=-res.bal[t.id];res.bal[t.id]=0}});
+  }
+  return res;
+}
+function tierInfo(t){var x=money(t.price)+' / لیتر';if(!t.free&&S.fuel.init){x+=' · موجودی '+nf2.format(fuelCalc().bal[t.id]||0)+' لیتر'}return x}
+function priceOf(b,id){var t=tplObj(id);return (b.price&&b.price[id]!=null)?b.price[id]:(t&&t.tier?t.tier.price:0)}
+function fuelBlockCost(b){var tot=0;b.tpls.forEach(function(id){var t=tplObj(id);if(t&&t.tier){var L=numOrNull((b.lit||{})[id]);if(L!==null)tot+=L*priceOf(b,id)}else{var c=numOrNull(b.icost[id]);if(c!==null)tot+=c/mult()}});return tot}
+function autoCost(){var f=form;if(!f||f.costEdited)return;if(!f.blocks.every(function(b){return b.kind==='fuel'}))return;var t=0;f.blocks.forEach(function(b){t+=fuelBlockCost(b)});f.costTxt=t>0?fa(t*mult()):'';var e=$('f_cost');if(e)e.value=f.costTxt}
+function refreshAmts(){[].forEach.call(document.querySelectorAll('[data-amt]'),function(el){var q=el.dataset.amt.split('|'),b=form.blocks[+q[0]],L=numOrNull((b.lit||{})[q[1]]);el.textContent=L===null?'':' · مبلغ: '+money(L*priceOf(b,q[1]))})}
+function fuelWarn(f){
+  if(!S.fuel.init)return '';var lit={},any=false;
+  f.blocks.forEach(function(b){if(b.kind!=='fuel')return;b.tpls.forEach(function(id){var t=tplObj(id),L=numOrNull((b.lit||{})[id]);if(t&&t.tier&&L!==null&&L>0){lit[id]=(lit[id]||0)+L;any=true}})});
+  if(!any)return '';
+  var c=fuelCalc({skipId:f.id,extra:{date:f.date,lit:lit}}),m=[];
+  Object.keys(c.over).forEach(function(id){m.push('از «'+tplName(id)+'» '+nf2.format(c.over[id])+' لیتر بیشتر از موجودی کارت زده‌اید.')});
+  return m.length?'هشدار: '+m.join(' ')+' اگر قبلاً بنزین زده‌اید و ثبت نکرده‌اید، آن را هم ثبت کنید یا موجودی را در تنظیمات اصلاح کنید. ثبت این مورد ممکن است.':'';
+}
+function fuelInitHtml(vals,btn){
+  var c=vals?fuelCalc():null;
+  return '<div class="stack fuel-init"><b>موجودی فعلی کارت سوخت</b><small class="muted">فقط یک بار لازم است؛ از این به بعد برنامه خودش کم و زیاد می‌کند. لیتر باقی‌مانده‌ی هر پله را بنویسید (اگر نداشتید ۰).</small>'+
+    S.fuel.tiers.filter(function(t){return !t.free}).map(function(t){return '<label>'+esc(emoOf(t.id,'fuel')+' '+t.name)+' (لیتر)<input type="text" inputmode="decimal" data-fi="'+t.id+'" autocomplete="off" value="'+(c?esc(nf2.format(c.bal[t.id]||0)):'')+'"></label>'}).join('')+
+    '<button class="btn primary" type="button" data-act="fuelInit">'+(btn||'ثبت موجودی')+'</button>'+(vals?'':'<button class="btn" type="button" data-act="fuelNone">کارت سوخت ندارم</button>')+'</div>';
+}
+function fuelSettingsHtml(){
+  var F=S.fuel,c=fuelCalc(),paid=F.tiers.filter(function(t){return !t.free}),h='<section class="card pad"><h2>⛽ کارت سوخت</h2>';
+  if(F.none)h+='<p class="muted">برنامه برای شما بدون کارت تنظیم شده است و فقط بنزین آزاد ثبت می‌شود.</p><button class="btn" type="button" data-act="fuelHas">کارت سوخت دارم</button></section>';
+  if(F.none)return h;
+  if(F.init)h+='<dl class="kv">'+paid.map(function(t){return '<div><dt>'+esc(emoOf(t.id,'fuel')+' '+t.name)+'</dt><dd>'+nf2.format(c.bal[t.id]||0)+' لیتر</dd></div>'}).join('')+'</dl><p class="muted">شارژ از اول هر ماه شمسی است. بنزین آزاد از کارت کم نمی‌شود.</p>';
+  else h+='<p class="muted">هنوز موجودی اولیه ثبت نشده است. هنگام اولین ثبت سوخت‌گیری هم از شما پرسیده می‌شود.</p>';
+  h+='<details><summary>'+(F.init?'اصلاح موجودی (مثلاً اگر بنزین‌زدنی را ثبت نکرده بودید)':'ثبت موجودی اولیه')+'</summary>'+fuelInitHtml(F.init,F.init?'ثبت موجودی تازه':'ثبت موجودی')+'</details>';
+  h+='<details><summary>نام، قیمت و سهمیه‌ی پله‌ها</summary><form data-form="fuelcfg" class="stack">'+F.tiers.map(function(t){
+    return '<div class="stack tier-ed"><b>'+esc(emoOf(t.id,'fuel')+' '+t.name)+'</b><label>نام<input id="fc_'+t.id+'_name" type="text" autocomplete="off" value="'+esc(t.name)+'"></label>'+
+      '<div class="grid2"><label>قیمت هر لیتر (تومان)<input id="fc_'+t.id+'_price" type="text" inputmode="numeric" data-grp="1" autocomplete="off" value="'+esc(fa(t.price))+'"></label>'+
+      (t.free?'':'<label>شارژ ماهانه (لیتر)<input id="fc_'+t.id+'_quota" type="text" inputmode="numeric" autocomplete="off" value="'+esc(fa(t.quota))+'"></label><label>سقف ذخیره (لیتر)<input id="fc_'+t.id+'_cap" type="text" inputmode="numeric" autocomplete="off" value="'+esc(fa(t.cap))+'"></label>')+'</div></div>'}).join('')+
+    '<small class="muted">سقف ذخیره: اگر استفاده نشود، شارژ ماه بعد تا این سقف روی موجودی جمع می‌شود. برای پله‌ای که نمی‌ماند، سقف را برابر شارژ ماهانه بگذارید.</small><button class="btn primary" type="submit">ذخیره</button></form></details></section>';
+  return h;
+}
+function fuelStatsHtml(logs){
+  var rows=[];logs.forEach(function(l){var lit=0,cost=0;groupsOf(l).forEach(function(g){if(g.kind!=='fuel')return;Object.keys(g.liters||{}).forEach(function(id){lit+=g.liters[id];cost+=(g.icost||{})[id]||0})});if(lit>0)rows.push({km:l.km,lit:lit,cost:cost})});
+  if(!rows.length)return '';
+  var L=0,C=0;rows.forEach(function(x){L+=x.lit;C+=x.cost});
+  var h='<section class="card pad"><h2>⛽ آمار سوخت</h2><dl class="kv"><div><dt>مجموع بنزین</dt><dd>'+nf2.format(L)+' لیتر</dd></div><div><dt>میانگین قیمت هر لیتر</dt><dd>'+money(C/L)+'</dd></div>';
+  var k=rows.filter(function(x){return x.km!=null}).sort(function(a,b){return a.km-b.km});
+  if(k.length>=2){var span=k[k.length-1].km-k[0].km;if(span>0){var L2=0,C2=0;k.slice(1).forEach(function(x){L2+=x.lit;C2+=x.cost});
+    h+='<div><dt>مصرف تقریبی</dt><dd>'+nf2.format(L2/span*100)+' لیتر در ۱۰۰ کیلومتر</dd></div><div><dt>هزینه‌ی سوخت هر کیلومتر</dt><dd>'+money(C2/span)+'</dd></div>'}}
+  return h+'</dl><p class="muted">مصرف با فرض پرکردن باک در هر بار حساب می‌شود و تقریبی است.</p></section>';
+}
+function itemsFor(kind){if(kind==='fuel')return fuelItems();return S.templates.filter(function(t){return t.kind===kind}).sort(function(a,b){return lifeScore(a)-lifeScore(b)||(a.ord||500)-(b.ord||500)||a.name.localeCompare(b.name,'fa')})}
+function newBlock(kind){return {kind:kind||'',every:'',tpls:[],gcostTxt:'',icost:{},lit:{},brand:'',price:{},newTxt:'',ddOpen:false,costOpen:false}}
+function snapOf(f){return JSON.stringify([f.date,f.kmTxt,f.costTxt,f.title,f.place,f.note,f.blocks.map(function(b){return [b.kind,b.tpls,b.gcostTxt,b.icost,b.lit,b.brand]})])}
 function numOrNull(t){if(t==null||String(t).trim()==='')return null;var n=parseNum(t);return isFinite(n)&&n>=0?n:null}
 function formCheck(f){
   var km=parseNum(f.kmTxt),total=numOrNull(f.costTxt),known=0,hasOther=false,i;
@@ -817,27 +891,36 @@ function formCheck(f){
   for(i=0;i<f.blocks.length;i++){
     var b=f.blocks[i];
     if(!b.kind||(!b.tpls.length&&!(f.legacy&&(f.title||'').trim())))return {ok:false,msg:''};
+    if(b.kind==='fuel'){
+      var tierSel=false;
+      for(var j=0;j<b.tpls.length;j++){var id=b.tpls[j],t=tplObj(id);
+        if(t&&t.tier){if(!t.tier.free)tierSel=true;var L=numOrNull((b.lit||{})[id]);if(L===null||L<=0)return {ok:false,msg:''}}
+        else if(id==='fu_supp'&&!(b.brand||'').trim())return {ok:false,msg:''}}
+      if(tierSel&&!S.fuel.init)return {ok:false,msg:'ابتدا موجودی فعلی کارت سوخت را (در همین صفحه) ثبت کنید.'};
+      known+=fuelBlockCost(b)*mult();continue;
+    }
     var sumI=0,g=numOrNull(b.gcostTxt);
     b.tpls.forEach(function(id){if(isOtherTpl(id))hasOther=true;var c=numOrNull(b.icost[id]);if(c!==null)sumI+=c});
     if(g!==null&&sumI>g)return {ok:false,msg:'جمع ریز هزینه‌ی موارد از هزینه‌ی همان دسته بیشتر است.'};
     known+=g!==null?g:sumI;
   }
-  if(known>total)return {ok:false,msg:'جمع ریز هزینه‌ها از هزینه‌ی کل بیشتر است.'};
+  if(known>total+1)return {ok:false,msg:'جمع ریز هزینه‌ها از هزینه‌ی کل بیشتر است.'};
   if(hasOther&&!(f.title||'').trim())return {ok:false,msg:'برای «سایر»، در بخش توضیحات بنویسید چه کاری انجام شد.'};
   return {ok:true,msg:''};
 }
 function formDirty(f){return !!f&&snapOf(f)!==f.snap}
-function updateOk(){if(!form)return;var c=formCheck(form),b=$('okBtn'),m=$('fmsg');if(b)b.disabled=!c.ok;if(m){m.textContent=c.msg;m.hidden=!c.msg}}
+function updateOk(){if(!form)return;var c=formCheck(form),b=$('okBtn'),m=$('fmsg');if(b)b.disabled=!c.ok;if(m){m.textContent=c.msg;m.hidden=!c.msg}var w=$('fwarn');if(w){var t=fuelWarn(form);w.textContent=t;w.hidden=!t}}
 function makeForm(o){
   o=o||{};var est=estimate();
   var f={id:o.id||null,date:o.date||todayIso(),title:'',place:o.place||'',note:o.note||'',confirmCancel:false,blocks:[],legacy:false};
   var km=('km' in o)?o.km:est.km;
   f.kmTxt=km!=null&&isFinite(km)?fa(km):'';
-  f.costTxt=(o.id&&o.cost!=null)?fa(o.cost*mult()):'';
+  f.costTxt=(o.id&&o.cost!=null)?fa(o.cost*mult()):'';f.costEdited=!!o.id;
   if(o.id){
     groupsOf(o).forEach(function(g){
       var ic={};Object.keys(g.icost||{}).forEach(function(k){ic[k]=fa(g.icost[k]*mult())});
-      f.blocks.push({kind:g.kind,tpls:(g.tpls||[]).slice(),gcostTxt:g.gcost!=null?fa(g.gcost*mult()):'',icost:ic,newTxt:'',ddOpen:false,costOpen:false});
+      var lt={};Object.keys(g.liters||{}).forEach(function(k){lt[k]=String(g.liters[k])});
+      f.blocks.push({kind:g.kind,every:g.every?fa(g.every):'',tpls:(g.tpls||[]).slice(),gcostTxt:g.kind==='fuel'?'':(g.gcost!=null?fa(g.gcost*mult()):''),icost:ic,lit:lt,brand:g.brand||'',price:Object.assign({},g.price||{}),newTxt:'',ddOpen:false,costOpen:false});
     });
     var names=(o.tpls||[]).map(tplName).filter(Boolean).join('، ');
     if(o.desc!=null)f.title=o.desc;else if(o.title&&o.title!==names)f.title=o.title;
@@ -847,22 +930,28 @@ function makeForm(o){
   f.snap=snapOf(f);return f;
 }
 function openAdd(o){form=makeForm(o);go('add')}
-function tplName(id){var t=S.templates.filter(function(x){return x.id===id})[0];return t?t.name:''}
+function tplName(id){var t=tplObj(id);return t?t.name:''}
 function blockHtml(f,b,i){
-  var usedElse=f.blocks.map(function(x,j){return j!==i?x.kind:null}),names=b.tpls.map(tplName).filter(Boolean);
+  var usedElse=f.blocks.map(function(x,j){return j!==i?x.kind:null}),names=b.tpls.map(tplLabel).filter(Boolean);
   var h='<div class="blk"><div class="blk-h"><b>دسته‌ی '+faDigits(i+1)+'</b>'+(f.blocks.length>1?'<button type="button" class="btn small" data-act="delBlock" data-bi="'+i+'">حذف این دسته</button>':'')+'</div>';
   h+='<label>دسته‌بندی<select data-fk="'+i+'"><option value=""'+(b.kind?'':' selected')+' disabled>انتخاب کنید…</option>'+Object.keys(KINDS).map(function(k){return '<option value="'+k+'"'+(b.kind===k?' selected':'')+(usedElse.indexOf(k)>=0?' disabled':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select></label>';
+  if(b.kind==='fuel'&&!S.fuel.init&&!S.fuel.none)h+=fuelInitHtml();
   h+='<div class="stack"><span class="flbl">مورد انجام‌شده (چند مورد هم می‌توانید انتخاب کنید)</span><details class="dd" id="itemsDd'+i+'"'+(b.kind?'':' data-off="1"')+(b.ddOpen&&b.kind?' open':'')+'><summary>'+
     (!b.kind?'ابتدا دسته‌بندی را انتخاب کنید':(names.length?esc(names.join('، ')):'انتخاب مورد…'))+'</summary>';
   if(b.kind){
-    h+='<div class="dd-list">'+itemsFor(b.kind).map(function(t){var it=intervalText(t);return '<label class="dd-row"><input type="checkbox" data-bi="'+i+'" data-tpl="'+t.id+'"'+(b.tpls.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(t.name)+'</b>'+(it==='بدون بازه'?'':'<small>'+it+'</small>')+'</span></label>'}).join('')+'</div>';
-    h+='<div class="dd-add"><input type="text" data-nt="'+i+'" autocomplete="off" placeholder="افزودن مورد جدید…" value="'+esc(b.newTxt)+'"><button class="btn small" type="button" data-act="addItem" data-bi="'+i+'">افزودن</button></div><div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="b" data-bi="'+i+'">تمام</button></div>';
+    h+='<div class="dd-list">'+itemsFor(b.kind).map(function(t){var it=t.tier?tierInfo(t.tier):intervalText(t);return '<label class="dd-row"><input type="checkbox" data-bi="'+i+'" data-tpl="'+t.id+'"'+(b.tpls.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(itemLabel(t))+'</b>'+(it==='بدون بازه'?'':'<small>'+it+'</small>')+'</span></label>'}).join('')+'</div>';
+    h+=(b.kind==='fuel'?'':'<div class="dd-add"><input type="text" data-nt="'+i+'" autocomplete="off" placeholder="افزودن مورد جدید…" value="'+esc(b.newTxt)+'"><button class="btn small" type="button" data-act="addItem" data-bi="'+i+'">افزودن</button></div>')+'<div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="b" data-bi="'+i+'">تمام</button></div>';
   }
   h+='</details></div>';
-  if(b.tpls.length){
+  if(b.kind==='fuel'&&b.tpls.length){
+    h+='<div class="stack fuelbox">'+b.tpls.map(function(id){var t=tplObj(id);if(!t)return '';
+      if(t.tier){var L=numOrNull((b.lit||{})[id]);return '<label>'+esc(itemLabel(t))+' — چند لیتر؟<input type="text" inputmode="decimal" data-lit="'+i+'|'+id+'" autocomplete="off" value="'+esc((b.lit||{})[id]||'')+'" placeholder="مثلاً ۱۰"><small>قیمت هر لیتر: '+money(priceOf(b,id))+'<span data-amt="'+i+'|'+id+'">'+(L===null?'':' · مبلغ: '+money(L*priceOf(b,id)))+'</span></small></label>'}
+      return '<div class="grid2"><label>'+esc(itemLabel(t))+' — برند<input type="text" data-brand="'+i+'" autocomplete="off" value="'+esc(b.brand||'')+'" placeholder="نام برند مکمل"></label><label>پیشنهاد سازنده: هر چند کیلومتر؟<input type="text" inputmode="numeric" autocomplete="off" data-every="'+i+'" value="'+esc(b.every||'')+'" placeholder="مثلاً ۳٬۰۰۰"></label><label>قیمت ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-ic="'+i+'|'+id+'" value="'+esc(b.icost[id]||'')+'"></label></div>'}).join('')+'</div>';
+  }
+  if(b.tpls.length&&b.kind!=='fuel'){
     h+='<details class="dd sub" id="costDd'+i+'"'+(b.costOpen?' open':'')+'><summary>ریز هزینه (اختیاری)</summary><div class="stack" style="padding:8px 12px">'+
       '<label>هزینه‌ی کل این دسته ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-gc="'+i+'" value="'+esc(b.gcostTxt)+'" placeholder="اگر می‌دانید"></label>'+
-      b.tpls.map(function(id){return '<label>'+esc(tplName(id))+' ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-ic="'+i+'|'+id+'" value="'+esc(b.icost[id]||'')+'" placeholder="اگر می‌دانید"></label>'}).join('')+
+      b.tpls.map(function(id){return '<label>'+esc(tplLabel(id))+' ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-ic="'+i+'|'+id+'" value="'+esc(b.icost[id]||'')+'" placeholder="اگر می‌دانید"></label>'}).join('')+
       '<small class="muted">هر چه را نمی‌دانید خالی بگذارید؛ فقط در هزینه‌ی کل حساب می‌شود.</small></div></details>';
   }
   return h+'</div>';
@@ -878,7 +967,8 @@ function vAdd(){
   h+='<button class="btn" type="button" data-act="addBlock"'+(canAdd?'':' disabled')+'>+ دسته‌ی دیگر (در همین مراجعه)</button>';
   h+='<label>کیلومتر<input id="f_km" type="text" inputmode="numeric" autocomplete="off" value="'+esc(f.kmTxt)+'"><small>عدد کیلومترشمار را بنویسید. مقدار پیش‌فرض تخمینی است.</small></label>';
   h+='<label>هزینه‌ی کل ('+unitName()+') — الزامی<input id="f_cost" type="text" inputmode="numeric" autocomplete="off" value="'+esc(f.costTxt)+'" placeholder="مجموع مبلغ پرداختی؛ اگر رایگان بود ۰ بنویسید"></label>';
-  h+='<p id="fmsg" class="banner" hidden></p>';
+  var w0=fuelWarn(f);
+  h+='<p id="fmsg" class="banner" hidden></p><p id="fwarn" class="banner"'+(w0?'':' hidden')+'>'+esc(w0)+'</p>';
   h+='<div class="stack extra"><span class="flbl">اطلاعات تکمیلی</span>'+
     '<label>مکان<input id="f_place" type="text" autocomplete="off" value="'+esc(f.place)+'" placeholder="مثلاً تعمیرگاه مرکزی"></label>'+
     '<label>توضیحات<input id="f_title" type="text" autocomplete="off" value="'+esc(f.title)+'" placeholder="جزئیات کار انجام‌شده؛ با «سایر» الزامی است"></label>'+
@@ -901,6 +991,13 @@ function saveLog(){
   var m=mult(),date=f.date,est=estimate(),km=Math.round(parseNum(f.kmTxt)),allNames=[],tplsAll=[],groups=[];
   f.blocks.forEach(function(b){
     var ic={},any=false;
+    if(b.kind==='fuel'){
+      var lit={},price={},gc=0,br=(b.brand||'').trim();
+      b.tpls.forEach(function(id){var t=tplObj(id);if(t&&t.tier){var L=numOrNull(b.lit[id]),pr=priceOf(b,id);lit[id]=L;price[id]=pr;ic[id]=L*pr;gc+=L*pr}else{var c=numOrNull(b.icost[id]);if(c!==null){ic[id]=c/m;gc+=c/m}}});
+      var ev=parseNum(b.every||'');groups.push({kind:'fuel',tpls:b.tpls.slice(),gcost:gc,icost:ic,liters:lit,price:price,brand:br,every:(b.tpls.indexOf('fu_supp')>=0&&isFinite(ev)&&ev>0)?Math.round(ev):0});
+      b.tpls.forEach(function(id){var t=tplObj(id);allNames.push(t&&t.tier?t.name+' '+nf2.format(lit[id])+' لیتر':(t?t.name:'')+(br?' ('+br+')':''));tplsAll.push(id)});
+      return;
+    }
     b.tpls.forEach(function(id){var c=numOrNull(b.icost[id]);if(c!==null){ic[id]=c/m;any=true}});
     var g=numOrNull(b.gcostTxt);
     groups.push({kind:b.kind,tpls:b.tpls.slice(),gcost:g!==null?g/m:null,icost:ic});
@@ -960,9 +1057,9 @@ function repMatch(l,fk0,fi0){
 function filterHtml(st,kAttr,tAttr,id){
   var h='<select '+kAttr+'="1" aria-label="دسته"><option value="all"'+(st.fk==='all'?' selected':'')+'>همه‌ی دسته‌ها</option>'+Object.keys(KINDS).map(function(k){return '<option value="'+k+'"'+(st.fk===k?' selected':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select>';
   if(st.fk!=='all'){
-    var names=st.fi.map(tplName).filter(Boolean);
+    var names=st.fi.map(tplLabel).filter(Boolean);
     h+='<details class="dd" id="'+id+'"'+(st.dd?' open':'')+'><summary>'+(names.length?esc(names.join('، ')):'همه‌ی موارد این دسته')+'</summary><div class="dd-list">'+
-      itemsFor(st.fk).map(function(t){return '<label class="dd-row"><input type="checkbox" '+tAttr+'="'+t.id+'"'+(st.fi.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(t.name)+'</b></span></label>'}).join('')+'</div><div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="'+id.charAt(0)+'">تمام</button></div></details>';
+      itemsFor(st.fk).map(function(t){return '<label class="dd-row"><input type="checkbox" '+tAttr+'="'+t.id+'"'+(st.fi.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(itemLabel(t))+'</b></span></label>'}).join('')+'</div><div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="'+id.charAt(0)+'">تمام</button></div></details>';
   }
   return h;
 }
@@ -989,13 +1086,14 @@ function vReport(){
   if(span>0)h+='<div><dt>مسافت ثبت‌شده</dt><dd>'+fa(span)+' کیلومتر</dd></div>';
   if(span>=100&&total>0)h+='<div><dt>هزینه‌ی هر کیلومتر</dt><dd>'+money(total/span)+'</dd></div>';
   h+='</dl></section>';
+  if(rep.fk==='fuel')h+=fuelStatsHtml(logs);
   if(!logs.length)return h+'<div class="empty">'+(inRange.length?'با این فیلتر موردی در این بازه نیست.':'در این بازه چیزی ثبت نشده است.')+'</div>';
 
   var cat={};
   if(rep.fk==='all')logs.forEach(function(l){var al=allocLog(l);al.exact.forEach(function(e){cat[e.kind]=(cat[e.kind]||0)+e.amt});al.pools.forEach(function(p){var k=p.kinds.length===1?p.kinds[0]:'mixed';cat[k]=(cat[k]||0)+p.amt})});
   else if(!rep.fi.length)logs.forEach(function(l){var al=allocLog(l);al.exact.forEach(function(e){if(e.kind===rep.fk)cat[e.tpl]=(cat[e.tpl]||0)+e.amt});al.pools.forEach(function(p){if(p.kinds.length===1&&p.kinds[0]===rep.fk){var k=p.tpls.length===1?p.tpls[0]:'_none';cat[k]=(cat[k]||0)+p.amt}})});
   var ck=Object.keys(cat).filter(function(k){return cat[k]>0}).sort(function(x,y){return cat[y]-cat[x]});
-  var catName=function(k){return rep.fk==='all'?(k==='mixed'?'ترکیبی (بدون ریز هزینه)':KINDS[k]):(k==='_none'?'بدون ریز هزینه‌ی مورد':(tplName(k)||'مورد حذف‌شده'))};
+  var catName=function(k){return rep.fk==='all'?(k==='mixed'?'ترکیبی (بدون ریز هزینه)':KINDS[k]):(k==='_none'?'بدون ریز هزینه‌ی مورد':(tplLabel(k)||'مورد حذف‌شده'))};
   if(ck.length&&total>0&&!(rep.fk!=='all'&&rep.fi.length)){
     h+='<section class="card pad"><h2>'+(rep.fk==='all'?'به تفکیک نوع':'به تفکیک مورد')+'</h2><div class="hb">'+ck.map(function(k){
       var p=cat[k]/total*100;
@@ -1031,11 +1129,12 @@ function vSetup(){
     '<label>میانگین اولیه (کیلومتر در روز)<input id="e_rate" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(S.fallbackRate)+'"></label></div>'+
     '<button class="btn primary" type="submit">ذخیره</button></form>'+
     (rd.length?'<div><h3>آخرین ثبت‌های کیلومتر</h3>'+rd.map(function(r){return '<div class="trow"><div class="trow-main"><b>'+fa(r.km)+' کیلومتر</b><small>'+fmtDate(r.date)+'</small></div><button class="btn small danger" data-act="delRead" data-d="'+r.date+'">حذف</button></div>'}).join('')+'</div>':'')+'</section>';
+  h+=fuelSettingsHtml();
   h+='<section class="card pad"><h2>سرویس‌ها و بازه‌ی تعویض</h2><p class="muted">بازه‌های پیش‌فرض، مقادیر رایج برای پراید ۱۱۱ و ۱۳۱ است و عین دفترچه‌ی سازنده نیست. با جدول دفترچه‌ی ماشین خودتان مطابقت بدهید و هر مورد را ویرایش، خاموش یا حذف کنید.</p><div>';
   S.templates.forEach(function(t){
     if(/^(r_|oth_)/.test(t.id))return;
     if(tplEdit===t.id)h+=tplForm(t);
-    else h+='<div class="trow"><div class="trow-main'+(t.on?'':' off')+'"><b>'+esc(t.name)+'</b><small>'+KINDS[t.kind]+' · '+intervalText(t)+'</small></div><div class="tools">'+
+    else h+='<div class="trow"><div class="trow-main'+(t.on?'':' off')+'"><b>'+esc(itemLabel(t))+'</b><small>'+KINDS[t.kind]+' · '+intervalText(t)+'</small></div><div class="tools">'+
       '<button class="btn small" data-act="tplToggle" data-id="'+t.id+'">'+(t.on?'خاموش':'روشن')+'</button><button class="btn small" data-act="tplEdit" data-id="'+t.id+'">ویرایش</button></div></div>';
   });
   h+='</div>'+(tplEdit==='new'?tplForm({id:'',name:'',kind:'service',km:0,months:0}):'<div class="actions"><button class="btn" data-act="tplNew">افزودن مورد جدید</button><button class="btn" data-act="applyPride">اعمال الگوی پراید</button></div>')+'</section>';
@@ -1130,6 +1229,9 @@ document.addEventListener('click',function(e){
   if(a==='cancelYes'){leaveForm();return}
   if(a==='cancelNo'){form.confirmCancel=false;render();return}
   if(a==='ddDone'){var w=b.dataset.w;if(w==='b'&&form)form.blocks[+b.dataset.bi].ddOpen=false;if(w==='r')rep.dd=false;if(w==='h')hf.dd=false;render();return}
+  if(a==='fuelNone'){S.fuel.none=true;commit();render();return}
+  if(a==='fuelHas'){S.fuel.none=false;commit();render();return}
+  if(a==='fuelInit'){var bal={};[].forEach.call(document.querySelectorAll('[data-fi]'),function(e){var v=parseNum(e.value);bal[e.dataset.fi]=isFinite(v)&&v>=0?v:0});S.fuel.bal=bal;S.fuel.init=true;S.fuel.initDate=todayIso();commit();toast('موجودی کارت ثبت شد');render();return}
   if(a==='addItem'){addItem(+b.dataset.bi);return}
   if(a==='addBlock'){form.blocks.forEach(function(x){x.ddOpen=false});var nb=newBlock('');form.blocks.push(nb);render();return}
   if(a==='delBlock'){form.blocks.splice(+b.dataset.bi,1);render();return}
@@ -1212,6 +1314,15 @@ document.addEventListener('submit',function(e){
   if(k==='odo'){saveOdo(val('qodo'));return}
   if(k==='log'){saveLog();return}
   if(k==='car'){S.car.name=val('c_name').trim();S.car.year=val('c_year').trim();S.car.plate=val('c_plate').trim();commit();renderHeader();toast('ذخیره شد');return}
+  if(k==='fuelcfg'){
+    S.fuel.tiers.forEach(function(t){
+      var nm=val('fc_'+t.id+'_name').trim(),pr=parseNum(val('fc_'+t.id+'_price'));
+      if(nm)t.name=nm;if(isFinite(pr)&&pr>0)t.price=Math.round(pr);
+      if(!t.free){var qu=parseNum(val('fc_'+t.id+'_quota')),cp=parseNum(val('fc_'+t.id+'_cap'));
+        if(isFinite(qu)&&qu>=0)t.quota=qu;if(isFinite(cp)&&cp>=0)t.cap=cp;if(t.cap<t.quota)t.cap=t.quota}
+    });
+    commit();toast('ذخیره شد');render();return;
+  }
   if(k==='est'){var rt=parseNum(val('e_rate'));S.calDays=+val('e_cal')||21;if(isFinite(rt)&&rt>0)S.fallbackRate=Math.round(rt);commit();toast('ذخیره شد');render();return}
   if(k==='tpl'){
     var name=val('tf_name').trim();if(!name){toast('نام را وارد کنید');return}
@@ -1236,23 +1347,27 @@ document.addEventListener('change',function(e){
     rd.onload=function(){$('bkText').value=String(rd.result||'');toast('فایل خوانده شد. برای بازیابی، دکمه‌ی «بازیابی از متن» را بزنید.')};
     rd.readAsText(t.files[0]);return;
   }
-  if(t.dataset&&t.dataset.fk!==undefined&&form){var bk=form.blocks[+t.dataset.fk];bk.kind=t.value;bk.tpls=[];bk.icost={};bk.gcostTxt='';bk.ddOpen=false;form.confirmCancel=false;render();return}
+  if(t.dataset&&t.dataset.fk!==undefined&&form){var bk=form.blocks[+t.dataset.fk];bk.kind=t.value;bk.tpls=[];bk.icost={};bk.lit={};bk.brand='';bk.price={};autoCost();bk.gcostTxt='';bk.ddOpen=false;form.confirmCancel=false;render();return}
   if(t.dataset&&t.dataset.hk!==undefined){hf.kind=t.value;hf.fi=[];hf.dd=false;render();return}
   if(t.dataset&&t.dataset.htpl!==undefined){hf.fi=[].map.call(document.querySelectorAll('[data-htpl]:checked'),function(i){return i.dataset.htpl});hf.dd=true;render();return}
   if(t.dataset&&t.dataset.rk!==undefined){rep.fk=t.value;rep.fi=[];rep.dd=false;render();return}
   if(t.dataset&&t.dataset.rtpl!==undefined){rep.fi=[].map.call(document.querySelectorAll('[data-rtpl]:checked'),function(i){return i.dataset.rtpl});rep.dd=true;render();return}
-  if(t.dataset&&t.dataset.tpl&&t.dataset.bi!==undefined&&form){var bb=form.blocks[+t.dataset.bi];bb.tpls=[].map.call(document.querySelectorAll('[data-bi="'+t.dataset.bi+'"][data-tpl]:checked'),function(i){return i.dataset.tpl});Object.keys(bb.icost).forEach(function(k){if(bb.tpls.indexOf(k)<0)delete bb.icost[k]});bb.ddOpen=true;render();return}
+  if(t.dataset&&t.dataset.tpl&&t.dataset.bi!==undefined&&form){var bb=form.blocks[+t.dataset.bi];bb.tpls=[].map.call(document.querySelectorAll('[data-bi="'+t.dataset.bi+'"][data-tpl]:checked'),function(i){return i.dataset.tpl});Object.keys(bb.icost).forEach(function(k){if(bb.tpls.indexOf(k)<0)delete bb.icost[k]});Object.keys(bb.lit||{}).forEach(function(k){if(bb.tpls.indexOf(k)<0)delete bb.lit[k]});bb.ddOpen=true;autoCost();render();return}
   if(t.id==='a_prov')auth.prov=t.value;
   if(t.id==='f_cost'||t.id==='f_km'||isMoneyIn(t)){var n=parseNum(t.value);if(isFinite(n))t.value=fa(n)}
 });
 var FMAP={f_km:'kmTxt',f_cost:'costTxt',f_place:'place',f_note:'note',f_title:'title'};
-function isMoneyIn(t){return t.dataset&&(t.dataset.gc!==undefined||t.dataset.ic!==undefined)}
+function isMoneyIn(t){return t.dataset&&(t.dataset.gc!==undefined||t.dataset.ic!==undefined||t.dataset.grp!==undefined)}
 function syncForm(t){
   if(!form)return;
+  if(t.id==='f_cost')form.costEdited=String(t.value).trim()!=='';
   if(FMAP[t.id])form[FMAP[t.id]]=t.value;
   else if(t.dataset){
+    if(t.dataset.lit!==undefined){var q=t.dataset.lit.split('|');form.blocks[+q[0]].lit[q[1]]=t.value;autoCost();refreshAmts();updateOk();return}
+    if(t.dataset.every!==undefined){form.blocks[+t.dataset.every].every=t.value;return}
+    if(t.dataset.brand!==undefined){form.blocks[+t.dataset.brand].brand=t.value;updateOk();return}
     if(t.dataset.gc!==undefined)form.blocks[+t.dataset.gc].gcostTxt=t.value;
-    else if(t.dataset.ic!==undefined){var p=t.dataset.ic.split('|');form.blocks[+p[0]].icost[p[1]]=t.value}
+    else if(t.dataset.ic!==undefined){var p=t.dataset.ic.split('|');form.blocks[+p[0]].icost[p[1]]=t.value;autoCost()}
     else if(t.dataset.nt!==undefined){form.blocks[+t.dataset.nt].newTxt=t.value;return}
   }
   updateOk();
