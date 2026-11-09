@@ -249,6 +249,8 @@ details.dd[data-off] summary{opacity:.55;pointer-events:none}
 .dd-add{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line)}.dd-add input{flex:1;min-width:0}
 .dd-empty{padding:8px 12px}
 .news ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
+.log-cost{display:flex;flex-direction:column;align-items:flex-end}.log-cost small{font-weight:400;color:var(--muted);font-size:11.5px}
+.dd-foot{padding:8px 12px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -424,9 +426,9 @@ function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
 function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
 
 /* ---------- account and cloud sync ---------- */
-var APP_VERSION='1.3.0',SEEN_KEY='carservice.seen',newsSeen=false;
+var APP_VERSION='1.3.2',SEEN_KEY='carservice.seen',newsSeen=false;
 /* نسخه‌گذاری: عدد اول = تغییر بنیادین، عدد دوم = قابلیت تازه، عدد سوم = رفع ایراد و بهبود کوچک. مهم‌ترین مورد اول بیاید. */
-var CHANGES=[{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var CHANGES=[{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
 var updAvail=null,lastUpd=0;
 function vcmp(a,b){a=a.split('.').map(Number);b=b.split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
 function checkUpdate(){
@@ -703,7 +705,7 @@ function remainText(st){
 
 /* ---------- ui helpers ---------- */
 var VIEWS=['home','add','history','report','setup'];
-var view='home',lastView=null,form=null,tplEdit=null,hf={kind:'all',q:''};
+var view='home',lastView=null,form=null,tplEdit=null,hf={kind:'all',fi:[],dd:false,q:''};
 var curJ=isoToJ(todayIso());
 var rep={fk:'all',fi:[],dd:false,mode:'month',y:curJ.jy,m:curJ.jm,from:jToIso(curJ.jy,1,1),to:todayIso()};
 var toastTimer=null;
@@ -854,7 +856,7 @@ function blockHtml(f,b,i){
     (!b.kind?'ابتدا دسته‌بندی را انتخاب کنید':(names.length?esc(names.join('، ')):'انتخاب مورد…'))+'</summary>';
   if(b.kind){
     h+='<div class="dd-list">'+itemsFor(b.kind).map(function(t){var it=intervalText(t);return '<label class="dd-row"><input type="checkbox" data-bi="'+i+'" data-tpl="'+t.id+'"'+(b.tpls.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(t.name)+'</b>'+(it==='بدون بازه'?'':'<small>'+it+'</small>')+'</span></label>'}).join('')+'</div>';
-    h+='<div class="dd-add"><input type="text" data-nt="'+i+'" autocomplete="off" placeholder="افزودن مورد جدید…" value="'+esc(b.newTxt)+'"><button class="btn small" type="button" data-act="addItem" data-bi="'+i+'">افزودن</button></div>';
+    h+='<div class="dd-add"><input type="text" data-nt="'+i+'" autocomplete="off" placeholder="افزودن مورد جدید…" value="'+esc(b.newTxt)+'"><button class="btn small" type="button" data-act="addItem" data-bi="'+i+'">افزودن</button></div><div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="b" data-bi="'+i+'">تمام</button></div>';
   }
   h+='</details></div>';
   if(b.tpls.length){
@@ -914,21 +916,24 @@ function saveLog(){
 }
 
 /* ---------- history ---------- */
-function logRow(l){
-  return '<button class="log" data-act="editLog" data-id="'+l.id+'"><span class="log-main"><small>'+fmtDate(l.date)+'</small><b>'+esc(l.title)+'</b><small>'+kindLabel(l)+(l.place?' · '+esc(l.place):'')+(l.km!=null?' · '+fa(l.km)+' کیلومتر':'')+'</small></span><span class="log-cost">'+(l.cost?money(l.cost):'')+'</span></button>';
+function logRow(l,m){
+  return '<button class="log" data-act="editLog" data-id="'+l.id+'"><span class="log-main"><small>'+fmtDate(l.date)+'</small><b>'+esc(l.title)+'</b><small>'+kindLabel(l)+(l.place?' · '+esc(l.place):'')+(l.km!=null?' · '+fa(l.km)+' کیلومتر':'')+'</small></span><span class="log-cost">'+(m?(m.exact>0?money(m.exact)+(m.exact<l.cost?'<small>از '+money(l.cost)+'</small>':''):(m.amb>0?'<small>ریز نامشخص</small>':'')):(l.cost?money(l.cost):''))+'</span></button>';
 }
 function vHistory(){
-  var h='<section class="stack"><h2>سوابق سرویس و تعمیر</h2><div class="seg" style="gap:6px">';
-  h+=[['all','همه']].concat(Object.keys(KINDS).map(function(k){return [k,KINDS[k]]})).map(function(p){return '<button class="fbtn'+(hf.kind===p[0]?' on':'')+'" data-act="hfilter" data-k="'+p[0]+'">'+p[1]+'</button>'}).join('');
-  h+='</div><input id="hq" type="search" placeholder="جستجو در شرح، مکان و یادداشت" value="'+esc(hf.q)+'" aria-label="جستجو"><div id="hlist" class="list"></div></section>';
+  var h='<section class="stack"><h2>سوابق سرویس و تعمیر</h2><div class="stack">'+filterHtml({fk:hf.kind,fi:hf.fi,dd:hf.dd},'data-hk','data-htpl','hItems')+'</div>';
+  h+='<input id="hq" type="search" placeholder="جستجو در شرح، مکان و یادداشت" value="'+esc(hf.q)+'" aria-label="جستجو"><div id="hsum"></div><div id="hlist" class="list"></div></section>';
   return h;
 }
 function fillHistory(){
-  var q=hf.q.trim(),arr=S.logs.filter(function(l){
-    if(hf.kind!=='all'&&!groupsOf(l).some(function(g){return g.kind===hf.kind}))return false;
-    return !q||(l.title+' '+l.place+' '+l.note).indexOf(q)>=0;
+  var q=hf.q.trim(),active=hf.kind!=='all',tot=0,amb=0,amts={};
+  var arr=S.logs.filter(function(l){
+    var m=repMatch(l,hf.kind,hf.fi);if(!m.inc)return false;
+    if(q&&(l.title+' '+l.place+' '+l.note).indexOf(q)<0)return false;
+    amts[l.id]=m;tot+=m.exact;amb+=m.amb;return true;
   }).sort(function(a,b){return a.date<b.date?1:(a.date>b.date?-1:0)});
-  $('hlist').innerHTML=arr.length?arr.map(logRow).join(''):'<div class="empty">'+(S.logs.length?'موردی با این فیلتر پیدا نشد.':'هنوز چیزی ثبت نشده. با دکمه‌ی «ثبت» پایین صفحه اولین سرویس را اضافه کنید.')+'</div>';
+  var sum=$('hsum');
+  if(sum)sum.innerHTML=(active&&arr.length)?'<div class="card pad"><p class="eyebrow">جمع هزینه‌ی '+(hf.fi.length?'موارد انتخاب‌شده':KINDS[hf.kind])+'</p><p class="big">'+fa(tot*mult())+' <span>'+unitName()+'</span></p>'+(amb>0?'<p class="muted">به‌علاوه‌ی '+money(amb)+' هزینه‌ی تقسیم‌نشده در مراجعه‌هایی که این '+(hf.fi.length?'مورد':'دسته')+' هم در آن‌ها بوده (ریز هزینه ثبت نشده).</p>':'')+'</div>':'';
+  $('hlist').innerHTML=arr.length?arr.map(function(l){return logRow(l,active?amts[l.id]:null)}).join(''):'<div class="empty">'+(S.logs.length?'موردی با این فیلتر پیدا نشد.':'هنوز چیزی ثبت نشده. با دکمه‌ی «ثبت» پایین صفحه اولین سرویس را اضافه کنید.')+'</div>';
 }
 
 /* ---------- report ---------- */
@@ -938,8 +943,8 @@ function repRange(){
   if(rep.mode==='range'){var a=rep.from<=rep.to?rep.from:rep.to,b=rep.from<=rep.to?rep.to:rep.from;return [a,b,'از '+fmtDate(a)+' تا '+fmtDate(b)]}
   return ['0000-01-01','9999-12-31','از ابتدا تا امروز'];
 }
-function repMatch(l){
-  var fk=rep.fk,fi=rep.fi||[];
+function repMatch(l,fk0,fi0){
+  var fk=fk0||rep.fk,fi=(fk0?fi0:rep.fi)||[];
   if(fk==='all')return {inc:true,exact:l.cost||0,amb:0};
   var inc=groupsOf(l).some(function(g){return g.kind===fk&&(!fi.length||(g.tpls||[]).some(function(id){return fi.indexOf(id)>=0}))});
   if(!inc)return {inc:false,exact:0,amb:0};
@@ -952,15 +957,16 @@ function repMatch(l){
   });
   return {inc:true,exact:ex,amb:amb};
 }
-function repFilterHtml(){
-  var h='<section class="card pad"><span class="flbl">فیلتر گزارش</span><select data-rk="1" aria-label="دسته"><option value="all"'+(rep.fk==='all'?' selected':'')+'>همه‌ی دسته‌ها</option>'+Object.keys(KINDS).map(function(k){return '<option value="'+k+'"'+(rep.fk===k?' selected':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select>';
-  if(rep.fk!=='all'){
-    var names=rep.fi.map(tplName).filter(Boolean);
-    h+='<details class="dd" id="rItems"'+(rep.dd?' open':'')+'><summary>'+(names.length?esc(names.join('، ')):'همه‌ی موارد این دسته')+'</summary><div class="dd-list">'+
-      itemsFor(rep.fk).map(function(t){return '<label class="dd-row"><input type="checkbox" data-rtpl="'+t.id+'"'+(rep.fi.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(t.name)+'</b></span></label>'}).join('')+'</div></details>';
+function filterHtml(st,kAttr,tAttr,id){
+  var h='<select '+kAttr+'="1" aria-label="دسته"><option value="all"'+(st.fk==='all'?' selected':'')+'>همه‌ی دسته‌ها</option>'+Object.keys(KINDS).map(function(k){return '<option value="'+k+'"'+(st.fk===k?' selected':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select>';
+  if(st.fk!=='all'){
+    var names=st.fi.map(tplName).filter(Boolean);
+    h+='<details class="dd" id="'+id+'"'+(st.dd?' open':'')+'><summary>'+(names.length?esc(names.join('، ')):'همه‌ی موارد این دسته')+'</summary><div class="dd-list">'+
+      itemsFor(st.fk).map(function(t){return '<label class="dd-row"><input type="checkbox" '+tAttr+'="'+t.id+'"'+(st.fi.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(t.name)+'</b></span></label>'}).join('')+'</div><div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="'+id.charAt(0)+'">تمام</button></div></details>';
   }
-  return h+'</section>';
+  return h;
 }
+function repFilterHtml(){return '<section class="card pad"><span class="flbl">فیلتر گزارش</span>'+filterHtml({fk:rep.fk,fi:rep.fi,dd:rep.dd},'data-rk','data-rtpl','rItems')+'</section>'}
 function vReport(){
   var r=repRange(),a=r[0],b=r[1],label=r[2],i;
   var inRange=S.logs.filter(function(l){return l.date>=a&&l.date<=b}).sort(function(x,y){return x.date<y.date?1:-1});
@@ -1123,6 +1129,7 @@ document.addEventListener('click',function(e){
   if(a==='cancelLog'){if(formDirty(form)&&!form.confirmCancel){form.confirmCancel=true;render();return}leaveForm();return}
   if(a==='cancelYes'){leaveForm();return}
   if(a==='cancelNo'){form.confirmCancel=false;render();return}
+  if(a==='ddDone'){var w=b.dataset.w;if(w==='b'&&form)form.blocks[+b.dataset.bi].ddOpen=false;if(w==='r')rep.dd=false;if(w==='h')hf.dd=false;render();return}
   if(a==='addItem'){addItem(+b.dataset.bi);return}
   if(a==='addBlock'){form.blocks.forEach(function(x){x.ddOpen=false});var nb=newBlock('');form.blocks.push(nb);render();return}
   if(a==='delBlock'){form.blocks.splice(+b.dataset.bi,1);render();return}
@@ -1229,8 +1236,10 @@ document.addEventListener('change',function(e){
     rd.onload=function(){$('bkText').value=String(rd.result||'');toast('فایل خوانده شد. برای بازیابی، دکمه‌ی «بازیابی از متن» را بزنید.')};
     rd.readAsText(t.files[0]);return;
   }
-  if(t.dataset&&t.dataset.fk!==undefined&&form){var bk=form.blocks[+t.dataset.fk];bk.kind=t.value;bk.tpls=[];bk.icost={};bk.gcostTxt='';bk.ddOpen=true;form.confirmCancel=false;render();return}
-  if(t.dataset&&t.dataset.rk!==undefined){rep.fk=t.value;rep.fi=[];rep.dd=true;render();return}
+  if(t.dataset&&t.dataset.fk!==undefined&&form){var bk=form.blocks[+t.dataset.fk];bk.kind=t.value;bk.tpls=[];bk.icost={};bk.gcostTxt='';bk.ddOpen=false;form.confirmCancel=false;render();return}
+  if(t.dataset&&t.dataset.hk!==undefined){hf.kind=t.value;hf.fi=[];hf.dd=false;render();return}
+  if(t.dataset&&t.dataset.htpl!==undefined){hf.fi=[].map.call(document.querySelectorAll('[data-htpl]:checked'),function(i){return i.dataset.htpl});hf.dd=true;render();return}
+  if(t.dataset&&t.dataset.rk!==undefined){rep.fk=t.value;rep.fi=[];rep.dd=false;render();return}
   if(t.dataset&&t.dataset.rtpl!==undefined){rep.fi=[].map.call(document.querySelectorAll('[data-rtpl]:checked'),function(i){return i.dataset.rtpl});rep.dd=true;render();return}
   if(t.dataset&&t.dataset.tpl&&t.dataset.bi!==undefined&&form){var bb=form.blocks[+t.dataset.bi];bb.tpls=[].map.call(document.querySelectorAll('[data-bi="'+t.dataset.bi+'"][data-tpl]:checked'),function(i){return i.dataset.tpl});Object.keys(bb.icost).forEach(function(k){if(bb.tpls.indexOf(k)<0)delete bb.icost[k]});bb.ddOpen=true;render();return}
   if(t.id==='a_prov')auth.prov=t.value;
@@ -1249,7 +1258,8 @@ function syncForm(t){
   updateOk();
 }
 var moreOpen=false;
-document.addEventListener('toggle',function(e){if(e.target&&e.target.id==='moreSvc')moreOpen=e.target.open;if(e.target&&e.target.id==='rItems')rep.dd=e.target.open;var tid=e.target&&e.target.id||'',mm=/^(itemsDd|costDd)(\d+)$/.exec(tid);if(mm&&form&&form.blocks[+mm[2]])form.blocks[+mm[2]][mm[1]==='itemsDd'?'ddOpen':'costOpen']=e.target.open;if(tid==='rItems')rep.dd=e.target.open},true);
+document.addEventListener('toggle',function(e){if(e.target&&e.target.id==='moreSvc')moreOpen=e.target.open;if(e.target&&e.target.id==='rItems')rep.dd=e.target.open;if(e.target&&e.target.id==='hItems')hf.dd=e.target.open;var tid=e.target&&e.target.id||'',mm=/^(itemsDd|costDd)(\d+)$/.exec(tid);if(mm&&form&&form.blocks[+mm[2]])form.blocks[+mm[2]][mm[1]==='itemsDd'?'ddOpen':'costOpen']=e.target.open;if(tid==='rItems')rep.dd=e.target.open},true);
+document.addEventListener('click',function(e){[].forEach.call(document.querySelectorAll('details.dd[open]'),function(d){if(/^(itemsDd|rItems|hItems)/.test(d.id)&&!d.contains(e.target))d.open=false})});
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.dataset&&e.target.dataset.nt!==undefined){e.preventDefault();if(form)addItem(+e.target.dataset.nt)}});
 var GROUPED=['ob_km','ob_rate','qodo','f_km','f_cost','tf_km','e_rate'];
 document.addEventListener('input',function(e){
