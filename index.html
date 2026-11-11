@@ -292,6 +292,24 @@ details.dd[data-off] summary{opacity:.55;pointer-events:none}
 .svl>span{display:flex;flex-direction:column;min-width:0}
 .svl small{color:var(--muted);font-size:12px}
 .svl select{min-width:150px}
+
+/* ---- v2.1: settings categories, contact modal ---- */
+.cats{display:flex;flex-direction:column;gap:8px}
+.cat{font:inherit;color:var(--ink);text-align:right;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:60px}
+.cat .ce{font-size:26px;line-height:1}
+.cat .ct{display:flex;flex-direction:column;flex:1;min-width:0}
+.cat small{color:var(--muted);font-size:12.5px}
+.cat .cc{font-size:24px;color:var(--muted)}
+.sethead{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:5;background:var(--bg);padding-block:6px}
+.sethead h2{margin:0;font-size:17px;flex:1;text-align:center}
+.sethead .btn{min-width:64px}
+.contact-btn{font:inherit;font-weight:700;color:var(--accent);background:var(--surface);border:1px dashed var(--gold);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;min-height:48px}
+.contact-btn small{font-weight:400;color:var(--muted);font-size:12px}
+#modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+#modal[hidden]{display:none}
+.mback{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.msheet{position:relative;background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:85vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.mclose{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -311,7 +329,7 @@ details.dd[data-off] summary{opacity:.55;pointer-events:none}
 </div>
 
 <script>
-window.MN_LOCAL=true;window.MN_CFG={"feedbackEmail": "feedback@example.ir", "donateUrl": ""};
+window.MN_LOCAL=true;window.MN_CFG={"feedbackEmail": "Mashinnameh@gmail.com", "donateUrl": ""};
 (function(){
 'use strict';
 
@@ -487,9 +505,9 @@ function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
 function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
 
 /* ---------- account and cloud sync ---------- */
-var APP_VERSION='2.0.0',SEEN_KEY='carservice.seen',newsSeen=false;
+var APP_VERSION='2.1.0',SEEN_KEY='carservice.seen',newsSeen=false;
 /* نسخه‌گذاری: عدد اول = تغییر بنیادین، عدد دوم = قابلیت تازه، عدد سوم = رفع ایراد و بهبود کوچک. مهم‌ترین مورد اول بیاید. */
-var CHANGES=[{v:'2.0.0',items:['پلن‌ها: 🥉 برنزی (فقط سرویس‌ها)، 🥈 نقره‌ای (سرویس و هزینه‌ی اختیاری) و 🥇 طلایی (هزینه، کارت سوخت و درآمد)؛ هر پلن رنگ و چیدمان خودش را دارد','راهنمای شروع: نوع وسیله، برند و مدل، ظرفیت موتور و نوع سوخت، و سرویس‌های مناسب همان ماشین یا موتور','پشتیبانی از موتورسیکلت','درآمد در پلن طلایی: امروز، دیروز، هفته، ماه یا بازه‌ی دلخواه، با سود خالص و سهم هزینه در گزارش','کاربران فعلی به‌صورت خودکار روی پلن طلایی می‌مانند؛ از تنظیمات می‌توانید پلن را عوض کنید']},{v:'1.4.1',items:['کسانی که کارت سوخت ندارند می‌توانند «کارت سوخت ندارم» را بزنند و فقط بنزین آزاد ثبت کنند','برای مکمل سوخت، فاصله‌ی پیشنهادی سازنده را (مثلاً ۳٬۰۰۰ کیلومتر) برای هر بار وارد می‌کنید']},{v:'1.4.0',items:['سوخت‌گیری: ثبت بنزین ۱۵۰۰، ۳۰۰۰، ۱۰۰۰۰ و آزاد با لیتر هر پله، موجودی خودکار کارت و شارژ اول هر ماه شمسی','مکمل سوخت با برند و قیمت؛ هر ۳۰۰۰ کیلومتر دوباره در صفحه‌ی اصلی پیشنهاد می‌شود','مصرف سوخت در ۱۰۰ کیلومتر و هزینه‌ی هر کیلومتر در گزارش','ایموجی کنار همه‌ی دسته‌ها و موضوع‌ها']},{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var CHANGES=[{v:'2.1.0',items:['تنظیمات دسته‌بندی‌شده شد: هر دسته صفحه‌ی خودش را دارد، با «ذخیره» بالا راست و «لغو» بالا چپ','«ارتباط با ما» کوچک و جمع‌وجور شد و با لمس، پنجره‌ی بازشو نشان می‌دهد','ایمیل واقعی برنامه اضافه شد']},{v:'2.0.0',items:['پلن‌ها: 🥉 برنزی (فقط سرویس‌ها)، 🥈 نقره‌ای (سرویس و هزینه‌ی اختیاری) و 🥇 طلایی (هزینه، کارت سوخت و درآمد)؛ هر پلن رنگ و چیدمان خودش را دارد','راهنمای شروع: نوع وسیله، برند و مدل، ظرفیت موتور و نوع سوخت، و سرویس‌های مناسب همان ماشین یا موتور','پشتیبانی از موتورسیکلت','درآمد در پلن طلایی: امروز، دیروز، هفته، ماه یا بازه‌ی دلخواه، با سود خالص و سهم هزینه در گزارش','کاربران فعلی به‌صورت خودکار روی پلن طلایی می‌مانند؛ از تنظیمات می‌توانید پلن را عوض کنید']},{v:'1.4.1',items:['کسانی که کارت سوخت ندارند می‌توانند «کارت سوخت ندارم» را بزنند و فقط بنزین آزاد ثبت کنند','برای مکمل سوخت، فاصله‌ی پیشنهادی سازنده را (مثلاً ۳٬۰۰۰ کیلومتر) برای هر بار وارد می‌کنید']},{v:'1.4.0',items:['سوخت‌گیری: ثبت بنزین ۱۵۰۰، ۳۰۰۰، ۱۰۰۰۰ و آزاد با لیتر هر پله، موجودی خودکار کارت و شارژ اول هر ماه شمسی','مکمل سوخت با برند و قیمت؛ هر ۳۰۰۰ کیلومتر دوباره در صفحه‌ی اصلی پیشنهاد می‌شود','مصرف سوخت در ۱۰۰ کیلومتر و هزینه‌ی هر کیلومتر در گزارش','ایموجی کنار همه‌ی دسته‌ها و موضوع‌ها']},{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
 var updAvail=null,lastUpd=0;
 function vcmp(a,b){a=a.split('.').map(Number);b=b.split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
 function checkUpdate(){
@@ -614,16 +632,29 @@ function mailLink(kind,label){
   var body='\n\n---\nنسخه‌ی برنامه: '+APP_VERSION+(kind==='bug'?'\nمرورگر: '+navigator.userAgent:'');
   return 'mailto:'+encodeURIComponent(cfg.feedbackEmail).replace('%40','@')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
-function feedbackCard(withDonate){
+function contactBody(withDonate){
   if(!cfg.feedbackEmail)return '';
-  var h='<section class="card pad fbcard"><h2>نظر، پیشنهاد یا انتقاد دارید؟</h2><p class="muted">پیام شما مستقیم به سازنده‌ی برنامه می‌رسد و برای بهتر شدن دفترچه خیلی کمک می‌کند.</p>'+
+  var h='<h2>💬 ارتباط با ما</h2><p class="muted">پیام شما مستقیم به سازنده‌ی برنامه می‌رسد و برای بهتر شدن دفترچه خیلی کمک می‌کند.</p>'+
     '<div class="fb-actions"><a class="btn" href="'+esc(mailLink('idea','پیشنهاد'))+'">پیشنهاد</a><a class="btn" href="'+esc(mailLink('crit','انتقاد'))+'">انتقاد</a><a class="btn" href="'+esc(mailLink('bug','گزارش مشکل'))+'">گزارش مشکل</a></div>'+
     '<div class="fbmail"><small>یا مستقیم به این ایمیل بنویسید:</small><span class="ltr" dir="ltr">'+esc(cfg.feedbackEmail)+'</span><button class="btn small" type="button" data-act="copyMail">کپی</button></div>';
   if(withDonate){
     h+='<div class="fbdonate"><p class="muted">اگر برنامه به کارتان آمد، می‌توانید از ادامه‌ی راه حمایت کنید.</p>'+
       (/^https:\/\//.test(cfg.donateUrl)?'<a class="btn gold" href="'+esc(cfg.donateUrl)+'" target="_blank" rel="noopener">حمایت از برنامه</a>':'<button class="btn gold" type="button" data-act="donateSoon">حمایت از برنامه</button>')+'</div>';
   }
-  return h+'</section>';
+  return h;
+}
+
+var contactOpen=false;
+function feedbackCard(){
+  if(!cfg.feedbackEmail)return '';
+  return '<button class="contact-btn" type="button" data-act="contactOpen">💬 ارتباط با ما <small>نظر، پیشنهاد، انتقاد</small></button>';
+}
+function syncModal(){
+  var m=$('modal');
+  if(!m){m=document.createElement('div');m.id='modal';document.body.appendChild(m)}
+  if(!contactOpen||!cfg.feedbackEmail){m.innerHTML='';m.hidden=true;return}
+  m.hidden=false;
+  m.innerHTML='<div class="mback" data-act="contactClose"></div><div class="msheet" role="dialog" aria-modal="true"><button class="btn small mclose" type="button" data-act="contactClose" aria-label="بستن">✕ بستن</button><div class="stack">'+contactBody(true)+'</div></div>';
 }
 
 /* ---------- install tip ---------- */
@@ -1315,37 +1346,54 @@ function planCardHtml(){
   return '<section class="card pad"><h2>پلن استفاده</h2><p class="muted">هر پلن ظاهر و امکانات را با نیاز شما هماهنگ می‌کند. اطلاعاتتان با عوض‌کردن پلن پاک نمی‌شود.</p><div class="plans">'+
     ['bronze','silver','gold'].map(function(k){var P=PLANS[k];return '<button type="button" class="plan'+(S.plan===k?' on':'')+'" data-act="setPlan" data-p="'+k+'"><span class="pe">'+P.em+'</span><b>'+P.name+'</b><small>'+P.tag+'</small></button>'}).join('')+'</div></section>';
 }
+var setCat='',setDirty=false;
+function setHead(title,withSave){
+  return '<div class="sethead"><'+(withSave?'button class="btn primary small" type="button" data-act="setSave">ذخیره':'button class="btn primary small" type="button" data-act="setBack" data-ok="1">تمام')+'</button><h2>'+title+'</h2>'+(withSave?'<button class="btn small" type="button" data-act="setBack">لغو</button>':'<span></span>')+'</div>';
+}
+function setCats(){
+  var L=[['car','🚗','مشخصات ماشین','نام، سال و پلاک'],['plan','🏅','پلن استفاده','برنزی، نقره‌ای یا طلایی'],['km','📏','تخمین کیلومتر','یادآوری و میانگین روزانه']];
+  if(costShown())L.push(['money','💵','واحد پول','تومان یا ریال']);
+  if(plan()!=='bronze')L.push(['fuel','⛽','کارت سوخت','موجودی و شارژ ماهانه']);
+  L.push(['svc','🔧','سرویس‌ها و بازه‌ی تعویض','روشن، خاموش و ویرایش'],['backup','💾','پشتیبان‌گیری','ذخیره، کپی و بازیابی']);
+  var h='<h2>تنظیمات</h2><div class="cats">'+L.map(function(c){return '<button type="button" class="cat" data-act="setOpen" data-c="'+c[0]+'"><span class="ce">'+c[1]+'</span><span class="ct"><b>'+c[2]+'</b><small>'+c[3]+'</small></span><span class="cc">‹</span></button>'}).join('')+
+    (cfg.feedbackEmail?'<button type="button" class="cat" data-act="contactOpen"><span class="ce">💬</span><span class="ct"><b>ارتباط با ما</b><small>نظر، پیشنهاد و حمایت</small></span><span class="cc">‹</span></button>':'')+'</div>'+accountCard();
+  return h;
+}
 function vSetup(){
-  var c=S.car,h='<h2>تنظیمات</h2>'+(!S.plan?'<button class="btn" data-go="home">بازگشت به راهنمای شروع</button>':'');
-  h+='<section class="card pad"><h2>مشخصات ماشین</h2><form data-form="car" class="stack"><label>نام یا مدل<input id="c_name" type="text" autocomplete="off" value="'+esc(c.name)+'"></label>'+
-    '<div class="grid2"><label>سال ساخت<input id="c_year" type="text" inputmode="numeric" autocomplete="off" value="'+esc(c.year)+'"></label><label>پلاک<input id="c_plate" type="text" autocomplete="off" value="'+esc(c.plate)+'"></label></div>'+
-    '<button class="btn primary" type="submit">ذخیره</button></form></section>';
-  h+=planCardHtml();
-  if(costShown())h+='<section class="card pad"><h2>واحد پول</h2><p class="muted">همه‌ی مبلغ‌ها و گزارش‌ها با این واحد نشان داده می‌شوند. عددهای قبلی خودکار تبدیل می‌شوند (هر تومان ۱۰ ریال).</p><div class="seg">'+
+  var c=S.car,h='';
+  if(!S.plan)setCat='backup';
+  if(!setCat)return setCats();
+  if(setCat==='car')h=setHead('🚗 مشخصات ماشین',true)+'<section class="card pad"><form data-form="car" class="stack"><label>نام یا مدل<input id="c_name" type="text" autocomplete="off" value="'+esc(c.name)+'"></label>'+
+    '<div class="grid2"><label>سال ساخت<input id="c_year" type="text" inputmode="numeric" autocomplete="off" value="'+esc(c.year)+'"></label><label>پلاک<input id="c_plate" type="text" autocomplete="off" value="'+esc(c.plate)+'"></label></div></form></section>';
+  if(setCat==='plan')h=setHead('🏅 پلن استفاده',false)+planCardHtml();
+  if(setCat==='money')h=setHead('💵 واحد پول',false)+'<section class="card pad"><p class="muted">همه‌ی مبلغ‌ها و گزارش‌ها با این واحد نشان داده می‌شوند. عددهای قبلی خودکار تبدیل می‌شوند (هر تومان ۱۰ ریال).</p><div class="seg">'+
     [['toman','تومان'],['rial','ریال']].map(function(p){return '<button class="fbtn'+(S.unit===p[0]?' on':'')+'" data-act="unit" data-u="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div></section>';
-  var rd=S.readings.slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
-  h+='<section class="card pad"><h2>تخمین کیلومتر</h2><p class="muted">برنامه از فاصله‌ی ثبت‌های کیلومتر، میانگین رانندگی روزانه را حساب می‌کند. ثبت‌های تازه‌تر وزن بیشتری دارند.</p><form data-form="est" class="stack">'+
+  if(setCat==='km'){
+    var rd=S.readings.slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
+    h=setHead('📏 تخمین کیلومتر',true)+'<section class="card pad"><p class="muted">برنامه از فاصله‌ی ثبت‌های کیلومتر، میانگین رانندگی روزانه را حساب می‌کند. ثبت‌های تازه‌تر وزن بیشتری دارند.</p><form data-form="est" class="stack">'+
     '<div class="grid2"><label>یادآوری ثبت کیلومتر<select id="e_cal">'+[7,14,21,30].map(function(d){return '<option value="'+d+'"'+(S.calDays===d?' selected':'')+'>هر '+faDigits(d)+' روز</option>'}).join('')+'</select></label>'+
-    '<label>میانگین اولیه (کیلومتر در روز)<input id="e_rate" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(S.fallbackRate)+'"></label></div>'+
-    '<button class="btn primary" type="submit">ذخیره</button></form>'+
+    '<label>میانگین اولیه (کیلومتر در روز)<input id="e_rate" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(S.fallbackRate)+'"></label></div></form>'+
     (rd.length?'<div><h3>آخرین ثبت‌های کیلومتر</h3>'+rd.map(function(r){return '<div class="trow"><div class="trow-main"><b>'+fa(r.km)+' کیلومتر</b><small>'+fmtDate(r.date)+'</small></div><button class="btn small danger" data-act="delRead" data-d="'+r.date+'">حذف</button></div>'}).join('')+'</div>':'')+'</section>';
-  if(plan()!=='bronze')h+=fuelSettingsHtml();
-  h+='<section class="card pad"><h2>سرویس‌ها و بازه‌ی تعویض</h2><p class="muted">بازه‌های پیش‌فرض، مقادیر رایج برای پراید ۱۱۱ و ۱۳۱ است و عین دفترچه‌ی سازنده نیست. با جدول دفترچه‌ی ماشین خودتان مطابقت بدهید و هر مورد را ویرایش، خاموش یا حذف کنید.</p><div>';
-  S.templates.forEach(function(t){
-    if(/^(r_|oth_)/.test(t.id))return;
-    if(tplEdit===t.id)h+=tplForm(t);
-    else h+='<div class="trow"><div class="trow-main'+(t.on?'':' off')+'"><b>'+esc(itemLabel(t))+'</b><small>'+KINDS[t.kind]+' · '+intervalText(t)+'</small></div><div class="tools">'+
-      '<button class="btn small" data-act="tplToggle" data-id="'+t.id+'">'+(t.on?'خاموش':'روشن')+'</button><button class="btn small" data-act="tplEdit" data-id="'+t.id+'">ویرایش</button></div></div>';
-  });
-  h+='</div>'+(tplEdit==='new'?tplForm({id:'',name:'',kind:'service',km:0,months:0}):'<div class="actions"><button class="btn" data-act="tplNew">افزودن مورد جدید</button><button class="btn" data-act="applyPride">اعمال الگوی پراید</button></div>')+'</section>';
-  h+='<section class="card pad"><h2>پشتیبان‌گیری و حفظ اطلاعات</h2><p class="muted" id="syncNote">'+syncNote()+'</p>'+
+  }
+  if(setCat==='fuel')h=setHead('⛽ کارت سوخت',false)+fuelSettingsHtml();
+  if(setCat==='svc'){
+    h=setHead('🔧 سرویس‌ها',false)+'<section class="card pad"><p class="muted">بازه‌ها مقدار رایج است و عین دفترچه‌ی سازنده نیست. با دفترچه‌ی ماشین خودتان مطابقت بدهید و هر مورد را ویرایش، خاموش یا حذف کنید.</p><div>';
+    S.templates.forEach(function(t){
+      if(/^(r_|oth_)/.test(t.id))return;
+      if(tplEdit===t.id)h+=tplForm(t);
+      else h+='<div class="trow"><div class="trow-main'+(t.on?'':' off')+'"><b>'+esc(itemLabel(t))+'</b><small>'+KINDS[t.kind]+' · '+intervalText(t)+'</small></div><div class="tools">'+
+        '<button class="btn small" data-act="tplToggle" data-id="'+t.id+'">'+(t.on?'خاموش':'روشن')+'</button><button class="btn small" data-act="tplEdit" data-id="'+t.id+'">ویرایش</button></div></div>';
+    });
+    h+='</div>'+(tplEdit==='new'?tplForm({id:'',name:'',kind:'service',km:0,months:0}):'<div class="actions"><button class="btn" data-act="tplNew">افزودن مورد جدید</button><button class="btn" data-act="applyPride">اعمال الگوی پراید</button></div>')+'</section>';
+  }
+  if(setCat==='backup'){
+    h=(S.plan?setHead('💾 پشتیبان‌گیری',false):'<button class="btn" data-go="home">بازگشت به راهنمای شروع</button>')+'<section class="card pad"><p class="muted" id="syncNote">'+syncNote()+'</p>'+
     '<div class="actions"><button class="btn" data-act="dlBackup">ذخیره‌ی فایل پشتیبان</button><button class="btn" data-act="copyBackup">کپی متن پشتیبان</button></div>'+
     '<label>متن پشتیبان (برای کپی یا چسباندن)<textarea id="bkText" spellcheck="false" placeholder="برای بازیابی، متن پشتیبان را اینجا بچسبانید"></textarea></label>'+
     '<label>یا فایل پشتیبان را انتخاب کنید<input id="bkFile" type="file" accept=".json,application/json"></label>'+
     '<div class="actions"><button class="btn" data-act="restoreText">بازیابی از متن</button><button class="btn danger" data-act="resetAll">پاک‌کردن همه‌ی داده‌ها</button></div></section>';
-  h+=accountCard();
-  h+=feedbackCard(true);
-  return h;
+  }
+  return '<div class="setpage">'+h+'</div>';
 }
 function tplForm(t){
   return '<form class="tpl-edit" data-form="tpl"><label>نام<input id="tf_name" type="text" autocomplete="off" value="'+esc(t.name)+'"></label>'+
@@ -1374,8 +1422,9 @@ function render(){
   if(view==='income'&&plan()!=='gold')view='home';
   var fn={home:vHome,add:vAdd,history:vHistory,report:vReport,setup:vSetup,income:vIncome}[view]||vHome;
   $('view').innerHTML=fn();
-  renderHeader();navActive();
+  renderHeader();navActive();syncModal();
   if(view==='history')fillHistory();
+  if(view!=='setup'){setCat='';setDirty=false}
   if(lastView!==view){try{window.scrollTo(0,0)}catch(e){}lastView=view}
 }
 function route(){var h=location.hash.slice(1);view=VIEWS.indexOf(h)>=0?h:'home';render()}
@@ -1409,7 +1458,7 @@ function importState(text){
 function backupJson(){return JSON.stringify(S,null,1)}
 document.addEventListener('click',function(e){
   var g=e.target.closest('[data-go]');
-  if(g){go(g.dataset.go);return}
+  if(g){if(g.dataset.go==='setup'&&S.plan&&g.dataset.nav==='setup')setCat='';go(g.dataset.go);return}
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act,id=b.dataset.id;
   if(a==='copyMail'){
@@ -1417,6 +1466,11 @@ document.addEventListener('click',function(e){
     try{navigator.clipboard.writeText(em).then(okm,selm)}catch(er){selm()}
     return;
   }
+  if(a==='setOpen'){setCat=b.dataset.c;setDirty=false;tplEdit=null;render();return}
+  if(a==='setBack'){if(setDirty&&!b.dataset.ok&&!confirmTwice(b,'تغییرات ذخیره‌نشده از بین می‌رود. لغو؟'))return;setCat='';setDirty=false;tplEdit=null;render();return}
+  if(a==='setSave'){var sf=document.querySelector('.setpage form[data-form]');if(sf){if(sf.requestSubmit)sf.requestSubmit();else sf.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))}return}
+  if(a==='contactOpen'){contactOpen=true;syncModal();return}
+  if(a==='contactClose'){contactOpen=false;syncModal();return}
   if(a==='donateSoon'){toast('راه حمایت مالی به‌زودی اضافه می‌شود. از محبت شما ممنونیم.');return}
   if(a==='authMode'){auth.mode=b.dataset.m;auth.msg='';render();return}
   if(a==='copyRec'){
@@ -1531,7 +1585,7 @@ document.addEventListener('submit',function(e){
   }
   if(k==='odo'){saveOdo(val('qodo'));return}
   if(k==='log'){saveLog();return}
-  if(k==='car'){S.car.name=val('c_name').trim();S.car.year=val('c_year').trim();S.car.plate=val('c_plate').trim();commit();renderHeader();toast('ذخیره شد');return}
+  if(k==='car'){S.car.name=val('c_name').trim();S.car.year=val('c_year').trim();S.car.plate=val('c_plate').trim();commit();setCat='';setDirty=false;render();toast('ذخیره شد');return}
   if(k==='fuelcfg'){
     S.fuel.tiers.forEach(function(t){
       var nm=val('fc_'+t.id+'_name').trim(),pr=parseNum(val('fc_'+t.id+'_price'));
@@ -1541,7 +1595,7 @@ document.addEventListener('submit',function(e){
     });
     commit();toast('ذخیره شد');render();return;
   }
-  if(k==='est'){var rt=parseNum(val('e_rate'));S.calDays=+val('e_cal')||21;if(isFinite(rt)&&rt>0)S.fallbackRate=Math.round(rt);commit();toast('ذخیره شد');render();return}
+  if(k==='est'){var rt=parseNum(val('e_rate'));S.calDays=+val('e_cal')||21;if(isFinite(rt)&&rt>0)S.fallbackRate=Math.round(rt);commit();setCat='';setDirty=false;toast('ذخیره شد');render();return}
   if(k==='tpl'){
     var name=val('tf_name').trim();if(!name){toast('نام را وارد کنید');return}
     var km2=parseNum(val('tf_km')),mo=parseNum(val('tf_months')),dy=parseNum(val('tf_days'));
@@ -1599,6 +1653,7 @@ var GROUPED=['ob_km','ob_rate','qodo','f_km','f_cost','tf_km','e_rate','tk_km','
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.dataset&&tour){if(t.dataset.t!==undefined&&!t.dataset.tr)tour[t.dataset.t]=t.value;if(t.dataset.tb!==undefined)tour.bal[t.dataset.tb]=t.value}
+  if(t.closest&&t.closest('.setpage')&&t.closest('form[data-form=car],form[data-form=est]'))setDirty=true;
   if(t.id==='inc_amt')inc.amt=t.value;if(t.id==='inc_note')inc.note=t.value;
   syncForm(t);
   if(t.id==='hq'){hf.q=t.value;fillHistory()}
