@@ -1,0 +1,1858 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#EEF2FA">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ماشین‌نامه">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png" type="image/png">
+<title>ماشین‌نامه</title>
+<style>
+/* Layout: one-column service booklet. Odometer drum on lapis tile panel, services by urgency, bottom tab bar. */
+:root{
+  --bg:#E6F0EF; --surface:#FFFFFF; --surface2:#EEF5F4; --ink:#10252E; --muted:#51696F; --line:#CBDCDA;
+  --accent:#1B3C8C; --accent-ink:#FFFFFF; --accent-soft:#DDE7F8;
+  --tq:#0E8C8A; --tq-soft:#D3EEEB; --gold:#B88415; --gold-soft:#F5E8C4;
+  --lapis:#1B3C8C; --on-lapis:#FFFFFF; --on-lapis-soft:#C9D8F5;
+  --ok:#1B7A4E; --ok-soft:#DFF2E8; --warn:#8F5600; --warn-soft:#FAEBCB; --bad:#B0261E; --bad-soft:#FADFDC;
+  --drum:#13232B; --drum-ink:#F1F5F6;
+  --plate-bg:#FFFFFF; --plate-ink:#101820; --plate-blue:#1C4FA0;
+  --display:'Lalezar','Vazirmatn',Tahoma,sans-serif;
+  --body:'Vazirmatn',Tahoma,'Segoe UI',system-ui,sans-serif;
+  --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 46 46'%3E%3Cg fill='none' stroke='white' stroke-opacity='.17' stroke-width='1'%3E%3Crect x='9' y='9' width='28' height='28'/%3E%3Crect x='9' y='9' width='28' height='28' transform='rotate%2845 23 23%29'/%3E%3Ccircle cx='23' cy='23' r='5'/%3E%3Cpath d='M0 0l5 5M46 0l-5 5M0 46l5-5M46 46l-5-5'/%3E%3C/g%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#08151A; --surface:#10252B; --surface2:#16303A; --ink:#E6F0F0; --muted:#94ADB2; --line:#21414A;
+    --accent:#8BB0F5; --accent-ink:#0A1530; --accent-soft:#18284A;
+    --tq:#4CC7C3; --tq-soft:#12353A; --gold:#E3B95B; --gold-soft:#3A2F12;
+    --lapis:#172B5E; --on-lapis:#FFFFFF; --on-lapis-soft:#B8C9EE;
+    --ok:#58C48C; --ok-soft:#12301F; --warn:#EDB25B; --warn-soft:#35270E; --bad:#FF918A; --bad-soft:#3B1B19;
+    --drum:#060B0E; --drum-ink:#E8EEF1;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#08151A; --surface:#10252B; --surface2:#16303A; --ink:#E6F0F0; --muted:#94ADB2; --line:#21414A;
+  --accent:#8BB0F5; --accent-ink:#0A1530; --accent-soft:#18284A;
+  --tq:#4CC7C3; --tq-soft:#12353A; --gold:#E3B95B; --gold-soft:#3A2F12;
+  --lapis:#172B5E; --on-lapis:#FFFFFF; --on-lapis-soft:#B8C9EE;
+  --ok:#58C48C; --ok-soft:#12301F; --warn:#EDB25B; --warn-soft:#35270E; --bad:#FF918A; --bad-soft:#3B1B19;
+  --drum:#060B0E; --drum-ink:#E8EEF1;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.75; direction:rtl;
+  padding-block:16px 110px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:720px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3,p{margin:0}
+h1{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.3}
+h2{font-size:17px;font-weight:700;text-wrap:balance}
+h3{font-size:15px;font-weight:700}
+.muted{color:var(--muted)}
+small{font-size:12.5px;color:var(--muted)}
+.eyebrow{font-size:12.5px;letter-spacing:.02em;color:var(--muted)}
+
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.top-end{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sub{color:var(--muted);font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.chip.on i{background:var(--ok)} .chip.err i,.chip.slow i{background:var(--warn)} .chip.off i{background:var(--muted)}
+.plate{display:inline-flex;direction:rtl;border:2px solid var(--plate-ink);border-radius:6px;background:var(--plate-bg);color:var(--plate-ink);overflow:hidden;font-weight:700;font-size:14px;line-height:1.5}
+.plate b{background:var(--plate-blue);color:#fff;font-size:10px;padding:2px 6px;display:flex;align-items:center;font-weight:500}
+.plate span{padding:1px 10px;letter-spacing:.04em}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.pad{padding:16px;display:flex;flex-direction:column;gap:12px}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+.odo{background:var(--accent-soft);border-color:transparent;padding:16px;display:flex;flex-direction:column;gap:12px}
+.odo-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.drums{display:flex;gap:4px;direction:ltr;justify-content:center}
+.drums .d{
+  width:clamp(34px,11vw,48px);height:clamp(48px,15vw,64px);display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(to bottom,rgba(255,255,255,.10),rgba(255,255,255,0) 45%,rgba(0,0,0,.28)),var(--drum);
+  color:var(--drum-ink);border-radius:6px;font-weight:700;font-size:clamp(24px,8vw,34px);font-variant-numeric:tabular-nums;
+}
+.odo-meta{font-size:13.5px;color:var(--muted);text-align:center}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:14px}
+
+label{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:500}
+input,select,textarea{
+  font:inherit;font-size:16px;font-weight:400;color:var(--ink);background:var(--surface);border:1px solid var(--line);
+  border-radius:8px;padding:9px 12px;min-height:46px;width:100%;
+}
+textarea{min-height:90px;resize:vertical;direction:ltr;text-align:left;font-size:13px}
+input::placeholder{color:var(--muted);opacity:.7}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:stretch}
+.row>input{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.datef{display:grid;grid-template-columns:.8fr 1.4fr 1fr;gap:6px}
+.datef select{padding-inline:8px}
+
+.btn{font:inherit;font-weight:700;font-size:15px;min-height:46px;padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{min-height:36px;padding:4px 12px;font-size:13.5px}
+.btn:disabled{opacity:.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{flex-direction:row;font-weight:500;cursor:pointer}
+.seg input{position:absolute;opacity:0;width:1px;height:1px;min-height:0;pointer-events:none}
+.seg span,.tchip span{display:inline-flex;align-items:center;min-height:38px;padding:4px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);font-size:14px}
+.seg input:checked+span,.tchip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+span,.tchip input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.tchips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{flex-direction:row;cursor:pointer}
+.tchip input{position:absolute;opacity:0;width:1px;height:1px;min-height:0;pointer-events:none}
+.fbtn{font:inherit;font-size:14px;min-height:36px;padding:2px 14px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.fbtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:1px 10px;border-radius:99px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.none{background:var(--surface2);color:var(--muted)}
+.svcs{display:flex;flex-direction:column;gap:8px}
+.svc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.svc-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.svc-head>div{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.bar{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--ok)}
+.svc.warn .bar i{background:var(--warn)} .svc.bad .bar i{background:var(--bad)}
+.svc-meta{font-size:14px}
+.svc.bad .svc-meta{color:var(--bad);font-weight:500}
+.sec-title{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+
+.log{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:start;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer}
+.log-main{display:flex;flex-direction:column;min-width:0}
+.log-main b{font-weight:700}
+.log-cost{font-weight:700;white-space:nowrap;font-size:14px}
+.list{display:flex;flex-direction:column;gap:8px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+
+.big{font-family:var(--display);font-size:38px;line-height:1.3}
+.big span{font-family:var(--body);font-size:14px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0}
+.kv div{background:var(--surface2);border-radius:8px;padding:8px 12px}
+.kv dt{font-size:12.5px;color:var(--muted)} .kv dd{margin:0;font-weight:700}
+.hb{display:flex;flex-direction:column;gap:10px}
+.hb-row{display:flex;flex-direction:column;gap:3px}
+.hb-row div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.hb-bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.hb-bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.cols-wrap{overflow-x:auto}
+.cols{display:flex;gap:8px;align-items:flex-end;min-width:max-content}
+.col{width:54px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.col small{font-size:11px;white-space:nowrap}
+.col .stick{width:26px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.col .stick.z{background:var(--line)}
+.col .cap{height:26px;display:flex;align-items:flex-start}
+
+.trow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.trow:first-of-type{border-top:0}
+.trow-main{min-width:0;display:flex;flex-direction:column}
+.trow-main.off b{color:var(--muted);text-decoration:line-through}
+.tools{display:flex;gap:6px;flex-shrink:0}
+.tpl-edit{background:var(--surface2);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;margin-block:6px}
+
+.nav{position:fixed;inset:auto 0 0 0;background:var(--surface);border-top:1px solid var(--line);z-index:20;
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.nav-in{max-width:720px;margin-inline:auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;gap:2px}
+.nav button{font:inherit;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--muted);padding:4px 0;min-height:48px;cursor:pointer}
+.nav button.on{color:var(--accent);font-weight:700}
+.nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav .add span{width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;margin-top:-18px;border:3px solid var(--surface)}
+.nav .add svg{width:26px;height:26px;stroke-width:2.2}
+.toast{position:fixed;inset:auto 0 calc(84px + env(safe-area-inset-bottom,0px)) 0;margin-inline:auto;width:max-content;max-width:calc(100% - 32px);
+  background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:30;text-align:center}
+
+/* Iranian treatment: lapis and turquoise tile, gold accents */
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:56px;height:56px;flex:none}
+.lg-a{fill:var(--accent);stroke:var(--gold);stroke-width:1.5}
+.lg-t{fill:var(--tq);stroke:var(--gold);stroke-width:1.5}
+.lg-s{fill:var(--surface)}
+.lg-r{fill:none;stroke:var(--gold);stroke-width:1.5}
+.lg-g{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+.lg-n{fill:none;stroke:var(--bad);stroke-width:2.6;stroke-linecap:round}
+.lg-d{fill:var(--ink)}
+.tilestrip{height:8px;margin-top:12px;border-radius:4px;
+  background:repeating-linear-gradient(90deg,var(--tq) 0 16px,var(--accent) 16px 32px,var(--gold) 32px 38px,var(--accent) 38px 54px)}
+h2::before{content:"";display:inline-block;width:8px;height:8px;background:var(--gold);transform:rotate(45deg);margin-inline-end:9px;vertical-align:middle}
+.odo{background-color:var(--lapis);background-image:var(--pat);color:var(--on-lapis);border:2px solid var(--gold)}
+.odo .eyebrow,.odo .odo-meta{color:var(--on-lapis-soft)}
+.odo .pill.none{background:rgba(255,255,255,.16);color:var(--on-lapis)}
+.odo .btn.primary{background:var(--gold);border-color:var(--gold);color:#10252E}
+.plate{direction:ltr}
+.plate b{gap:4px}
+.flag{display:block;width:15px;height:10px;background:linear-gradient(#239F40 33%,#FFFFFF 33% 66%,#DA0000 66%);border:1px solid rgba(255,255,255,.6)}
+.plate b{flex-direction:column;justify-content:center;align-items:center;padding:2px 5px;line-height:1.2}
+.plate .no{padding:1px 10px;letter-spacing:.04em;direction:rtl}
+.svc{border-inline-start:4px solid var(--line)}
+.svc.ok{border-inline-start-color:var(--tq)} .svc.warn{border-inline-start-color:var(--gold)} .svc.bad{border-inline-start-color:var(--bad)}
+.bar i{background:var(--tq)}
+.hb-bar i{background:var(--tq)} .col .stick{background:var(--tq)}
+.nav .add span{background:var(--accent);outline:2px solid var(--gold);outline-offset:-5px}
+.card.pad>h2:first-child,.stack>.sec-title h2{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}}
+
+body{padding-top:max(16px,env(safe-area-inset-top,0px))}
+.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.ltr{direction:ltr;text-align:left}
+.chk{flex-direction:row;align-items:center;gap:10px;font-weight:400}
+.chk input{width:22px;min-height:22px;height:22px;flex:none}
+.reccode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:clamp(17px,5.6vw,26px);letter-spacing:.05em;text-align:center;background:var(--surface2);border:1px dashed var(--gold);border-radius:10px;padding:16px 8px;direction:ltr;font-weight:700;user-select:all;overflow-wrap:anywhere}
+.banner.bad{background:var(--bad-soft);color:var(--bad)}
+.tip{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);color:var(--accent)}
+.linkrow{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lnk{background:none;border:0;color:var(--accent);font:inherit;font-size:14px;cursor:pointer;padding:6px 0;text-decoration:underline;min-height:36px}
+details{border-top:1px solid var(--line);padding-top:8px}
+details summary{cursor:pointer;font-weight:700;padding:6px 0}
+details form{margin-top:8px}
+details.more .svcs{margin-top:8px}
+.acct-mail{direction:ltr;text-align:right;font-weight:700;overflow-wrap:anywhere}
+.fbcard{border:1px dashed var(--gold)}
+.fb-actions{display:flex;gap:8px;flex-wrap:wrap}
+.fbmail{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fbmail span{font-weight:700;overflow-wrap:anywhere}
+.fbdonate{display:flex;flex-direction:column;gap:8px;align-items:flex-start;border-top:1px solid var(--line);padding-top:12px}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#10252E}
+.nm{color:var(--gold)}
+
+.addbar{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:5;background:var(--surface);padding:6px 0;border-bottom:1px solid var(--line)}
+.addbar h2{margin:0;font-size:16px;flex:1;text-align:center}
+.addbar .btn{min-height:42px;padding:6px 16px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.flbl{font-size:14px;font-weight:500}
+details.dd{border:1px solid var(--line);border-radius:8px;padding:0;background:var(--surface)}
+details.dd>summary{padding:10px 12px;min-height:44px;display:flex;align-items:center;font-weight:500;cursor:pointer}
+details.dd[data-off] summary{opacity:.55;pointer-events:none}
+.dd-list{display:flex;flex-direction:column;border-top:1px solid var(--line);max-height:46vh;overflow:auto}
+.dd-row{flex-direction:row!important;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);font-weight:500;cursor:pointer}
+.dd-row input{width:20px;height:20px;min-height:0;flex:none}
+.dd-row span{display:flex;flex-direction:column;line-height:1.5}.dd-row small{color:var(--muted)}
+.dd-add{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line)}.dd-add input{flex:1;min-width:0}
+.dd-empty{padding:8px 12px}
+.news ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px}
+.log-cost{display:flex;flex-direction:column;align-items:flex-end}.log-cost small{font-weight:400;color:var(--muted);font-size:11.5px}
+.dd-foot{padding:8px 12px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+.fuelbox{gap:10px}.fuel-init{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface2,var(--surface))}.tier-ed{border-top:1px solid var(--line);padding-top:8px}
+
+/* ---- plans: per-plan colour, scale and layout ---- */
+:root[data-plan="bronze"] #view,:root[data-plan="bronze"] #hdr{zoom:1.1}
+:root[data-plan="gold"] #view,:root[data-plan="gold"] #hdr{zoom:.95}
+:root[data-plan="bronze"] .nav-in{grid-template-columns:repeat(4,1fr)}
+:root[data-plan="bronze"] .nav [data-nav="report"],:root[data-plan="bronze"] .log-cost,:root[data-plan="bronze"] #hsum{display:none!important}
+:root[data-plan="bronze"] .nav button{font-size:13px}
+:root[data-plan="bronze"] .btn{min-height:50px}
+.logo{border-radius:10px}
+.pchip{font-size:20px;line-height:1;padding:2px}
+.plans{display:grid;gap:10px}
+.plans.two{grid-template-columns:1fr 1fr}
+.plan{font:inherit;color:var(--ink);text-align:right;background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;cursor:pointer;min-height:56px}
+.plan .pe{grid-row:span 2;font-size:34px;line-height:1}
+.plan b{font-size:16px}
+.plan small{color:var(--muted);font-size:12.5px;line-height:1.6}
+.plan.on{border-color:var(--accent);background:var(--accent-soft)}
+.plans.two .plan{grid-template-columns:1fr;justify-items:center;text-align:center;row-gap:4px}
+.plans.two .plan .pe{grid-row:auto}
+.tour{display:flex;flex-direction:column;gap:14px}
+.tprog{display:flex;gap:4px}
+.tprog i{flex:1;height:5px;border-radius:99px;background:var(--line)}
+.tprog i.on{background:var(--accent)}
+.tnav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+.tnav .btn{min-width:110px}
+.svl{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+.svl>span{display:flex;flex-direction:column;min-width:0}
+.svl small{color:var(--muted);font-size:12px}
+.svl select{min-width:150px}
+
+/* ---- v2.1: settings categories, contact modal ---- */
+.cats{display:flex;flex-direction:column;gap:8px}
+.cat{font:inherit;color:var(--ink);text-align:right;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;min-height:60px}
+.cat .ce{font-size:26px;line-height:1}
+.cat .ct{display:flex;flex-direction:column;flex:1;min-width:0}
+.cat small{color:var(--muted);font-size:12.5px}
+.cat .cc{font-size:24px;color:var(--muted)}
+.sethead{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:5;background:var(--bg);padding-block:6px}
+.sethead h2{margin:0;font-size:17px;flex:1;text-align:center}
+.sethead .btn{min-width:64px}
+.contact-btn{font:inherit;font-weight:700;color:var(--accent);background:var(--surface);border:1px dashed var(--gold);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;min-height:48px}
+.contact-btn small{font-weight:400;color:var(--muted);font-size:12px}
+#modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+#modal[hidden]{display:none}
+.mback{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.msheet{position:relative;background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:85vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+.mclose{align-self:flex-start}
+
+/* ===== تجربی: ظاهر شیشه‌ای و برجسته (فقط ظاهر) ===== */
+@font-face{font-family:'VazirSkin';src:url('Vazirmatn.woff2') format('woff2');font-weight:100 900;font-display:swap}
+:root{
+  --body:'VazirSkin','Vazirmatn','SF Arabic','Geeza Pro',Tahoma,'Segoe UI',system-ui,sans-serif;
+  --r1:28px;--r2:22px;--r3:16px;
+  --glass:color-mix(in srgb,var(--surface) 64%,transparent);
+  --glass-strong:color-mix(in srgb,var(--surface) 80%,transparent);
+  --g-edge:rgba(255,255,255,.7);--g-edge2:rgba(255,255,255,.25);
+  --sh-c:16,37,46;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--g-edge:rgba(255,255,255,.16);--g-edge2:rgba(255,255,255,.05);--sh-c:0,0,0}}
+:root[data-theme="dark"]{--g-edge:rgba(255,255,255,.16);--g-edge2:rgba(255,255,255,.05);--sh-c:0,0,0}
+body{font-family:var(--body)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+   radial-gradient(60% 38% at 95% 0%,color-mix(in srgb,var(--accent) 24%,transparent),transparent 70%),
+   radial-gradient(55% 34% at 0% 32%,color-mix(in srgb,var(--tq) 20%,transparent),transparent 70%),
+   radial-gradient(65% 40% at 85% 100%,color-mix(in srgb,var(--gold) 18%,transparent),transparent 70%)}
+/* glass surfaces */
+.card,.svc,.tpl-edit,.plan,.cat,.banner,.news,.contact-btn,.log,.trow,details.more,.fuel-init,.empty{
+  background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(165%);backdrop-filter:blur(18px) saturate(165%);
+  border:1px solid var(--g-edge2);
+  box-shadow:inset 0 1px 0 var(--g-edge),0 10px 28px rgba(var(--sh-c),.10),0 2px 6px rgba(var(--sh-c),.06)}
+.card,.news,.msheet{border-radius:var(--r1)}
+.svc,.plan,.cat,.banner,.tpl-edit,.contact-btn,.log,details.more,.empty{border-radius:var(--r2)}
+.trow{border-radius:var(--r3)}
+.svc{border-inline-start-width:1px}
+.svc.bad{box-shadow:inset 4px 0 0 var(--bad),inset 0 1px 0 var(--g-edge),0 10px 28px rgba(var(--sh-c),.10)}
+.svc.warn{box-shadow:inset 4px 0 0 var(--warn),inset 0 1px 0 var(--g-edge),0 10px 28px rgba(var(--sh-c),.10)}
+.plan.on,.cat:active{border-color:var(--accent)}
+/* embossed buttons */
+.btn,.fbtn{border-radius:var(--r3);border:1px solid var(--g-edge2);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 96%,white),color-mix(in srgb,var(--surface) 82%,var(--line)));
+  box-shadow:inset 0 1px 0 var(--g-edge),0 4px 10px rgba(var(--sh-c),.14),0 1px 2px rgba(var(--sh-c),.12);
+  transition:transform .12s ease,box-shadow .12s ease,filter .12s ease}
+.btn.primary,.fbtn.on{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 80%,white),var(--accent));border-color:color-mix(in srgb,var(--accent) 70%,black);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 14px color-mix(in srgb,var(--accent) 40%,transparent),0 1px 2px rgba(var(--sh-c),.2)}
+.btn.gold{background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 78%,white),var(--gold));color:#2a1d02}
+.btn.danger{color:var(--bad)}
+.btn:active,.fbtn:active,.cat:active,.plan:active,.contact-btn:active{transform:translateY(1px) scale(.98);box-shadow:inset 0 2px 5px rgba(var(--sh-c),.22)}
+.fbtn,.seg input+span,.tchip span,.pill,.chip{border-radius:99px}
+input,select,textarea{border-radius:var(--r3);box-shadow:inset 0 2px 4px rgba(var(--sh-c),.10);background:color-mix(in srgb,var(--surface) 88%,transparent)}
+/* odometer: deeper, raised drums */
+.odo{border-radius:var(--r1);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -10px 24px rgba(0,0,0,.25),0 18px 36px rgba(var(--sh-c),.28),0 3px 8px rgba(var(--sh-c),.2)}
+.drums .d{border-radius:12px;box-shadow:inset 0 2px 6px rgba(0,0,0,.6),inset 0 -1px 0 rgba(255,255,255,.12),0 2px 0 rgba(255,255,255,.08);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 35%,rgba(0,0,0,.35))}
+/* floating glass nav */
+.nav{inset:auto max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
+  border:1px solid var(--g-edge2);border-radius:30px;background:var(--glass-strong);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--g-edge),0 14px 34px rgba(var(--sh-c),.22);padding:6px 8px;max-width:560px;margin-inline:auto}
+.nav .add span{box-shadow:0 8px 18px color-mix(in srgb,var(--accent) 45%,transparent),inset 0 1px 0 rgba(255,255,255,.4);border-width:0}
+.toast{bottom:calc(92px + env(safe-area-inset-bottom,0px));border-radius:99px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.sethead{background:var(--glass-strong);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:var(--r2);padding:6px 8px}
+/* sheet */
+.msheet{background:var(--glass-strong);-webkit-backdrop-filter:blur(26px) saturate(170%);backdrop-filter:blur(26px) saturate(170%);border-radius:30px 30px 0 0;box-shadow:inset 0 1px 0 var(--g-edge),0 -10px 40px rgba(0,0,0,.25)}
+.mback{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.logo{border-radius:14px;box-shadow:0 6px 14px rgba(var(--sh-c),.22)}
+.tilestrip{border-radius:99px;overflow:hidden}
+@supports (corner-shape:squircle){
+  .card,.news,.hero,.msheet,.contact-btn{corner-shape:squircle;border-radius:calc(var(--r1)*1.55)}
+  .svc,.plan,.cat,.banner,.tpl-edit,.log,details.more,.empty,.quick button,.skin{corner-shape:squircle;border-radius:calc(var(--r2)*1.55)}
+  .btn,input,select,textarea,.trow{corner-shape:squircle;border-radius:calc(var(--r3)*1.55)}
+  .nav{corner-shape:squircle;border-radius:46px}
+}
+}
+
+/* motion */
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes roll{from{transform:translateY(-55%);opacity:0}to{transform:none;opacity:1}}
+#view.enter>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+#view.enter>*:nth-child(2){animation-delay:.05s}#view.enter>*:nth-child(3){animation-delay:.1s}#view.enter>*:nth-child(4){animation-delay:.15s}
+#view.enter>*:nth-child(5){animation-delay:.2s}#view.enter>*:nth-child(n+6){animation-delay:.25s}
+#view.enter .drums .d{animation:roll .7s cubic-bezier(.2,.9,.2,1) both}
+#view.enter .drums .d:nth-child(2){animation-delay:.06s}#view.enter .drums .d:nth-child(3){animation-delay:.12s}
+#view.enter .drums .d:nth-child(4){animation-delay:.18s}#view.enter .drums .d:nth-child(5){animation-delay:.24s}#view.enter .drums .d:nth-child(6){animation-delay:.3s}
+.msheet{animation:rise .35s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){#view.enter>*,#view.enter .drums .d,.msheet{animation:none!important}.btn,.fbtn{transition:none}}
+/* fallbacks */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root{--glass:var(--surface);--glass-strong:var(--surface)}}
+@media (prefers-reduced-transparency:reduce){:root{--glass:var(--surface);--glass-strong:var(--surface)}
+  .card,.svc,.nav,.msheet{-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* ===== skins (generated) ===== */
+html[data-skin="modern"]{--r1:28px;--r2:22px;--r3:16px}
+html[data-skin="modern"]{--bg:#EEF2FA;--surface:#FFFFFF;--surface2:#F2F6FE;--ink:#0F172A;--muted:#6D7381;--line:#D1D6DF;--accent:#2563EB;--accent-ink:#FFFFFF;--accent-soft:#CEDBF8;--a2:#7C3AED;--gold:#7C3AED;--gold-soft:#D7CDF7;--tq:#504EEC;--tq-soft:#D2D4F7;--lapis:#2563EB;--hero:linear-gradient(135deg,#2563EB,#4F46E5);--on-lapis:#FFFFFF;--on-lapis-soft:#C8D8FA;--drum:#080C15}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="modern"]{--bg:#0B1020;--surface:#151B2E;--surface2:#1A233B;--ink:#E8ECF8;--muted:#9498A6;--line:#2E3343;--accent:#6EA0FF;--accent-ink:#FFFFFF;--accent-soft:#213051;--a2:#A78BFA;--gold:#A78BFA;--gold-soft:#2A294C;--tq:#8A96FC;--tq-soft:#222848;--lapis:#2B50C8;--hero:linear-gradient(135deg,#2B50C8,#4338CA);--on-lapis:#FFFFFF;--on-lapis-soft:#CAD3F1;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="modern"]{--bg:#0B1020;--surface:#151B2E;--surface2:#1A233B;--ink:#E8ECF8;--muted:#9498A6;--line:#2E3343;--accent:#6EA0FF;--accent-ink:#FFFFFF;--accent-soft:#213051;--a2:#A78BFA;--gold:#A78BFA;--gold-soft:#2A294C;--tq:#8A96FC;--tq-soft:#222848;--lapis:#2B50C8;--hero:linear-gradient(135deg,#2B50C8,#4338CA);--on-lapis:#FFFFFF;--on-lapis-soft:#CAD3F1;--drum:#05070A;color-scheme:dark}
+html[data-skin="classic"]{--r1:14px;--r2:10px;--r3:8px}
+html[data-skin="classic"]{--bg:#F3EDE0;--surface:#FBF7EE;--surface2:#EEEBE4;--ink:#1B2A41;--muted:#767C84;--line:#D7D4CB;--accent:#1B2A41;--accent-ink:#FFFFFF;--accent-soft:#D0CEC7;--a2:#B8892B;--gold:#B8892B;--gold-soft:#E7D9BC;--tq:#6A5A36;--tq-soft:#DAD3C1;--lapis:#1B2A41;--hero:linear-gradient(135deg,#1B2A41,#2E4468);--on-lapis:#F3E3B8;--on-lapis-soft:#BDB59A;--drum:#0E1520}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="classic"]{--bg:#14110C;--surface:#1E1A13;--surface2:#292318;--ink:#F1E8D5;--muted:#9D9689;--line:#37332C;--accent:#D9B25F;--accent-ink:#0B1020;--accent-soft:#3F341E;--a2:#D9B25F;--gold:#D9B25F;--gold-soft:#3B311D;--tq:#D9B25F;--tq-soft:#372E1B;--lapis:#2E3F5E;--hero:linear-gradient(135deg,#2E3F5E,#1B2A41);--on-lapis:#F3E3B8;--on-lapis-soft:#C2BAA2;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="classic"]{--bg:#14110C;--surface:#1E1A13;--surface2:#292318;--ink:#F1E8D5;--muted:#9D9689;--line:#37332C;--accent:#D9B25F;--accent-ink:#0B1020;--accent-soft:#3F341E;--a2:#D9B25F;--gold:#D9B25F;--gold-soft:#3B311D;--tq:#D9B25F;--tq-soft:#372E1B;--lapis:#2E3F5E;--hero:linear-gradient(135deg,#2E3F5E,#1B2A41);--on-lapis:#F3E3B8;--on-lapis-soft:#C2BAA2;--drum:#05070A;color-scheme:dark}
+html[data-skin="cute"]{--r1:36px;--r2:28px;--r3:22px}
+html[data-skin="cute"]{--bg:#F6F0FF;--surface:#FFFFFF;--surface2:#F8F5FE;--ink:#3B2F5C;--muted:#8A80A0;--line:#DED7EA;--accent:#8B5CF6;--accent-ink:#FFFFFF;--accent-soft:#E5D8FE;--a2:#2DD4BF;--gold:#2DD4BF;--gold-soft:#CEEAF2;--tq:#5C98DA;--tq-soft:#DAE0F8;--lapis:#B9A6FD;--hero:linear-gradient(135deg,#B9A6FD,#8FE7F2);--on-lapis:#2B2150;--on-lapis-soft:#4E427B;--drum:#1E182E}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="cute"]{--bg:#17112B;--surface:#231A3F;--surface2:#2C224B;--ink:#EDE7FF;--muted:#9C96AE;--line:#39334D;--accent:#B79CFF;--accent-ink:#FFFFFF;--accent-soft:#3A305A;--a2:#5EEAD4;--gold:#5EEAD4;--gold-soft:#253C4D;--tq:#8AC3EA;--tq-soft:#2C314D;--lapis:#6D4FD6;--hero:linear-gradient(135deg,#6D4FD6,#2BA6B8);--on-lapis:#FFFFFF;--on-lapis-soft:#DAD3F5;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="cute"]{--bg:#17112B;--surface:#231A3F;--surface2:#2C224B;--ink:#EDE7FF;--muted:#9C96AE;--line:#39334D;--accent:#B79CFF;--accent-ink:#FFFFFF;--accent-soft:#3A305A;--a2:#5EEAD4;--gold:#5EEAD4;--gold-soft:#253C4D;--tq:#8AC3EA;--tq-soft:#2C314D;--lapis:#6D4FD6;--hero:linear-gradient(135deg,#6D4FD6,#2BA6B8);--on-lapis:#FFFFFF;--on-lapis-soft:#DAD3F5;--drum:#05070A;color-scheme:dark}
+html[data-skin="girl"]{--r1:32px;--r2:26px;--r3:20px}
+html[data-skin="girl"]{--bg:#FFF0F4;--surface:#FFFFFF;--surface2:#FDF2F7;--ink:#4A1D33;--muted:#967684;--line:#E7D5DB;--accent:#DB2777;--accent-ink:#FFFFFF;--accent-soft:#F9D0E0;--a2:#FB923C;--gold:#FB923C;--gold-soft:#FEDDCF;--tq:#EB5C5A;--tq-soft:#FBD5D8;--lapis:#F472B6;--hero:linear-gradient(135deg,#F472B6,#FB7185);--on-lapis:#FFFFFF;--on-lapis-soft:#FCDCED;--drum:#250E1A}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="girl"]{--bg:#1F0F18;--surface:#2D1824;--surface2:#391D2D;--ink:#FCE7F0;--muted:#A8959E;--line:#42323B;--accent:#F472B6;--accent-ink:#FFFFFF;--accent-soft:#4E253B;--a2:#FDBA74;--gold:#FDBA74;--gold-soft:#4B312A;--tq:#F89695;--tq-soft:#46272E;--lapis:#BE185D;--hero:linear-gradient(135deg,#BE185D,#E11D48);--on-lapis:#FFFFFF;--on-lapis-soft:#EFC5D6;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="girl"]{--bg:#1F0F18;--surface:#2D1824;--surface2:#391D2D;--ink:#FCE7F0;--muted:#A8959E;--line:#42323B;--accent:#F472B6;--accent-ink:#FFFFFF;--accent-soft:#4E253B;--a2:#FDBA74;--gold:#FDBA74;--gold-soft:#4B312A;--tq:#F89695;--tq-soft:#46272E;--lapis:#BE185D;--hero:linear-gradient(135deg,#BE185D,#E11D48);--on-lapis:#FFFFFF;--on-lapis-soft:#EFC5D6;--drum:#05070A;color-scheme:dark}
+html[data-skin="boy"]{--r1:20px;--r2:16px;--r3:12px}
+html[data-skin="boy"]{--bg:#E8F0F7;--surface:#FFFFFF;--surface2:#F0F6F9;--ink:#0B2239;--muted:#687989;--line:#CBD5DE;--accent:#0369A1;--accent-ink:#FFFFFF;--accent-soft:#C3DAE9;--a2:#06B6D4;--gold:#06B6D4;--gold-soft:#BBE4F0;--tq:#0490BA;--tq-soft:#BFDFEC;--lapis:#075985;--hero:linear-gradient(135deg,#075985,#0EA5E9);--on-lapis:#FFFFFF;--on-lapis-soft:#C1D6E0;--drum:#06111C}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="boy"]{--bg:#07131E;--surface:#0F2133;--surface2:#112A3F;--ink:#E3F0FB;--muted:#8F9CA7;--line:#2A3641;--accent:#38BDF8;--accent-ink:#0B1020;--accent-soft:#12384E;--a2:#22D3EE;--gold:#22D3EE;--gold-soft:#0C3948;--tq:#2DC8F3;--tq-soft:#0E3444;--lapis:#0C4A6E;--hero:linear-gradient(135deg,#0C4A6E,#0284C7);--on-lapis:#FFFFFF;--on-lapis-soft:#C2D2DB;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="boy"]{--bg:#07131E;--surface:#0F2133;--surface2:#112A3F;--ink:#E3F0FB;--muted:#8F9CA7;--line:#2A3641;--accent:#38BDF8;--accent-ink:#0B1020;--accent-soft:#12384E;--a2:#22D3EE;--gold:#22D3EE;--gold-soft:#0C3948;--tq:#2DC8F3;--tq-soft:#0E3444;--lapis:#0C4A6E;--hero:linear-gradient(135deg,#0C4A6E,#0284C7);--on-lapis:#FFFFFF;--on-lapis-soft:#C2D2DB;--drum:#05070A;color-scheme:dark}
+html[data-skin="neon"]{--r1:24px;--r2:18px;--r3:14px}
+html[data-skin="neon"]{--bg:#F4EEFB;--surface:#FFFFFF;--surface2:#FBF2FC;--ink:#1C1030;--muted:#776D85;--line:#D8D1E1;--accent:#C026D3;--accent-ink:#FFFFFF;--accent-soft:#ECCEF5;--a2:#0891B2;--gold:#0891B2;--gold-soft:#C5DBEC;--tq:#645CC2;--tq-soft:#DAD4F1;--lapis:#7E22CE;--hero:linear-gradient(135deg,#7E22CE,#DB2777);--on-lapis:#FFFFFF;--on-lapis-soft:#DFC8F3;--drum:#0E0818}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="neon"]{--bg:#0B0B14;--surface:#161625;--surface2:#231F32;--ink:#F4F4FF;--muted:#9B9BA6;--line:#30303A;--accent:#F0ABFC;--accent-ink:#0B1020;--accent-soft:#3D2E47;--a2:#22D3EE;--gold:#22D3EE;--gold-soft:#103340;--tq:#89BFF5;--tq-soft:#222B3C;--lapis:#6D1BB8;--hero:linear-gradient(135deg,#6D1BB8,#C21F73);--on-lapis:#FFFFFF;--on-lapis-soft:#DAC6ED;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="neon"]{--bg:#0B0B14;--surface:#161625;--surface2:#231F32;--ink:#F4F4FF;--muted:#9B9BA6;--line:#30303A;--accent:#F0ABFC;--accent-ink:#0B1020;--accent-soft:#3D2E47;--a2:#22D3EE;--gold:#22D3EE;--gold-soft:#103340;--tq:#89BFF5;--tq-soft:#222B3C;--lapis:#6D1BB8;--hero:linear-gradient(135deg,#6D1BB8,#C21F73);--on-lapis:#FFFFFF;--on-lapis-soft:#DAC6ED;--drum:#05070A;color-scheme:dark}
+html[data-skin="forest"]{--r1:26px;--r2:20px;--r3:14px}
+html[data-skin="forest"]{--bg:#E9F1EA;--surface:#FFFFFF;--surface2:#F1F7F3;--ink:#10281A;--muted:#6B7C71;--line:#CDD7CF;--accent:#15803D;--accent-ink:#FFFFFF;--accent-soft:#C7DFCE;--a2:#65A30D;--gold:#65A30D;--gold-soft:#CFE1BE;--tq:#3D9225;--tq-soft:#CAE0C7;--lapis:#14532D;--hero:linear-gradient(135deg,#14532D,#16A34A);--on-lapis:#ECFCCB;--on-lapis-soft:#B6D2A4;--drum:#08140D}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="forest"]{--bg:#08130C;--surface:#10231A;--surface2:#132E20;--ink:#E6F5EA;--muted:#929F96;--line:#2C3730;--accent:#4ADE80;--accent-ink:#0B1020;--accent-soft:#174026;--a2:#A3E635;--gold:#A3E635;--gold-soft:#273D14;--tq:#76E25A;--tq-soft:#1C381A;--lapis:#14532D;--hero:linear-gradient(135deg,#14532D,#15803D);--on-lapis:#ECFCCB;--on-lapis-soft:#B6D2A4;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="forest"]{--bg:#08130C;--surface:#10231A;--surface2:#132E20;--ink:#E6F5EA;--muted:#929F96;--line:#2C3730;--accent:#4ADE80;--accent-ink:#0B1020;--accent-soft:#174026;--a2:#A3E635;--gold:#A3E635;--gold-soft:#273D14;--tq:#76E25A;--tq-soft:#1C381A;--lapis:#14532D;--hero:linear-gradient(135deg,#14532D,#15803D);--on-lapis:#ECFCCB;--on-lapis-soft:#B6D2A4;--drum:#05070A;color-scheme:dark}
+html[data-skin="sport"]{--r1:14px;--r2:10px;--r3:8px}
+html[data-skin="sport"]{--bg:#F2F2F2;--surface:#FFFFFF;--surface2:#FEF5F0;--ink:#171717;--muted:#737373;--line:#D6D6D6;--accent:#EA580C;--accent-ink:#FFFFFF;--accent-soft:#F1D9CD;--a2:#CA8A04;--gold:#CA8A04;--gold-soft:#EADDC2;--tq:#DA7108;--tq-soft:#EEDBC8;--lapis:#262626;--hero:linear-gradient(135deg,#262626,#0A0A0A);--on-lapis:#FDBA74;--on-lapis-soft:#C79560;--drum:#0C0C0C}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="sport"]{--bg:#101010;--surface:#1C1C1C;--surface2:#29231E;--ink:#F5F5F5;--muted:#9E9E9E;--line:#353535;--accent:#FB923C;--accent-ink:#FFFFFF;--accent-soft:#442D1A;--a2:#FACC15;--gold:#FACC15;--gold-soft:#3F3611;--tq:#FAAF28;--tq-soft:#3A2D14;--lapis:#262626;--hero:linear-gradient(135deg,#262626,#0A0A0A);--on-lapis:#FDBA74;--on-lapis-soft:#C79560;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="sport"]{--bg:#101010;--surface:#1C1C1C;--surface2:#29231E;--ink:#F5F5F5;--muted:#9E9E9E;--line:#353535;--accent:#FB923C;--accent-ink:#FFFFFF;--accent-soft:#442D1A;--a2:#FACC15;--gold:#FACC15;--gold-soft:#3F3611;--tq:#FAAF28;--tq-soft:#3A2D14;--lapis:#262626;--hero:linear-gradient(135deg,#262626,#0A0A0A);--on-lapis:#FDBA74;--on-lapis-soft:#C79560;--drum:#05070A;color-scheme:dark}
+html[data-skin="sunset"]{--r1:30px;--r2:24px;--r3:18px}
+html[data-skin="sunset"]{--bg:#FFF1EA;--surface:#FFFFFF;--surface2:#F9F1FA;--ink:#3A1C3F;--muted:#8D7587;--line:#E5D5D4;--accent:#A21CAF;--accent-ink:#FFFFFF;--accent-soft:#F0CFE1;--a2:#EA580C;--gold:#EA580C;--gold-soft:#FBD2BE;--tq:#C63A5E;--tq-soft:#F5D0D1;--lapis:#7C3AED;--hero:linear-gradient(135deg,#7C3AED,#F97316);--on-lapis:#FFFFFF;--on-lapis-soft:#DECEFA;--drum:#1D0E20}
+@media (prefers-color-scheme: dark){html:not([data-theme="light"])[data-skin="sunset"]{--bg:#1B0E1F;--surface:#291632;--surface2:#341C3E;--ink:#FBE9F4;--muted:#A696A3;--line:#3F3141;--accent:#E879F9;--accent-ink:#FFFFFF;--accent-soft:#48264F;--a2:#FB923C;--gold:#FB923C;--gold-soft:#482825;--tq:#F2869A;--tq-soft:#422435;--lapis:#6D28D9;--hero:linear-gradient(135deg,#6D28D9,#EA580C);--on-lapis:#FFFFFF;--on-lapis-soft:#DAC9F6;--drum:#05070A;color-scheme:dark}}
+html[data-theme="dark"][data-skin="sunset"]{--bg:#1B0E1F;--surface:#291632;--surface2:#341C3E;--ink:#FBE9F4;--muted:#A696A3;--line:#3F3141;--accent:#E879F9;--accent-ink:#FFFFFF;--accent-soft:#48264F;--a2:#FB923C;--gold:#FB923C;--gold-soft:#482825;--tq:#F2869A;--tq-soft:#422435;--lapis:#6D28D9;--hero:linear-gradient(135deg,#6D28D9,#EA580C);--on-lapis:#FFFFFF;--on-lapis-soft:#DAC9F6;--drum:#05070A;color-scheme:dark}
+
+/* ===== v3: new header, hero card, plan rim, quick tiles, look settings ===== */
+body::before{background:
+  radial-gradient(60% 38% at 95% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%),
+  radial-gradient(55% 34% at 0% 32%,color-mix(in srgb,var(--a2,var(--accent)) 18%,transparent),transparent 70%),
+  radial-gradient(65% 40% at 85% 100%,color-mix(in srgb,var(--a2,var(--accent)) 14%,transparent),transparent 70%)}
+.tilestrip{display:none}
+:root{--rim:linear-gradient(135deg,#E3A06A,#8C4E1C 55%,#D08B52)}
+:root[data-plan="silver"]{--rim:linear-gradient(135deg,#F1F5F9,#8A94A3 55%,#D5DBE3)}
+:root[data-plan="gold"]{--rim:linear-gradient(135deg,#FDE68A,#B7791F 55%,#F2C94C)}
+.ring::after,.hero::after,.nav::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:2.5px;background:var(--rim);pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);mask-composite:exclude}
+.nav::after{padding:2px}
+header.top{align-items:center;flex-wrap:nowrap}
+.brand{gap:10px}
+.logo{width:40px;height:40px;border-radius:12px;box-shadow:0 6px 14px rgba(var(--sh-c),.22)}
+h1{font-family:var(--body);font-weight:800;font-size:21px;line-height:1.2;margin:0}
+h1 .nm{color:var(--accent)}
+.top-end{flex-wrap:nowrap;gap:6px}
+.pchip{font-size:20px}
+.hero{position:relative;color:var(--on-lapis);background:var(--hero);border-radius:var(--r1);padding:18px;display:flex;flex-direction:column;gap:10px;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 18px 36px color-mix(in srgb,var(--lapis) 40%,transparent),0 3px 8px rgba(var(--sh-c),.2)}
+.hero>*{position:relative}
+.hero::before{content:"";position:absolute;left:-40px;top:-50px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.13);pointer-events:none}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hero .eyebrow{opacity:.8;font-size:12.5px;margin:0}
+.hero-name{margin:0;font-size:24px;font-weight:800;line-height:1.3;color:inherit}
+.hero-km{font-size:46px;font-weight:800;line-height:1.1;letter-spacing:.5px}
+.hero-km small{font-size:15px;font-weight:400;opacity:.8;margin-inline-start:6px}
+.hero-meta{font-size:13px;opacity:.88;margin:0}
+.hero-bar{height:8px;border-radius:9px;background:rgba(255,255,255,.28);overflow:hidden}
+.hero-bar i{display:block;height:100%;border-radius:9px;background:var(--on-lapis)}
+.hero .banner{background:rgba(255,255,255,.18);color:inherit;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.hero form.row input{background:rgba(255,255,255,.92);color:#10141f;border-color:transparent}
+.hero .btn.primary{background:#fff;color:#10141f;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.quick button{font:inherit;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;font-size:12.5px;cursor:pointer;
+  background:var(--glass);border:1px solid var(--g-edge2);border-radius:var(--r2);box-shadow:inset 0 1px 0 var(--g-edge),0 8px 20px rgba(var(--sh-c),.1);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.quick button span{font-size:24px;line-height:1}
+.quick button:active{transform:translateY(1px) scale(.97)}
+.quick.n3{grid-template-columns:repeat(3,1fr)}
+:root[data-plan="bronze"] .quick button{padding:16px 4px;font-size:14px}
+.nav .add span{background:var(--accent);color:var(--accent-ink)}
+.nav button.on{color:var(--accent)}
+.skins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.skin{font:inherit;color:var(--ink);text-align:right;background:var(--glass);border:2px solid var(--g-edge2);border-radius:var(--r2);padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer;box-shadow:inset 0 1px 0 var(--g-edge)}
+.skin.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.skin .sw{display:flex;height:34px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.skin .sw i{flex:1}
+.skin b{font-size:15px}.skin small{color:var(--muted);font-size:12px;line-height:1.5}
+.chip{white-space:nowrap;font-size:11px;padding:3px 8px}
+.brand{flex:1;min-width:0}
+.hero .plate{flex:none;font-size:12px;transform-origin:top left}.hero .plate .no{white-space:nowrap}
+.hero-name{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div id="root" dir="rtl" lang="fa">
+  <div class="wrap">
+    <div id="hdr"></div>
+    <main id="view" style="display:flex;flex-direction:column;gap:16px"></main>
+  </div>
+  <nav class="nav" aria-label="بخش‌های برنامه"><div class="nav-in">
+    <button data-go="home" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/></svg>خانه</button>
+    <button data-go="history" data-nav="history"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>سوابق</button>
+    <button class="add" data-act="newLog" data-nav="add" aria-label="ثبت سرویس یا هزینه"><span><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>ثبت</button>
+    <button data-go="report" data-nav="report"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>گزارش</button>
+    <button data-go="setup" data-nav="setup"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>تنظیمات</button>
+  </div></nav>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</div>
+
+<script>
+window.MN_LOCAL=true;window.MN_CFG={"feedbackEmail": "Mashinnameh@gmail.com", "donateUrl": ""};
+(function(){
+'use strict';
+
+/*#JAL-START*/
+function div(a,b){return ~~(a/b)}
+function mod(a,b){return a-~~(a/b)*b}
+var BREAKS=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+function jalCal(jy,withoutLeap){
+  var bl=BREAKS.length,gy=jy+621,leapJ=-14,jp=BREAKS[0],jm,jump=0,leap,leapG,march,n,i;
+  if(jy<jp||jy>=BREAKS[bl-1])throw new Error('Invalid Jalaali year '+jy);
+  for(i=1;i<bl;i+=1){
+    jm=BREAKS[i];jump=jm-jp;
+    if(jy<jm)break;
+    leapJ=leapJ+div(jump,33)*8+div(mod(jump,33),4);
+    jp=jm;
+  }
+  n=jy-jp;
+  leapJ=leapJ+div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4&&jump-n===4)leapJ+=1;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(withoutLeap)return {gy:gy,march:march};
+  if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);
+  if(leap===-1)leap=4;
+  return {leap:leap,gy:gy,march:march};
+}
+function g2d(gy,gm,gd){
+  var d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;
+  d=d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;
+  return d;
+}
+function d2g(jdn){
+  var j,i,gd,gm,gy;
+  j=4*jdn+139361631;
+  j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;
+  i=div(mod(j,1461),4)*5+308;
+  gd=div(mod(i,153),5)+1;
+  gm=mod(div(i,153),12)+1;
+  gy=div(j,1461)-100100+div(8-gm,6);
+  return {gy:gy,gm:gm,gd:gd};
+}
+function j2d(jy,jm,jd){
+  var r=jalCal(jy,true);
+  return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;
+}
+function d2j(jdn){
+  var gy=d2g(jdn).gy,jy=gy-621,r=jalCal(jy,false),jdn1f=g2d(gy,3,r.march),jd,jm,k;
+  k=jdn-jdn1f;
+  if(k>=0){
+    if(k<=185){jm=1+div(k,31);jd=mod(k,31)+1;return {jy:jy,jm:jm,jd:jd};}
+    k-=186;
+  }else{
+    jy-=1;k+=179;
+    if(r.leap===1)k+=1;
+  }
+  jm=7+div(k,30);jd=mod(k,30)+1;
+  return {jy:jy,jm:jm,jd:jd};
+}
+/*#JAL-END*/
+
+var MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+var KINDS={service:'🔧 سرویس دوره‌ای',repair:'🛠️ تعمیر',consumable:'🧰 لوازم مصرفی',fuel:'⛽ سوخت‌گیری',document:'📄 بیمه و اسناد',other:'📦 سایر'};
+var PLANS={bronze:{em:'🥉',name:'برنزی',tag:'فقط سرویس‌هایم یادم باشد',desc:'فقط یادآوری سرویس‌ها. بدون هزینه، گزارش و سوخت؛ ساده و درشت.'},
+  silver:{em:'🥈',name:'نقره‌ای',tag:'سرویس‌ها و کمی هزینه',desc:'یادآوری سرویس‌ها و ثبت هزینه‌ها (اختیاری)، سوخت ساده و گزارش ماهانه و سالانه.'},
+  gold:{em:'🥇',name:'طلایی',tag:'کار و درآمد؛ حساب‌وکتاب کامل',desc:'برای کسانی که با وسیله درآمد دارند (اسنپ، تاکسی، پیک، آژانس): هزینه، کارت سوخت، درآمد و سود خالص.'}};
+function plan(){return (typeof S!=='undefined'&&S&&S.plan)||'silver'}
+function costShown(){return plan()!=='bronze'}
+function costRequired(){return plan()==='gold'}
+function kindKeys(){return Object.keys(KINDS).filter(function(k){return !(k==='fuel'&&plan()==='bronze')})}
+var KEMO={service:'🔧',repair:'🛠️',consumable:'🧰',fuel:'⛽',document:'📄',other:'📦'};
+var EM={wash:'🚿',oil:'🛢️',oilf:'🔩',airf:'🌬️',fuelf:'⛽',plug:'⚡',brakef:'🛑',cool:'❄️',gear:'⚙️',timing:'⛓️',align:'⚖️',cabf:'🍃',pads:'🛑',padsr:'🛑',tires:'🛞',battery:'🔋',wiper:'🌧️',inspect:'✅',ins3:'🛡️',insb:'🛡️',toll:'🛣️',r_brake:'🛑',r_susp:'🔧',r_batt:'🔋',r_clutch:'⚙️',r_cool:'❄️',r_fuel:'⛽',r_engine:'🔩',r_gear:'⚙️',r_steer:'🛞',r_exh:'💨',r_ac:'🌡️',r_elec:'💡',r_body:'🚗',r_diag:'🔍',fu_t1500:'🟢',fu_t3000:'🟡',fu_t10000:'🟠',fu_free:'🔴',fu_supp:'🧪'};
+function emoOf(id,kind){return EM[id]||(String(id).indexOf('oth_')===0?'📝':(KEMO[kind]||''))}
+var PD='۰۱۲۳۴۵۶۷۸۹';
+function groupsOf(l){return l.groups&&l.groups.length?l.groups:[{kind:l.kind,tpls:l.tpls||[],gcost:null,icost:{}}]}
+function kindLabel(l){var ks=[];groupsOf(l).forEach(function(g){if(ks.indexOf(g.kind)<0)ks.push(g.kind)});return ks.map(function(k){return KINDS[k]||''}).join(' + ')}
+/* تقسیم هزینه‌ی یک ثبت: مقدارهای دقیق + «استخر» هزینه‌ی تقسیم‌نشده */
+function allocLog(l){
+  var g=groupsOf(l),exact=[],pools=[],known=0,total=l.cost||0,open=[];
+  g.forEach(function(b){
+    var ic=b.icost||{},sumI=0,noCost=[];
+    (b.tpls||[]).forEach(function(id){if(ic[id]!=null&&ic[id]!==''&&isFinite(ic[id])){sumI+=ic[id];exact.push({kind:b.kind,tpl:id,amt:ic[id]})}else noCost.push(id)});
+    if(b.gcost!=null){var rest=Math.max(0,b.gcost-sumI);known+=Math.max(b.gcost,sumI);if(rest>0)pools.push({amt:rest,kinds:[b.kind],tpls:noCost})}
+    else{known+=sumI;if(noCost.length||!(b.tpls||[]).length)open.push({kind:b.kind,tpls:noCost})}
+  });
+  var rem=Math.max(0,total-known);
+  if(rem>0){
+    var src=open.length?open:g.map(function(b){return {kind:b.kind,tpls:(b.tpls||[]).filter(function(id){return !((b.icost||{})[id]!=null)})}}),kinds=[],tpls=[];
+    src.forEach(function(b){if(kinds.indexOf(b.kind)<0)kinds.push(b.kind);b.tpls.forEach(function(id){tpls.push(id)})});
+    pools.push({amt:rem,kinds:kinds,tpls:tpls});
+  }
+  return {exact:exact,pools:pools};
+}
+var nf=new Intl.NumberFormat('fa-IR',{maximumFractionDigits:0});
+var nf2=new Intl.NumberFormat('fa-IR',{maximumFractionDigits:2});
+function fa(n){return isFinite(n)?nf.format(Math.round(n)):'—'}
+function faDigits(s){return String(s).replace(/\d/g,function(d){return PD[d]})}
+function mult(){return S.unit==='rial'?10:1}
+function unitName(){return S.unit==='rial'?'ریال':'تومان'}
+function money(n){return fa(n*mult())+' '+unitName()}
+function parseNum(s){
+  if(s==null)return NaN;
+  s=String(s).replace(/[۰-۹]/g,function(d){return PD.indexOf(d)}).replace(/[٠-٩]/g,function(d){return '٠١٢٣٤٥٦٧٨٩'.indexOf(d)})
+    .replace(/[٬,،\s]/g,'').replace('٫','.');
+  return s===''?NaN:Number(s);
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pad(n){return String(n).padStart(2,'0')}
+function isoOf(y,m,d){return y+'-'+pad(m)+'-'+pad(d)}
+function isoToJdn(iso){var p=iso.split('-');return g2d(+p[0],+p[1],+p[2])}
+function jdnToIso(j){var g=d2g(j);return isoOf(g.gy,g.gm,g.gd)}
+function isoToJ(iso){return d2j(isoToJdn(iso))}
+function jToIso(y,m,d){return jdnToIso(j2d(y,m,d))}
+function jMonthLen(y,m){return m<=6?31:(m<=11?30:(jalCal(y,false).leap===0?30:29))}
+function todayIso(){var d=new Date();return isoOf(d.getFullYear(),d.getMonth()+1,d.getDate())}
+function fmtDate(iso){var j=isoToJ(iso);return faDigits(j.jd)+' '+MONTHS[j.jm-1]+' '+faDigits(j.jy)}
+function addMonths(iso,n){
+  var j=isoToJ(iso),m=j.jm-1+n,y=j.jy+Math.floor(m/12);
+  m=((m%12)+12)%12;
+  return jToIso(y,m+1,Math.min(j.jd,jMonthLen(y,m+1)));
+}
+function daysBetween(a,b){return isoToJdn(b)-isoToJdn(a)}
+function durText(d){
+  if(d<45)return faDigits(d)+' روز';
+  var m=Math.floor(d/30.44),r=Math.round(d-m*30.44);
+  return faDigits(m)+' ماه'+(r>0&&m<12?' و '+faDigits(r)+' روز':'');
+}
+function agoText(d){return d<=0?'امروز':(d===1?'دیروز':faDigits(d)+' روز پیش')}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+/* ---------- state ---------- */
+var KEY='carservice.v2',OWNER_KEY='carservice.owner',USER_KEY='carservice.user';
+var PROVINCES=["آذربایجان شرقی", "آذربایجان غربی", "اردبیل", "اصفهان", "البرز", "ایلام", "بوشهر", "تهران", "چهارمحال و بختیاری", "خراسان جنوبی", "خراسان رضوی", "خراسان شمالی", "خوزستان", "زنجان", "سمنان", "سیستان و بلوچستان", "فارس", "قزوین", "قم", "کردستان", "کرمان", "کرمانشاه", "کهگیلویه و بویراحمد", "گلستان", "گیلان", "لرستان", "مازندران", "مرکزی", "هرمزگان", "همدان", "یزد"];
+function T(id,name,kind,km,months,on,days,ord){return {id:id,name:name,kind:kind,km:km,months:months,days:days||0,on:on!==false,ord:ord||500}}
+function defaultTpls(){return [
+  T('wash','کارواش','service',0,0,true,15),T('oil','روغن موتور','service',5000,6),T('oilf','فیلتر روغن','service',5000,6),
+  T('airf','فیلتر هوا','service',20000,12),T('brakef','روغن ترمز','service',40000,24),
+  T('inspect','معاینه فنی','document',0,12),T('ins3','بیمه شخص ثالث','document',0,12),
+  T('fuelf','فیلتر بنزین','service',20000,24,false),T('plug','شمع','service',20000,24,false),
+  T('cool','ضدیخ (مایع خنک‌کننده)','service',40000,24,false),T('gear','روغن گیربکس','service',60000,48,false),
+  T('timing','تسمه تایم و تسمه‌ی دینام','service',60000,60,false),T('align','بالانس و ترازبندی چرخ','service',15000,12,false),
+  T('cabf','فیلتر کابین (در صورت وجود)','service',15000,12,false),
+  T('pads','لنت ترمز جلو','consumable',30000,0,false),T('padsr','کفشک ترمز عقب','consumable',60000,0,false),
+  T('tires','لاستیک','consumable',50000,48,false),T('battery','باتری','consumable',0,36,false),
+  T('wiper','تیغه برف‌پاک‌کن','consumable',0,12,false),
+  T('insb','بیمه بدنه','document',0,12,false),T('toll','عوارض سالیانه','document',0,12,false)
+].concat(extraTpls())}
+function extraTpls(){var R=[['r_brake','ترمز (دیسک، کالیپر، پمپ)'],['r_susp','جلوبندی و تعلیق (کمک‌فنر، سیبک، بوش)'],['r_batt','باتری، استارت و دینام'],['r_clutch','کلاچ'],['r_cool','سیستم خنک‌کننده (رادیاتور، واترپمپ)'],['r_fuel','سیستم سوخت (انژکتور، پمپ بنزین)'],['r_engine','موتور (جزئی یا اساسی)'],['r_gear','گیربکس'],['r_steer','فرمان'],['r_exh','اگزوز'],['r_ac','کولر و بخاری'],['r_elec','برق و چراغ‌ها'],['r_body','بدنه، رنگ و شیشه'],['r_diag','سنسورها و عیب‌یابی']],o=[];
+  R.forEach(function(r,i){o.push(T(r[0],r[1],'repair',0,0,true,0,i+1))});
+  Object.keys(KINDS).forEach(function(k){if(k!=='fuel')o.push(T('oth_'+k,'سایر',k,0,0,true,0,9999))});o.push(T('fu_supp','مکمل سوخت','fuel',3000,0,true,0,1));return o}
+function isOtherTpl(id){return String(id).indexOf('oth_')===0}
+function defaultFuel(){return {init:false,none:false,initDate:'',bal:{},tiers:[
+  {id:'fu_t1500',name:'بنزین ۱۵۰۰',price:1500,quota:60,cap:180},
+  {id:'fu_t3000',name:'بنزین ۳۰۰۰',price:3000,quota:50,cap:50},
+  {id:'fu_t10000',name:'بنزین ۱۰۰۰۰',price:10000,quota:50,cap:50},
+  {id:'fu_free',name:'بنزین آزاد',price:10000,free:true}]}}
+function blank(){return {v:1,tplVer:5,fuel:defaultFuel(),unit:'toman',updated:0,plan:'',look:{skin:'modern',mode:'system'},income:[],car:{name:'',plate:'',year:'',type:'car'},calDays:21,fallbackRate:40,readings:[],templates:defaultTpls(),logs:[]}}
+function migrate(o){var b=blank();for(var k in o){if(Object.prototype.hasOwnProperty.call(o,k))b[k]=o[k]}
+  if(!b.car)b.car=blank().car;if(!Array.isArray(b.readings))b.readings=[];if(!Array.isArray(b.logs))b.logs=[];if(!Array.isArray(b.templates))b.templates=defaultTpls();
+  if(!o.tplVer){if(!b.logs.length&&!b.readings.length&&!b.car.name)b.templates=defaultTpls();b.tplVer=2}
+  if(b.tplVer<3){if(!b.templates.some(function(t){return t.id==='wash'}))b.templates.push(T('wash','کارواش','service',0,0,true,15));b.tplVer=3}
+  if(b.tplVer<4){extraTpls().forEach(function(t){if(!b.templates.some(function(x){return x.id===t.id}))b.templates.push(t)});b.tplVer=4}
+  if(b.tplVer<5){if(!b.templates.some(function(t){return t.id==='fu_supp'}))b.templates.push(T('fu_supp','مکمل سوخت','fuel',3000,0,true,0,1));b.tplVer=5}
+  if(!b.fuel||!Array.isArray(b.fuel.tiers))b.fuel=defaultFuel();
+  if(!Array.isArray(b.income))b.income=[];
+  if(!b.look||!b.look.skin)b.look={skin:'modern',mode:b.look&&b.look.mode||'system'};
+  if(!b.car.type)b.car.type='car';
+  if(!b.plan)b.plan=(b.car.name||b.readings.length||b.logs.length)?'gold':'';
+  if(!b.unit)b.unit='toman';return b}
+function loadLocal(){try{var r=localStorage.getItem(KEY);if(r)return migrate(JSON.parse(r))}catch(e){}return blank()}
+var S=loadLocal();
+var SKINS=[{"id": "modern", "n": "مدرن", "d": "آبی الکتریک؛ تمیز و امروزی", "c": ["#2563EB", "#7C3AED", "#EEF2FA", "#0B1020"]}, {"id": "classic", "n": "کلاسیک", "d": "سرمه‌ای و زرین؛ آرام و باوقار", "c": ["#1B2A41", "#B8892B", "#F3EDE0", "#14110C"]}, {"id": "cute", "n": "کیوت", "d": "پاستل لیلاکی و نعنایی؛ گرد و بامزه", "c": ["#8B5CF6", "#2DD4BF", "#F6F0FF", "#17112B"]}, {"id": "girl", "n": "دخترانه", "d": "رزی و مرجانی؛ لطیف و پرانرژی", "c": ["#DB2777", "#FB923C", "#FFF0F4", "#1F0F18"]}, {"id": "boy", "n": "پسرانه", "d": "آبی فولادی و فیروزه‌ای؛ مطمئن", "c": ["#0369A1", "#06B6D4", "#E8F0F7", "#07131E"]}, {"id": "neon", "n": "نئون", "d": "سرخابی و فیروزه‌ی درخشان", "c": ["#C026D3", "#0891B2", "#F4EEFB", "#0B0B14"]}, {"id": "forest", "n": "جنگل", "d": "سبز عمیق و لیمویی؛ آرام", "c": ["#15803D", "#65A30D", "#E9F1EA", "#08130C"]}, {"id": "sport", "n": "اسپرت", "d": "مشکی و نارنجی؛ تند و قدرتمند", "c": ["#EA580C", "#CA8A04", "#F2F2F2", "#101010"]}, {"id": "sunset", "n": "غروب", "d": "بنفش و نارنجی گرم؛ هنری", "c": ["#A21CAF", "#EA580C", "#FFF1EA", "#1B0E1F"]}];
+function applyLook(){
+  var L=S.look||{skin:'modern',mode:'system'},el=document.documentElement;
+  el.setAttribute('data-skin',L.skin);
+  if(L.mode==='light'||L.mode==='dark')el.setAttribute('data-theme',L.mode);else el.removeAttribute('data-theme');
+  try{var bg=getComputedStyle(el).getPropertyValue('--bg').trim(),m=document.querySelector('meta[name=theme-color]');if(m&&bg)m.setAttribute('content',bg)}catch(e){}
+}
+applyLook();
+try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){applyLook()})}catch(e){}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
+function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
+
+/* ---------- account and cloud sync ---------- */
+var APP_VERSION='3.0.0',SEEN_KEY='carservice.seen',newsSeen=false;
+/* نسخه‌گذاری: عدد اول = تغییر بنیادین، عدد دوم = قابلیت تازه، عدد سوم = رفع ایراد و بهبود کوچک. مهم‌ترین مورد اول بیاید. */
+var CHANGES=[{v:'3.0.0',items:['ظاهر تازه: لوگوی جدید، کارت بالای صفحه با دکمه‌های ثبت سریع، و حاشیه‌ی فلزی به رنگ پلن (برنزی، نقره‌ای، طلایی)','۹ طرح رنگی در تنظیمات ← ظاهر برنامه: مدرن، کلاسیک، کیوت، دخترانه، پسرانه، نئون، جنگل، اسپرت و غروب','حالت روشن، تاریک یا خودکار (روز روشن و شب تاریک)','نقش‌ونگار ایرانی برداشته شد و ظاهر ساده‌تر و مینیمال شد']},{v:'2.1.0',items:['تنظیمات دسته‌بندی‌شده شد: هر دسته صفحه‌ی خودش را دارد، با «ذخیره» بالا راست و «لغو» بالا چپ','«ارتباط با ما» کوچک و جمع‌وجور شد و با لمس، پنجره‌ی بازشو نشان می‌دهد','ایمیل واقعی برنامه اضافه شد']},{v:'2.0.0',items:['پلن‌ها: 🥉 برنزی (فقط سرویس‌ها)، 🥈 نقره‌ای (سرویس و هزینه‌ی اختیاری) و 🥇 طلایی (هزینه، کارت سوخت و درآمد)؛ هر پلن رنگ و چیدمان خودش را دارد','راهنمای شروع: نوع وسیله، برند و مدل، ظرفیت موتور و نوع سوخت، و سرویس‌های مناسب همان ماشین یا موتور','پشتیبانی از موتورسیکلت','درآمد در پلن طلایی: امروز، دیروز، هفته، ماه یا بازه‌ی دلخواه، با سود خالص و سهم هزینه در گزارش','کاربران فعلی به‌صورت خودکار روی پلن طلایی می‌مانند؛ از تنظیمات می‌توانید پلن را عوض کنید']},{v:'1.4.1',items:['کسانی که کارت سوخت ندارند می‌توانند «کارت سوخت ندارم» را بزنند و فقط بنزین آزاد ثبت کنند','برای مکمل سوخت، فاصله‌ی پیشنهادی سازنده را (مثلاً ۳٬۰۰۰ کیلومتر) برای هر بار وارد می‌کنید']},{v:'1.4.0',items:['سوخت‌گیری: ثبت بنزین ۱۵۰۰، ۳۰۰۰، ۱۰۰۰۰ و آزاد با لیتر هر پله، موجودی خودکار کارت و شارژ اول هر ماه شمسی','مکمل سوخت با برند و قیمت؛ هر ۳۰۰۰ کیلومتر دوباره در صفحه‌ی اصلی پیشنهاد می‌شود','مصرف سوخت در ۱۰۰ کیلومتر و هزینه‌ی هر کیلومتر در گزارش','ایموجی کنار همه‌ی دسته‌ها و موضوع‌ها']},{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var updAvail=null,lastUpd=0;
+function vcmp(a,b){a=a.split('.').map(Number);b=b.split('.').map(Number);for(var i=0;i<3;i++){var d=(a[i]||0)-(b[i]||0);if(d)return d}return 0}
+function checkUpdate(){
+  if(!LOCAL_ONLY||!/^https?:/.test(location.protocol)||Date.now()-lastUpd<30*60*1000||!navigator.onLine)return;
+  lastUpd=Date.now();
+  try{fetch(location.origin+location.pathname,{cache:'reload'}).then(function(r){return r.ok?r.text():''}).then(function(t){
+    var m=/APP_VERSION='([0-9.]+)'/.exec(t);
+    if(m&&vcmp(m[1],APP_VERSION)>0&&!updAvail){updAvail=m[1];if(view==='home')render()}
+  }).catch(function(){})}catch(e){}
+}
+function updCard(){
+  if(!updAvail)return '';
+  return '<div class="banner tip"><span>نسخه‌ی تازه‌ی '+verFa(updAvail)+' آماده است. اطلاعات شما حفظ می‌شود.</span><button class="btn small primary" data-act="doUpdate">به‌روزرسانی</button></div>';
+}
+function verFa(v){return faDigits(v).replace(/\./g,'٫')}
+function newsPending(){
+  if(newsSeen)return false;
+  var seen=null;try{seen=localStorage.getItem(SEEN_KEY)}catch(e){}
+  if(seen===APP_VERSION){newsSeen=true;return false}
+  if(seen===null&&!hasData()){try{localStorage.setItem(SEEN_KEY,APP_VERSION)}catch(e){}newsSeen=true;return false}
+  return true;
+}
+function newsCard(){
+  if(!newsPending())return '';
+  return '<section class="card pad news"><h2>تازه‌های نسخه‌ی '+verFa(CHANGES[0].v)+'</h2><ul>'+CHANGES[0].items.slice(0,3).map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ul><button class="btn primary" data-act="newsOk">فهمیدم</button></section>';
+}
+function changesList(){return CHANGES.map(function(c){return '<p class="muted"><b>نسخه‌ی '+verFa(c.v)+'</b></p><ul>'+c.items.map(function(i){return '<li class="muted">'+esc(i)+'</li>'}).join('')+'</ul>'}).join('')}
+var LOCAL_ONLY=!!window.MN_LOCAL,cfg={feedbackEmail:'',donateUrl:''};
+var me=null,booted=false,sync={mode:'init'},pushTimer=null,retryTimer=null,pushing=false,pending=false,dirty=false,lastPull=0;
+var auth={mode:'login',msg:'',recovery:null,busy:false,email:'',prov:''};
+var SYNC_TEXT={init:'در حال اتصال…',on:'ذخیره‌ی ابری فعال',off:'آفلاین',slow:'اتصال کند است',err:'همگام‌سازی ناموفق',local:'فقط روی این دستگاه'};
+function api(method,url,body){
+  return fetch(url,{method:method,credentials:'same-origin',headers:body?{'content-type':'application/json'}:{},body:body?JSON.stringify(body):undefined})
+    .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {status:r.status,ok:r.ok,data:j}})});
+}
+function setSync(m){sync.mode=m;renderHeader();var el=$('syncNote');if(el)el.innerHTML=syncNote()}
+function schedulePush(now){
+  if(!me||LOCAL_ONLY)return;
+  dirty=true;clearTimeout(pushTimer);pushTimer=setTimeout(push,now?0:800);
+}
+function push(){
+  if(!me)return;
+  if(pushing){pending=true;return}
+  pushing=true;
+  var snap=JSON.parse(JSON.stringify(S));
+  api('PUT','/api/state',{state:snap}).then(function(r){
+    if(r.status===200){if(snap.updated===S.updated)dirty=false;setSync('on')}
+    else if(r.status===409&&r.data&&r.data.state){adoptRemote(r.data.state);setSync('on')}
+    else if(r.status===401){sessionLost()}
+    else setSync('err');
+  },function(){
+    setSync('off');clearTimeout(retryTimer);retryTimer=setTimeout(function(){schedulePush(true)},15000);
+  }).catch(function(){setSync('err')}).then(function(){pushing=false;if(pending){pending=false;schedulePush(false)}});
+}
+function adoptRemote(remote){
+  S=migrate(remote);saveLocal();dirty=false;
+  if(view==='add'||view==='setup'){renderHeader()}else{render()}
+}
+function pull(){
+  lastPull=Date.now();
+  var t=setTimeout(function(){if(sync.mode==='init')setSync('slow')},10000);
+  return api('GET','/api/state').then(function(r){
+    clearTimeout(t);
+    if(r.status===401){sessionLost();return}
+    if(r.status!==200){setSync('err');return}
+    var rs=r.data.state,ru=r.data.updated||0;
+    if(rs&&ru>(S.updated||0)){adoptRemote(rs)}
+    else if(hasData()&&(S.updated||0)>ru){schedulePush(true)}
+    setSync('on');
+  },function(){clearTimeout(t);setSync('off')});
+}
+function startSession(u){
+  var prev=null;try{prev=localStorage.getItem(OWNER_KEY)}catch(e){}
+  if(prev!==u.email){S=blank();saveLocal()}
+  try{localStorage.setItem(OWNER_KEY,u.email);localStorage.setItem(USER_KEY,JSON.stringify(u))}catch(e){}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  me=u;booted=true;render();
+  return pull();
+}
+function sessionLost(){me=null;auth.mode='login';auth.msg='نشست شما تمام شد. دوباره وارد شوید.';render()}
+function clearLocalAll(){try{localStorage.removeItem(KEY);localStorage.removeItem(OWNER_KEY);localStorage.removeItem(USER_KEY)}catch(e){}S=blank();dirty=false}
+function doLogout(){
+  var fin=function(){clearLocalAll();me=null;auth.mode='login';auth.msg='';auth.recovery=null;try{location.hash=''}catch(e){}view='home';render()};
+  api('POST','/api/logout').then(fin,fin);
+}
+function boot(){
+  loadConfig();
+  if(LOCAL_ONLY){me={email:'local',province:'',admin:false,local:true};booted=true;sync.mode='local';render();checkUpdate();document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate()});return}
+  render();
+  api('GET','/api/me').then(function(r){
+    if(r.status===200){startSession(r.data.user)}
+    else{booted=true;me=null;render()}
+  },function(){
+    var cu=null;try{cu=JSON.parse(localStorage.getItem(USER_KEY)||'null')}catch(e){}
+    booted=true;
+    if(cu&&cu.email){me=cu;setSync('off');render()}
+    else{me=null;auth.msg='برای اولین ورود باید به اینترنت وصل باشید.';render()}
+  });
+}
+window.addEventListener('online',function(){if(me&&!LOCAL_ONLY){pull();if(dirty)schedulePush(true)}});
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&me&&!LOCAL_ONLY&&!dirty&&Date.now()-lastPull>60000)pull();
+});
+function syncNote(){
+  if(LOCAL_ONLY)return 'داده‌های شما فقط روی همین گوشی ذخیره می‌شوند و به هیچ سرور یا شخصی فرستاده نمی‌شوند. اگر گوشی گم شود، عوض شود یا اطلاعات مرورگر پاک شود، داده‌ها از بین می‌روند. پس مرتب فایل پشتیبان بگیرید.';
+  if(sync.mode==='on')return 'داده‌های شما علاوه بر این دستگاه، به‌صورت خصوصی روی سرور هم ذخیره می‌شوند. اگر گوشی گم شود یا عوض کنید، با ورود به حساب همه چیز برمی‌گردد.';
+  if(sync.mode==='init')return 'در حال اتصال به سرور…';
+  if(sync.mode==='off')return 'اینترنت وصل نیست. داده‌ها روی گوشی ذخیره می‌شوند و بعد از اتصال به سرور می‌روند.';
+  return 'ارتباط با سرور برقرار نشد. داده‌ها فعلاً روی گوشی هستند و بعد از اتصال دوباره همگام می‌شوند.';
+}
+
+/* ---------- feedback and support ---------- */
+function loadConfig(){
+  if(LOCAL_ONLY){var c0=window.MN_CFG||{};cfg={feedbackEmail:String(c0.feedbackEmail||''),donateUrl:String(c0.donateUrl||'')};return Promise.resolve()}
+  return fetch('/config.json',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(j){
+    cfg={feedbackEmail:String(j.feedbackEmail||''),donateUrl:String(j.donateUrl||'')};
+    if(booted&&!auth.recovery&&view!=='add')render();
+  }).catch(function(){});
+}
+function mailLink(kind,label){
+  var subj='ماشین‌نامه: '+label;
+  var body='\n\n---\nنسخه‌ی برنامه: '+APP_VERSION+(kind==='bug'?'\nمرورگر: '+navigator.userAgent:'');
+  return 'mailto:'+encodeURIComponent(cfg.feedbackEmail).replace('%40','@')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+}
+function contactBody(withDonate){
+  if(!cfg.feedbackEmail)return '';
+  var h='<h2>💬 ارتباط با ما</h2><p class="muted">پیام شما مستقیم به سازنده‌ی برنامه می‌رسد و برای بهتر شدن دفترچه خیلی کمک می‌کند.</p>'+
+    '<div class="fb-actions"><a class="btn" href="'+esc(mailLink('idea','پیشنهاد'))+'">پیشنهاد</a><a class="btn" href="'+esc(mailLink('crit','انتقاد'))+'">انتقاد</a><a class="btn" href="'+esc(mailLink('bug','گزارش مشکل'))+'">گزارش مشکل</a></div>'+
+    '<div class="fbmail"><small>یا مستقیم به این ایمیل بنویسید:</small><span class="ltr" dir="ltr">'+esc(cfg.feedbackEmail)+'</span><button class="btn small" type="button" data-act="copyMail">کپی</button></div>';
+  if(withDonate){
+    h+='<div class="fbdonate"><p class="muted">اگر برنامه به کارتان آمد، می‌توانید از ادامه‌ی راه حمایت کنید.</p>'+
+      (/^https:\/\//.test(cfg.donateUrl)?'<a class="btn gold" href="'+esc(cfg.donateUrl)+'" target="_blank" rel="noopener">حمایت از برنامه</a>':'<button class="btn gold" type="button" data-act="donateSoon">حمایت از برنامه</button>')+'</div>';
+  }
+  return h;
+}
+
+var contactOpen=false;
+function feedbackCard(){
+  if(!cfg.feedbackEmail)return '';
+  return '<button class="contact-btn" type="button" data-act="contactOpen">💬 ارتباط با ما <small>نظر، پیشنهاد، انتقاد</small></button>';
+}
+function syncModal(){
+  var m=$('modal');
+  if(!m){m=document.createElement('div');m.id='modal';document.body.appendChild(m)}
+  if(!contactOpen||!cfg.feedbackEmail){m.innerHTML='';m.hidden=true;return}
+  m.hidden=false;
+  m.innerHTML='<div class="mback" data-act="contactClose"></div><div class="msheet" role="dialog" aria-modal="true"><button class="btn small mclose" type="button" data-act="contactClose" aria-label="بستن">✕ بستن</button><div class="stack">'+contactBody(true)+'</div></div>';
+}
+
+/* ---------- install tip ---------- */
+var deferredInstall=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;if(me&&view==='home'&&!auth.recovery)render()});
+function isStandalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}
+function isIos(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
+function tipDismissed(){try{return localStorage.getItem('carservice.tip')==='1'}catch(e){return false}}
+function lastBackup(){try{return Number(localStorage.getItem('carservice.lastBackup'))||0}catch(e){return 0}}
+function markBackup(){try{localStorage.setItem('carservice.lastBackup',String(Date.now()))}catch(e){}}
+function backupTip(){
+  if(!LOCAL_ONLY||!hasData())return '';
+  var lb=lastBackup();
+  if(lb&&Date.now()-lb<30*864e5)return '';
+  return '<div class="banner tip"><span>'+(lb?'بیش از ۳۰ روز از آخرین پشتیبان‌گیری گذشته است.':'اطلاعات شما فقط روی این گوشی است و هنوز از آن پشتیبان نگرفته‌اید.')+'</span><button class="btn small primary" data-go="setup">پشتیبان‌گیری</button></div>';
+}
+function installTip(){
+  if(isStandalone()||tipDismissed())return '';
+  if(deferredInstall)return '<div class="banner tip"><span>این برنامه را روی صفحه‌ی اصلی گوشی نصب کنید.</span><span class="actions"><button class="btn small primary" data-act="installApp">نصب</button><button class="btn small" data-act="dismissTip">بعداً</button></span></div>';
+  if(isIos())return '<div class="banner tip"><span>برای نصب روی آیفون: در Safari دکمه‌ی اشتراک‌گذاری را بزنید و «Add to Home Screen» را انتخاب کنید. توجه: برنامه‌ی نصب‌شده روی آیفون اطلاعاتش را جدا از Safari نگه می‌دارد؛ پیش از نصب از تنظیمات «کپی متن پشتیبان» را بزنید و بعد از نصب در تنظیمات برنامه بچسبانید.</span><button class="btn small" data-act="dismissTip">فهمیدم</button></div>';
+  return '';
+}
+
+/* ---------- auth views ---------- */
+function provOptions(sel){
+  return '<option value="">انتخاب کنید</option>'+PROVINCES.map(function(p){return '<option value="'+esc(p)+'"'+(p===sel?' selected':'')+'>'+esc(p)+'</option>'}).join('');
+}
+function vAuth(){
+  var a=auth,h='';
+  if(a.recovery){
+    return '<section class="card pad"><h2>کد بازیابی شما</h2><p class="muted">اگر رمز عبور را فراموش کنید، فقط با این کد می‌توانید دوباره وارد شوید. همین حالا آن را جایی امن بنویسید یا از صفحه عکس بگیرید. این کد دوباره نشان داده نمی‌شود.</p>'+
+      '<p class="reccode" id="reccode">'+esc(a.recovery)+'</p>'+
+      '<div class="actions"><button class="btn" type="button" data-act="copyRec">کپی کد</button></div>'+
+      '<label class="chk"><input type="checkbox" id="rec_ok"><span>کد را ذخیره کردم</span></label>'+
+      '<button class="btn primary" type="button" data-act="recDone">ادامه</button></section>';
+  }
+  var msg=a.msg?'<p class="banner bad" role="alert">'+esc(a.msg)+'</p>':'';
+  var dis=a.busy?' disabled':'';
+  if(a.mode==='signup'){
+    h='<section class="card pad"><h2>ساخت حساب</h2><p class="muted">با حساب کاربری، اطلاعات شما با گم‌شدن یا عوض‌کردن گوشی از بین نمی‌رود.</p>'+msg+'<form data-form="signup" class="stack">'+
+      '<label>ایمیل<input id="a_email" class="ltr" type="email" inputmode="email" autocomplete="username" value="'+esc(a.email)+'" required></label>'+
+      '<label>رمز عبور<input id="a_pass" class="ltr" type="password" autocomplete="new-password" minlength="8" required><small>دست‌کم ۸ نویسه</small></label>'+
+      '<label>استان محل زندگی<select id="a_prov" required>'+provOptions(a.prov)+'</select><small>فقط برای آمار کلی استفاده می‌شود.</small></label>'+
+      '<label class="chk"><input type="checkbox" id="a_terms"><span><a href="/privacy" target="_blank" rel="noopener">حریم خصوصی</a> را خوانده‌ام و می‌پذیرم</span></label>'+
+      '<button class="btn primary" type="submit"'+dis+'>ساخت حساب</button></form>'+
+      '<div class="linkrow"><button class="lnk" data-act="authMode" data-m="login">حساب دارم، وارد می‌شوم</button></div></section>';
+  }else if(a.mode==='recover'){
+    h='<section class="card pad"><h2>بازیابی حساب</h2><p class="muted">ایمیل و کد بازیابی‌ای که هنگام ساخت حساب گرفتید را وارد کنید و رمز تازه بسازید.</p>'+msg+'<form data-form="recover" class="stack">'+
+      '<label>ایمیل<input id="a_email" class="ltr" type="email" inputmode="email" autocomplete="username" value="'+esc(a.email)+'" required></label>'+
+      '<label>کد بازیابی<input id="a_rec" class="ltr" type="text" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX-XXXX" required></label>'+
+      '<label>رمز عبور تازه<input id="a_pass" class="ltr" type="password" autocomplete="new-password" minlength="8" required></label>'+
+      '<button class="btn primary" type="submit"'+dis+'>بازیابی و ورود</button></form>'+
+      '<div class="linkrow"><button class="lnk" data-act="authMode" data-m="login">بازگشت به ورود</button></div></section>';
+  }else{
+    h='<section class="card pad"><h2>ورود</h2><p class="muted">دفترچه‌ی ماشین خود را با ایمیل و رمز عبور باز کنید.</p>'+msg+'<form data-form="login" class="stack">'+
+      '<label>ایمیل<input id="a_email" class="ltr" type="email" inputmode="email" autocomplete="username" value="'+esc(a.email)+'" required></label>'+
+      '<label>رمز عبور<input id="a_pass" class="ltr" type="password" autocomplete="current-password" required></label>'+
+      '<button class="btn primary" type="submit"'+dis+'>ورود</button></form>'+
+      '<div class="linkrow"><button class="lnk" data-act="authMode" data-m="signup">ساخت حساب تازه</button><button class="lnk" data-act="authMode" data-m="recover">رمز را فراموش کرده‌ام</button></div></section>';
+  }
+  return h+feedbackCard(false);
+}
+function authCall(url,body){
+  if(auth.busy)return;
+  auth.busy=true;auth.msg='';
+  api('POST',url,body).then(function(r){
+    auth.busy=false;
+    if(r.status===200){auth.recovery=r.data.recovery||null;auth.msg='';auth.mode='login';startSession(r.data.user)}
+    else{auth.msg=(r.data&&r.data.error)||'خطا در ارتباط با سرور';render()}
+  },function(){auth.busy=false;auth.msg='ارتباط با سرور برقرار نشد. اینترنت را بررسی کنید.';render()});
+}
+function accountCard(){
+  if(!me)return '';
+  if(LOCAL_ONLY)return '<section class="card pad"><h2>درباره‌ی ماشین‌نامه</h2><p class="muted">نسخه‌ی '+verFa(APP_VERSION)+'. اطلاعات شما فقط روی همین دستگاه ذخیره می‌شود.</p>'+
+    '<details><summary>تازه‌های نسخه‌ها</summary>'+changesList()+'</details><details><summary>حریم خصوصی</summary><p class="muted">این برنامه هیچ داده‌ای را به سرور نمی‌فرستد و هیچ حسابی از شما نمی‌خواهد. مشخصات خودرو، کیلومتر، سرویس‌ها و هزینه‌هایی که وارد می‌کنید فقط در حافظه‌ی مرورگر همین گوشی می‌ماند و سازنده‌ی برنامه به آن‌ها دسترسی ندارد. هر زمان بخواهید می‌توانید در همین صفحه همه‌ی داده‌ها را پاک کنید. اگر ایمیلی برای نظر و پیشنهاد می‌فرستید، آن پیام را خودتان از برنامه‌ی ایمیل می‌فرستید.</p></details></section>';
+  return '<section class="card pad"><h2>حساب کاربری</h2><p class="acct-mail">'+esc(me.email)+'</p>'+
+    '<form data-form="prof" class="stack"><label>استان<select id="p_prov">'+provOptions(me.province)+'</select></label><button class="btn" type="submit">ذخیره‌ی استان</button></form>'+
+    '<div class="actions"><button class="btn" data-act="logout">خروج از حساب</button><a class="btn" href="/privacy" target="_blank" rel="noopener">حریم خصوصی</a>'+(me.admin?'<a class="btn primary" href="/admin">گزارش مدیر</a>':'')+'</div>'+
+    '<details><summary>تغییر رمز عبور</summary><form data-form="pw" class="stack"><label>رمز فعلی<input id="pw_cur" class="ltr" type="password" autocomplete="current-password"></label><label>رمز تازه<input id="pw_new" class="ltr" type="password" autocomplete="new-password" minlength="8"></label><button class="btn" type="submit">تغییر رمز</button></form></details>'+
+    '<details><summary>حذف حساب و همه‌ی داده‌ها</summary><p class="muted">با این کار حساب شما و همه‌ی اطلاعات ثبت‌شده برای همیشه از سرور پاک می‌شود.</p><form data-form="del" class="stack"><label>رمز عبور<input id="del_pass" class="ltr" type="password" autocomplete="current-password"></label><button class="btn danger" type="submit">حذف حساب</button></form></details></section>';
+}
+
+/* ---------- estimation ---------- */
+function points(){
+  var m={};
+  S.readings.forEach(function(r){m[r.date]=Math.max(m[r.date]||0,r.km)});
+  S.logs.forEach(function(l){if(l.km!=null)m[l.date]=Math.max(m[l.date]||0,l.km)});
+  return Object.keys(m).sort().map(function(d){return {date:d,km:m[d]}});
+}
+function estimate(){
+  var pts=points(),today=todayIso(),prior=S.fallbackRate>0?S.fallbackRate:40;
+  if(!pts.length)return {km:null,rate:prior,last:null,elapsed:0,days:0};
+  var last=pts[pts.length-1],num=prior*14,den=14,days=0,i;
+  for(i=1;i<pts.length;i++){
+    var dd=daysBetween(pts[i-1].date,pts[i].date),dk=pts[i].km-pts[i-1].km;
+    if(dd<=0||dk<0)continue;
+    var age=Math.max(0,daysBetween(pts[i].date,today)),w=Math.pow(0.5,age/90);
+    num+=dk*w;den+=dd*w;days+=dd;
+  }
+  var rate=num/den,elapsed=Math.max(0,daysBetween(last.date,today));
+  return {km:Math.round(last.km+rate*elapsed),rate:rate,last:last,elapsed:elapsed,days:days};
+}
+function lastDone(id){
+  var best=null;
+  S.logs.forEach(function(l){
+    if((l.tpls||[]).indexOf(id)>=0&&(!best||l.date>best.date||(l.date===best.date&&(l.km||0)>(best.km||0))))best=l;
+  });
+  return best;
+}
+function statusFor(t,est){
+  var ld=lastDone(t.id),today=todayIso();
+  if(!ld)return {t:t,ld:null,state:'none',frac:-1};
+  var fk=-Infinity,fd=-Infinity,kmLeft=null,daysLeft=null,evg=groupsOf(ld).filter(function(g){return g.every&&(g.tpls||[]).indexOf(t.id)>=0})[0],kmI=evg?evg.every:t.km;
+  if(kmI>0&&ld.km!=null&&est.km!=null){kmLeft=ld.km+kmI-est.km;fk=(est.km-ld.km)/kmI}
+  var dueIso=null;
+  if(t.months>0)dueIso=addMonths(ld.date,t.months);
+  if(t.days>0){var d2=jdnToIso(isoToJdn(ld.date)+t.days);if(!dueIso||d2<dueIso)dueIso=d2}
+  var tot=0;
+  if(dueIso){daysLeft=daysBetween(today,dueIso);tot=daysBetween(ld.date,dueIso);fd=tot>0?(tot-daysLeft)/tot:1}
+  var frac=Math.max(fk,fd);
+  if(!isFinite(frac))return {t:t,ld:ld,state:'none',frac:-1};
+  var state='ok';
+  if(frac>=1)state='bad';
+  else if((kmLeft!=null&&kmLeft<=Math.max(300,kmI*0.1))||(daysLeft!=null&&daysLeft<=Math.min(30,Math.max(2,Math.round(tot*0.25)))))state='warn';
+  return {t:t,ld:ld,state:state,frac:frac,kmLeft:kmLeft,daysLeft:daysLeft};
+}
+function intervalText(t){
+  var p=[];
+  if(t.km>0)p.push('هر '+fa(t.km)+' کیلومتر');
+  if(t.months>0)p.push(t.months===12?'هر سال':(t.months%12===0?'هر '+faDigits(t.months/12)+' سال':'هر '+faDigits(t.months)+' ماه'));
+  if(t.days>0)p.push('هر '+faDigits(t.days)+' روز');
+  return p.length?p.join(' یا '):'بدون بازه';
+}
+function remainText(st){
+  var p=[];
+  if(st.kmLeft!=null)p.push(st.kmLeft>=0?fa(st.kmLeft)+' کیلومتر دیگر':fa(-st.kmLeft)+' کیلومتر از موعد گذشته');
+  if(st.daysLeft!=null)p.push(st.daysLeft>0?durText(st.daysLeft)+' دیگر':(st.daysLeft===0?'موعد امروز است':durText(-st.daysLeft)+' از موعد گذشته'));
+  return p.join(' · ');
+}
+
+/* ---------- ui helpers ---------- */
+var VIEWS=['home','add','history','report','setup','income'];
+var view='home',lastView=null,form=null,tplEdit=null,hf={kind:'all',fi:[],dd:false,q:''};
+var curJ=isoToJ(todayIso());
+var rep={fk:'all',fi:[],dd:false,mode:'month',y:curJ.jy,m:curJ.jm,from:jToIso(curJ.jy,1,1),to:todayIso()};
+var toastTimer=null;
+function $(id){return document.getElementById(id)}
+function val(id){var e=$(id);return e?e.value:''}
+function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true},4200)}
+function confirmTwice(btn,text){
+  if(btn.dataset.armed==='1')return true;
+  btn.dataset.armed='1';btn.dataset.orig=btn.textContent;btn.textContent=text;
+  setTimeout(function(){if(btn.isConnected){btn.dataset.armed='';btn.textContent=btn.dataset.orig}},4000);
+  return false;
+}
+function dateField(id,iso){
+  var j=isoToJ(iso),cj=isoToJ(todayIso()),lo=Math.min(cj.jy-15,j.jy),hi=Math.max(cj.jy+2,j.jy),i,d='',m='',y='';
+  for(i=1;i<=31;i++)d+='<option value="'+i+'"'+(i===j.jd?' selected':'')+'>'+faDigits(i)+'</option>';
+  for(i=1;i<=12;i++)m+='<option value="'+i+'"'+(i===j.jm?' selected':'')+'>'+MONTHS[i-1]+'</option>';
+  for(i=hi;i>=lo;i--)y+='<option value="'+i+'"'+(i===j.jy?' selected':'')+'>'+faDigits(i)+'</option>';
+  return '<div class="datef" id="'+id+'"><select data-df="'+id+'" data-p="d" aria-label="روز">'+d+'</select><select data-df="'+id+'" data-p="m" aria-label="ماه">'+m+'</select><select data-df="'+id+'" data-p="y" aria-label="سال">'+y+'</select></div>';
+}
+function readDate(id){
+  var box=$(id),q=function(p){return +box.querySelector('[data-p='+p+']').value};
+  var y=q('y'),m=q('m'),d=Math.min(q('d'),jMonthLen(y,m));
+  return jToIso(y,m,d);
+}
+function clampDay(id){
+  var box=$(id);if(!box)return;
+  var y=+box.querySelector('[data-p=y]').value,m=+box.querySelector('[data-p=m]').value,ds=box.querySelector('[data-p=d]');
+  var len=jMonthLen(y,m);if(+ds.value>len)ds.value=String(len);
+}
+function plateHtml(p){return p?'<span class="plate" aria-label="پلاک"><b><i class="flag"></i>ایران</b><span class="no">'+esc(faDigits(p))+'</span></span>':''}
+function logoSvg(){return '<svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lgA" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#14B8A6"/><stop offset="1" stop-color="#A3E635"/></linearGradient></defs><rect width="100" height="100" rx="26" fill="#0F172A"/><path d="M20 72A36 36 0 1 1 80 72" fill="none" stroke="url(#lgA)" stroke-width="8" stroke-linecap="round"/><path d="M46 38h8l14 34H32z" fill="#334155"/><path d="M50 46v6M50 58v6" stroke="#FBBF24" stroke-width="3.5" stroke-linecap="round"/></svg>'}
+
+/* ---------- header ---------- */
+function renderHeader(){
+  $('hdr').innerHTML='<header class="top"><div class="brand">'+logoSvg()+'<h1>ماشین<span class="nm">‌نامه</span></h1></div>'+
+    (me?'<div class="top-end">'+(S.plan?'<span class="pchip" title="پلن '+PLANS[S.plan].name+'">'+PLANS[S.plan].em+'</span>':'')+'<span class="chip '+sync.mode+'" title="'+esc(syncNote())+'"><i></i>'+SYNC_TEXT[sync.mode]+'</span></div>':'')+'</header>';
+}
+
+/* ---------- home ---------- */
+function drums(km){
+  var s=String(Math.max(0,Math.round(km))).padStart(6,'0'),h='',i;
+  for(i=0;i<s.length;i++)h+='<span class="d">'+PD[s[i]]+'</span>';
+  return '<div class="drums" role="img" aria-label="'+fa(km)+' کیلومتر">'+h+'</div>';
+}
+function vOnboard(){
+  return '<div class="banner tip"><span>قبلاً اطلاعات وارد کرده‌اید؟ مثلاً در مرورگر، پیش از نصب روی صفحه‌ی اصلی.</span><button class="btn small" data-go="setup">بازیابی از پشتیبان</button></div>'+
+  '<section class="card pad"><h2>شروع کنیم</h2><p class="muted">برای تخمین کیلومتر و یادآوری سرویس‌ها فقط چند مورد لازم است. همه‌ی آن‌ها بعداً در تنظیمات قابل تغییر است.</p>'+
+  '<form data-form="onboard" class="stack">'+
+  '<div class="grid2"><label>نام یا مدل ماشین<input id="ob_name" type="text" autocomplete="off" value="پراید"></label><label>سال ساخت<input id="ob_year" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(1389)+'"></label></div>'+
+  '<label>پلاک (اختیاری)<input id="ob_plate" type="text" autocomplete="off" placeholder="۱۲ ب ۳۴۵ - ۶۷"></label>'+
+  '<label>عدد فعلی کیلومترشمار<input id="ob_km" type="text" inputmode="numeric" autocomplete="off" placeholder="مثلاً ۸۵٬۴۰۰"></label>'+
+  '<label>میانگین رانندگی روزانه (حدودی)<input id="ob_rate" type="text" inputmode="numeric" autocomplete="off" placeholder="مثلاً ۴۰"><small>فقط برای شروع است. با هر بار ثبت کیلومتر، برنامه میانگین واقعی شما را یاد می‌گیرد.</small></label>'+
+  '<button class="btn primary" type="submit">شروع</button></form></section>';
+}
+function vHome(){
+  if(!S.plan)return vTour();
+  var est=estimate(),today=todayIso(),lastP=est.last,html=updCard()+newsCard()+installTip()+backupTip();
+  var needCal=!lastP||daysBetween(lastP.date,today)>=S.calDays;
+  var all=S.templates.filter(function(t){return t.on&&(t.km>0||t.months>0||t.days>0)}).map(function(t){return statusFor(t,est)});
+  var nxt=all.filter(function(x){return x.state!=='none'}).sort(function(x,y){return y.frac-x.frac})[0];
+  html+='<section class="hero"><div class="hero-top"><div><p class="eyebrow">'+(S.car.type==='moto'?'موتور من':'خودروی من')+(S.car.year?' · '+faDigits(esc(S.car.year)):'')+'</p><h2 class="hero-name">'+esc(S.car.name||'ماشین من')+'</h2></div>'+plateHtml(S.car.plate)+'</div>';
+  html+=est.km==null?'<p class="hero-meta">هنوز کیلومتری ثبت نشده است.</p>':'<div class="hero-km">'+fa(est.km)+'<small>کیلومتر</small></div>';
+  if(est.km!=null)html+='<p class="hero-meta">'+(est.days>=7?'بر پایه‌ی ثبت‌های شما':'تخمین اولیه')+' · میانگین ≈ '+fa(est.rate)+' کیلومتر در روز · آخرین ثبت: '+fa(lastP.km)+' ('+agoText(est.elapsed)+')</p>';
+  if(nxt)html+='<div class="hero-bar"><i style="width:'+Math.min(100,Math.max(3,nxt.frac*100)).toFixed(0)+'%"></i></div><p class="hero-meta">'+esc(itemLabel(nxt.t))+': '+remainText(nxt)+'</p>';
+  if(needCal&&lastP)html+='<p class="banner">'+faDigits(est.elapsed)+' روز از آخرین ثبت گذشته. عدد واقعی کیلومترشمار را وارد کنید تا تخمین دقیق‌تر شود.</p>';
+  html+='<form data-form="odo" class="row"><input id="qodo" type="text" inputmode="numeric" autocomplete="off" aria-label="عدد کیلومترشمار" placeholder="عدد کیلومترشمار الان"><button class="btn primary" type="submit">ثبت کیلومتر</button></form></section>';
+  var QK={bronze:[['service','🔧','سرویس'],['repair','🛠️','تعمیر'],['document','📄','مدارک']],silver:[['fuel','⛽','سوخت'],['service','🔧','سرویس'],['repair','🛠️','تعمیر'],['document','📄','مدارک']],gold:[['fuel','⛽','سوخت'],['service','🔧','سرویس'],['repair','🛠️','تعمیر'],['income','💰','درآمد']]}[plan()];
+  html+='<div class="quick'+(QK.length===3?' n3':'')+'">'+QK.map(function(q){return '<button type="button" data-act="qk" data-k="'+q[0]+'"><span>'+q[1]+'</span>'+q[2]+'</button>'}).join('')+'</div>';
+
+  var urgent=all.filter(function(s){return s.state==='bad'||s.state==='warn'}).sort(function(a,b){return b.frac-a.frac});
+  var okl=all.filter(function(s){return s.state==='ok'}).sort(function(a,b){return b.frac-a.frac});
+  var none=all.filter(function(s){return s.state==='none'});
+  html+='<section class="stack"><div class="sec-title"><h2>نزدیک موعد</h2>'+(urgent.length?'<small>به ترتیب فوریت</small>':'')+'</div>';
+  if(urgent.length)html+='<div class="svcs">'+urgent.map(function(s){return svcRow(s,false)}).join('')+'</div>';
+  else if(okl.length)html+='<div class="empty">فعلاً هیچ سرویسی نزدیک موعد نیست.</div>';
+  else html+='<div class="empty">هنوز سرویسی ثبت نشده. «همه‌ی سرویس‌ها» را باز کنید و آخرین زمان انجام هر مورد را وارد کنید تا موعدها محاسبه شود.</div>';
+  html+='</section>';
+  if(okl.length+none.length){
+    html+='<details id="moreSvc" class="more"'+(moreOpen||(!urgent.length&&!okl.length)?' open':'')+'><summary>همه‌ی سرویس‌ها ('+faDigits(okl.length+none.length)+')</summary><div class="svcs">'+
+      okl.map(function(s){return svcRow(s,false)}).join('')+none.map(function(s){return svcRow(s,true)}).join('')+'</div></details>';
+  }
+  var offN=S.templates.filter(function(t){return !t.on}).length;
+  if(offN)html+='<p class="muted" style="margin:0">'+faDigits(offN)+' مورد دیگر (مثل شمع، تسمه‌ی تایم و لاستیک) فعلاً خاموش است. اگر لازم دارید، از <button class="fbtn" data-go="setup">تنظیمات</button> روشنش کنید.</p>';
+  if(plan()!=='bronze'&&S.fuel.init&&!S.fuel.none){var fc=fuelCalc();html+='<details class="more"><summary>⛽ موجودی کارت سوخت</summary><dl class="kv" style="margin-top:8px">'+S.fuel.tiers.filter(function(t){return !t.free}).map(function(t){return '<div><dt>'+esc(emoOf(t.id,'fuel')+' '+t.name)+'</dt><dd>'+nf2.format(fc.bal[t.id]||0)+' لیتر</dd></div>'}).join('')+'</dl></details>'}
+  var cm=isoToJ(today),ms=jToIso(cm.jy,cm.jm,1),ys=jToIso(cm.jy,1,1);
+  var mt=sumCost(S.logs.filter(function(l){return l.date>=ms})),yt=sumCost(S.logs.filter(function(l){return l.date>=ys}));
+  if(costShown())html+='<section class="card pad"><div class="sec-title"><h2>هزینه‌ها</h2><span class="tools">'+(plan()==='gold'?'<button class="fbtn" data-go="income">💰 ثبت درآمد</button>':'')+'<button class="fbtn" data-go="report">گزارش کامل</button></span></div><dl class="kv"><div><dt>'+MONTHS[cm.jm-1]+' '+faDigits(cm.jy)+'</dt><dd>'+money(mt)+'</dd></div><div><dt>سال '+faDigits(cm.jy)+'</dt><dd>'+money(yt)+'</dd></div></dl></section>';
+  html+=feedbackCard(true);
+  return html;
+}
+function sumCost(a){return a.reduce(function(s,l){return s+(l.cost||0)},0)}
+function svcRow(s,isNone){
+  var t=s.t,label={bad:'عقب‌افتاده',warn:'نزدیک موعد',ok:'خوب',none:'ثبت نشده'}[s.state];
+  var h='<article class="svc '+s.state+'"><div class="svc-head"><div><h3>'+esc(itemLabel(t))+'</h3><span class="pill '+s.state+'">'+label+'</span></div>'+
+    '<button class="btn small" data-act="done" data-id="'+t.id+'">'+(isNone?'ثبت آخرین انجام':'انجام شد')+'</button></div>';
+  if(!isNone){
+    h+='<div class="bar"><i style="width:'+Math.min(100,Math.max(2,s.frac*100)).toFixed(0)+'%"></i></div><p class="svc-meta">'+remainText(s)+'</p>'+
+    '<small>آخرین بار: '+fmtDate(s.ld.date)+(s.ld.km!=null?' · '+fa(s.ld.km)+' کیلومتر':'')+' · '+intervalText(t)+(t.km>0&&t.months>0?' (هرکدام زودتر)':'')+'</small>';
+  }else h+='<small>'+intervalText(t)+'</small>';
+  return h+'</article>';
+}
+
+/* ---------- add / edit log ---------- */
+function lifeScore(t){var c=[];if(t.km>0)c.push(t.km/40);if(t.months>0)c.push(t.months*30);if(t.days>0)c.push(t.days);return c.length?Math.min.apply(null,c):1e9}
+function fuelItems(){return S.fuel.tiers.filter(function(t){return t.free||!S.fuel.none}).map(function(t){return {id:t.id,name:t.name,kind:'fuel',km:0,months:0,days:0,on:true,tier:t}}).concat(S.templates.filter(function(t){return t.kind==='fuel'}))}
+function tplObj(id){var f=S.fuel.tiers.filter(function(t){return t.id===id})[0];if(f)return {id:f.id,name:f.name,kind:'fuel',tier:f};return S.templates.filter(function(x){return x.id===id})[0]}
+function tplLabel(id){var t=tplObj(id);return t?emoOf(t.id,t.kind)+' '+t.name:''}
+function itemLabel(t){return emoOf(t.id,t.kind)+' '+t.name}
+function monthIdx(iso){var j=isoToJ(iso);return j.jy*12+j.jm-1}
+function fuelCalc(opt){
+  var F=S.fuel,res={ok:!!F.init,bal:{},over:{}};if(!F.init)return res;
+  opt=opt||{};var paid=F.tiers.filter(function(t){return !t.free}),byM={},mNow=monthIdx(todayIso()),m0=monthIdx(F.initDate);
+  paid.forEach(function(t){res.bal[t.id]=F.bal[t.id]||0});
+  function add(date,lit){if(date<F.initDate)return;var m=monthIdx(date);if(m>mNow)return;(byM[m]=byM[m]||[]).push(lit)}
+  S.logs.forEach(function(l){if(l.id===opt.skipId)return;groupsOf(l).forEach(function(g){if(g.kind==='fuel'&&g.liters)add(l.date,g.liters)})});
+  if(opt.extra)add(opt.extra.date,opt.extra.lit);
+  for(var m=m0;m<=mNow;m++){
+    if(m>m0)paid.forEach(function(t){res.bal[t.id]=Math.min(t.cap||t.quota||0,res.bal[t.id]+(t.quota||0))});
+    (byM[m]||[]).forEach(function(lit){Object.keys(lit).forEach(function(id){if(res.bal[id]!==undefined)res.bal[id]-=lit[id]})});
+    paid.forEach(function(t){if(res.bal[t.id]<-1e-9){if(m===mNow)res.over[t.id]=-res.bal[t.id];res.bal[t.id]=0}});
+  }
+  return res;
+}
+function tierInfo(t){var x=money(t.price)+' / لیتر';if(!t.free&&S.fuel.init){x+=' · موجودی '+nf2.format(fuelCalc().bal[t.id]||0)+' لیتر'}return x}
+function priceOf(b,id){var t=tplObj(id);return (b.price&&b.price[id]!=null)?b.price[id]:(t&&t.tier?t.tier.price:0)}
+function fuelBlockCost(b){var tot=0;b.tpls.forEach(function(id){var t=tplObj(id);if(t&&t.tier){var L=numOrNull((b.lit||{})[id]);if(L!==null)tot+=L*priceOf(b,id)}else{var c=numOrNull(b.icost[id]);if(c!==null)tot+=c/mult()}});return tot}
+function autoCost(){var f=form;if(!f||f.costEdited)return;if(!f.blocks.every(function(b){return b.kind==='fuel'}))return;var t=0;f.blocks.forEach(function(b){t+=fuelBlockCost(b)});f.costTxt=t>0?fa(t*mult()):'';var e=$('f_cost');if(e)e.value=f.costTxt}
+function refreshAmts(){[].forEach.call(document.querySelectorAll('[data-amt]'),function(el){var q=el.dataset.amt.split('|'),b=form.blocks[+q[0]],L=numOrNull((b.lit||{})[q[1]]);el.textContent=L===null?'':' · مبلغ: '+money(L*priceOf(b,q[1]))})}
+function fuelWarn(f){
+  if(!S.fuel.init)return '';var lit={},any=false;
+  f.blocks.forEach(function(b){if(b.kind!=='fuel')return;b.tpls.forEach(function(id){var t=tplObj(id),L=numOrNull((b.lit||{})[id]);if(t&&t.tier&&L!==null&&L>0){lit[id]=(lit[id]||0)+L;any=true}})});
+  if(!any)return '';
+  var c=fuelCalc({skipId:f.id,extra:{date:f.date,lit:lit}}),m=[];
+  Object.keys(c.over).forEach(function(id){m.push('از «'+tplName(id)+'» '+nf2.format(c.over[id])+' لیتر بیشتر از موجودی کارت زده‌اید.')});
+  return m.length?'هشدار: '+m.join(' ')+' اگر قبلاً بنزین زده‌اید و ثبت نکرده‌اید، آن را هم ثبت کنید یا موجودی را در تنظیمات اصلاح کنید. ثبت این مورد ممکن است.':'';
+}
+function fuelInitHtml(vals,btn){
+  var c=vals?fuelCalc():null;
+  return '<div class="stack fuel-init"><b>موجودی فعلی کارت سوخت</b><small class="muted">فقط یک بار لازم است؛ از این به بعد برنامه خودش کم و زیاد می‌کند. لیتر باقی‌مانده‌ی هر پله را بنویسید (اگر نداشتید ۰).</small>'+
+    S.fuel.tiers.filter(function(t){return !t.free}).map(function(t){return '<label>'+esc(emoOf(t.id,'fuel')+' '+t.name)+' (لیتر)<input type="text" inputmode="decimal" data-fi="'+t.id+'" autocomplete="off" value="'+(c?esc(nf2.format(c.bal[t.id]||0)):'')+'"></label>'}).join('')+
+    '<button class="btn primary" type="button" data-act="fuelInit">'+(btn||'ثبت موجودی')+'</button>'+(vals?'':'<button class="btn" type="button" data-act="fuelNone">کارت سوخت ندارم</button>')+'</div>';
+}
+function fuelSettingsHtml(){
+  var F=S.fuel,c=fuelCalc(),paid=F.tiers.filter(function(t){return !t.free}),h='<section class="card pad"><h2>⛽ کارت سوخت</h2>';
+  if(F.none)h+='<p class="muted">برنامه برای شما بدون کارت تنظیم شده است و فقط بنزین آزاد ثبت می‌شود.</p><button class="btn" type="button" data-act="fuelHas">کارت سوخت دارم</button></section>';
+  if(F.none)return h;
+  if(F.init)h+='<dl class="kv">'+paid.map(function(t){return '<div><dt>'+esc(emoOf(t.id,'fuel')+' '+t.name)+'</dt><dd>'+nf2.format(c.bal[t.id]||0)+' لیتر</dd></div>'}).join('')+'</dl><p class="muted">شارژ از اول هر ماه شمسی است. بنزین آزاد از کارت کم نمی‌شود.</p>';
+  else h+='<p class="muted">هنوز موجودی اولیه ثبت نشده است. هنگام اولین ثبت سوخت‌گیری هم از شما پرسیده می‌شود.</p>';
+  h+='<details><summary>'+(F.init?'اصلاح موجودی (مثلاً اگر بنزین‌زدنی را ثبت نکرده بودید)':'ثبت موجودی اولیه')+'</summary>'+fuelInitHtml(F.init,F.init?'ثبت موجودی تازه':'ثبت موجودی')+'</details>';
+  h+='<details><summary>نام، قیمت و سهمیه‌ی پله‌ها</summary><form data-form="fuelcfg" class="stack">'+F.tiers.map(function(t){
+    return '<div class="stack tier-ed"><b>'+esc(emoOf(t.id,'fuel')+' '+t.name)+'</b><label>نام<input id="fc_'+t.id+'_name" type="text" autocomplete="off" value="'+esc(t.name)+'"></label>'+
+      '<div class="grid2"><label>قیمت هر لیتر (تومان)<input id="fc_'+t.id+'_price" type="text" inputmode="numeric" data-grp="1" autocomplete="off" value="'+esc(fa(t.price))+'"></label>'+
+      (t.free?'':'<label>شارژ ماهانه (لیتر)<input id="fc_'+t.id+'_quota" type="text" inputmode="numeric" autocomplete="off" value="'+esc(fa(t.quota))+'"></label><label>سقف ذخیره (لیتر)<input id="fc_'+t.id+'_cap" type="text" inputmode="numeric" autocomplete="off" value="'+esc(fa(t.cap))+'"></label>')+'</div></div>'}).join('')+
+    '<small class="muted">سقف ذخیره: اگر استفاده نشود، شارژ ماه بعد تا این سقف روی موجودی جمع می‌شود. برای پله‌ای که نمی‌ماند، سقف را برابر شارژ ماهانه بگذارید.</small><button class="btn primary" type="submit">ذخیره</button></form></details></section>';
+  return h;
+}
+function fuelStatsHtml(logs){
+  var rows=[];logs.forEach(function(l){var lit=0,cost=0;groupsOf(l).forEach(function(g){if(g.kind!=='fuel')return;Object.keys(g.liters||{}).forEach(function(id){lit+=g.liters[id];cost+=(g.icost||{})[id]||0})});if(lit>0)rows.push({km:l.km,lit:lit,cost:cost})});
+  if(!rows.length)return '';
+  var L=0,C=0;rows.forEach(function(x){L+=x.lit;C+=x.cost});
+  var h='<section class="card pad"><h2>⛽ آمار سوخت</h2><dl class="kv"><div><dt>مجموع بنزین</dt><dd>'+nf2.format(L)+' لیتر</dd></div><div><dt>میانگین قیمت هر لیتر</dt><dd>'+money(C/L)+'</dd></div>';
+  var k=rows.filter(function(x){return x.km!=null}).sort(function(a,b){return a.km-b.km});
+  if(k.length>=2){var span=k[k.length-1].km-k[0].km;if(span>0){var L2=0,C2=0;k.slice(1).forEach(function(x){L2+=x.lit;C2+=x.cost});
+    h+='<div><dt>مصرف تقریبی</dt><dd>'+nf2.format(L2/span*100)+' لیتر در ۱۰۰ کیلومتر</dd></div><div><dt>هزینه‌ی سوخت هر کیلومتر</dt><dd>'+money(C2/span)+'</dd></div>'}}
+  return h+'</dl><p class="muted">مصرف با فرض پرکردن باک در هر بار حساب می‌شود و تقریبی است.</p></section>';
+}
+function itemsFor(kind){if(kind==='fuel')return fuelItems();return S.templates.filter(function(t){return t.kind===kind}).sort(function(a,b){return lifeScore(a)-lifeScore(b)||(a.ord||500)-(b.ord||500)||a.name.localeCompare(b.name,'fa')})}
+function newBlock(kind){return {kind:kind||'',every:'',tpls:[],gcostTxt:'',icost:{},lit:{},brand:'',price:{},newTxt:'',ddOpen:false,costOpen:false}}
+function snapOf(f){return JSON.stringify([f.date,f.kmTxt,f.costTxt,f.title,f.place,f.note,f.blocks.map(function(b){return [b.kind,b.tpls,b.gcostTxt,b.icost,b.lit,b.brand]})])}
+function numOrNull(t){if(t==null||String(t).trim()==='')return null;var n=parseNum(t);return isFinite(n)&&n>=0?n:null}
+function formCheck(f){
+  var km=parseNum(f.kmTxt),total=numOrNull(f.costTxt),known=0,hasOther=false,i;
+  if(!f.date||!isFinite(km)||km<0||(total===null&&costRequired()))return {ok:false,msg:''};
+  for(i=0;i<f.blocks.length;i++){
+    var b=f.blocks[i];
+    if(!b.kind||(!b.tpls.length&&!(f.legacy&&(f.title||'').trim())))return {ok:false,msg:''};
+    if(b.kind==='fuel'){
+      var tierSel=false;
+      for(var j=0;j<b.tpls.length;j++){var id=b.tpls[j],t=tplObj(id);
+        if(t&&t.tier){if(!t.tier.free)tierSel=true;var L=numOrNull((b.lit||{})[id]);if(L===null||L<=0)return {ok:false,msg:''}}
+        else if(id==='fu_supp'&&!(b.brand||'').trim())return {ok:false,msg:''}}
+      if(tierSel&&!S.fuel.init)return {ok:false,msg:'ابتدا موجودی فعلی کارت سوخت را (در همین صفحه) ثبت کنید.'};
+      known+=fuelBlockCost(b)*mult();continue;
+    }
+    var sumI=0,g=numOrNull(b.gcostTxt);
+    b.tpls.forEach(function(id){if(isOtherTpl(id))hasOther=true;var c=numOrNull(b.icost[id]);if(c!==null)sumI+=c});
+    if(g!==null&&sumI>g)return {ok:false,msg:'جمع ریز هزینه‌ی موارد از هزینه‌ی همان دسته بیشتر است.'};
+    known+=g!==null?g:sumI;
+  }
+  if(total!==null&&known>total+1)return {ok:false,msg:'جمع ریز هزینه‌ها از هزینه‌ی کل بیشتر است.'};
+  if(hasOther&&!(f.title||'').trim())return {ok:false,msg:'برای «سایر»، در بخش توضیحات بنویسید چه کاری انجام شد.'};
+  return {ok:true,msg:''};
+}
+function formDirty(f){return !!f&&snapOf(f)!==f.snap}
+function updateOk(){if(!form)return;var c=formCheck(form),b=$('okBtn'),m=$('fmsg');if(b)b.disabled=!c.ok;if(m){m.textContent=c.msg;m.hidden=!c.msg}var w=$('fwarn');if(w){var t=fuelWarn(form);w.textContent=t;w.hidden=!t}}
+function makeForm(o){
+  o=o||{};var est=estimate();
+  var f={id:o.id||null,date:o.date||todayIso(),title:'',place:o.place||'',note:o.note||'',confirmCancel:false,blocks:[],legacy:false};
+  var km=('km' in o)?o.km:est.km;
+  f.kmTxt=km!=null&&isFinite(km)?fa(km):'';
+  f.costTxt=(o.id&&o.cost!=null)?fa(o.cost*mult()):'';f.costEdited=!!o.id;
+  if(o.id){
+    groupsOf(o).forEach(function(g){
+      var ic={};Object.keys(g.icost||{}).forEach(function(k){ic[k]=fa(g.icost[k]*mult())});
+      var lt={};Object.keys(g.liters||{}).forEach(function(k){lt[k]=String(g.liters[k])});
+      f.blocks.push({kind:g.kind,every:g.every?fa(g.every):'',tpls:(g.tpls||[]).slice(),gcostTxt:g.kind==='fuel'?'':(g.gcost!=null?fa(g.gcost*mult()):''),icost:ic,lit:lt,brand:g.brand||'',price:Object.assign({},g.price||{}),newTxt:'',ddOpen:false,costOpen:false});
+    });
+    var names=(o.tpls||[]).map(tplName).filter(Boolean).join('، ');
+    if(o.desc!=null)f.title=o.desc;else if(o.title&&o.title!==names)f.title=o.title;
+    f.legacy=!(o.tpls&&o.tpls.length);
+  }else if(o.kind||(o.tpls&&o.tpls.length)){var nb=newBlock(o.kind);nb.tpls=(o.tpls||[]).slice();f.blocks.push(nb)}
+  if(!f.blocks.length)f.blocks.push(newBlock(''));
+  f.snap=snapOf(f);return f;
+}
+function openAdd(o){form=makeForm(o);go('add')}
+function tplName(id){var t=tplObj(id);return t?t.name:''}
+function blockHtml(f,b,i){
+  var usedElse=f.blocks.map(function(x,j){return j!==i?x.kind:null}),names=b.tpls.map(tplLabel).filter(Boolean);
+  var h='<div class="blk"><div class="blk-h"><b>دسته‌ی '+faDigits(i+1)+'</b>'+(f.blocks.length>1?'<button type="button" class="btn small" data-act="delBlock" data-bi="'+i+'">حذف این دسته</button>':'')+'</div>';
+  h+='<label>دسته‌بندی<select data-fk="'+i+'"><option value=""'+(b.kind?'':' selected')+' disabled>انتخاب کنید…</option>'+kindKeys().map(function(k){return '<option value="'+k+'"'+(b.kind===k?' selected':'')+(usedElse.indexOf(k)>=0?' disabled':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select></label>';
+  if(b.kind==='fuel'&&!S.fuel.init&&!S.fuel.none)h+=fuelInitHtml();
+  h+='<div class="stack"><span class="flbl">مورد انجام‌شده (چند مورد هم می‌توانید انتخاب کنید)</span><details class="dd" id="itemsDd'+i+'"'+(b.kind?'':' data-off="1"')+(b.ddOpen&&b.kind?' open':'')+'><summary>'+
+    (!b.kind?'ابتدا دسته‌بندی را انتخاب کنید':(names.length?esc(names.join('، ')):'انتخاب مورد…'))+'</summary>';
+  if(b.kind){
+    h+='<div class="dd-list">'+itemsFor(b.kind).map(function(t){var it=t.tier?tierInfo(t.tier):intervalText(t);return '<label class="dd-row"><input type="checkbox" data-bi="'+i+'" data-tpl="'+t.id+'"'+(b.tpls.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(itemLabel(t))+'</b>'+(it==='بدون بازه'?'':'<small>'+it+'</small>')+'</span></label>'}).join('')+'</div>';
+    h+=(b.kind==='fuel'?'':'<div class="dd-add"><input type="text" data-nt="'+i+'" autocomplete="off" placeholder="افزودن مورد جدید…" value="'+esc(b.newTxt)+'"><button class="btn small" type="button" data-act="addItem" data-bi="'+i+'">افزودن</button></div>')+'<div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="b" data-bi="'+i+'">تمام</button></div>';
+  }
+  h+='</details></div>';
+  if(b.kind==='fuel'&&b.tpls.length){
+    h+='<div class="stack fuelbox">'+b.tpls.map(function(id){var t=tplObj(id);if(!t)return '';
+      if(t.tier){var L=numOrNull((b.lit||{})[id]);return '<label>'+esc(itemLabel(t))+' — چند لیتر؟<input type="text" inputmode="decimal" data-lit="'+i+'|'+id+'" autocomplete="off" value="'+esc((b.lit||{})[id]||'')+'" placeholder="مثلاً ۱۰"><small>قیمت هر لیتر: '+money(priceOf(b,id))+'<span data-amt="'+i+'|'+id+'">'+(L===null?'':' · مبلغ: '+money(L*priceOf(b,id)))+'</span></small></label>'}
+      return '<div class="grid2"><label>'+esc(itemLabel(t))+' — برند<input type="text" data-brand="'+i+'" autocomplete="off" value="'+esc(b.brand||'')+'" placeholder="نام برند مکمل"></label><label>پیشنهاد سازنده: هر چند کیلومتر؟<input type="text" inputmode="numeric" autocomplete="off" data-every="'+i+'" value="'+esc(b.every||'')+'" placeholder="مثلاً ۳٬۰۰۰"></label><label>قیمت ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-ic="'+i+'|'+id+'" value="'+esc(b.icost[id]||'')+'"></label></div>'}).join('')+'</div>';
+  }
+  if(b.tpls.length&&b.kind!=='fuel'&&costShown()){
+    h+='<details class="dd sub" id="costDd'+i+'"'+(b.costOpen?' open':'')+'><summary>ریز هزینه (اختیاری)</summary><div class="stack" style="padding:8px 12px">'+
+      '<label>هزینه‌ی کل این دسته ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-gc="'+i+'" value="'+esc(b.gcostTxt)+'" placeholder="اگر می‌دانید"></label>'+
+      b.tpls.map(function(id){return '<label>'+esc(tplLabel(id))+' ('+unitName()+')<input type="text" inputmode="numeric" autocomplete="off" data-ic="'+i+'|'+id+'" value="'+esc(b.icost[id]||'')+'" placeholder="اگر می‌دانید"></label>'}).join('')+
+      '<small class="muted">هر چه را نمی‌دانید خالی بگذارید؛ فقط در هزینه‌ی کل حساب می‌شود.</small></div></details>';
+  }
+  return h+'</div>';
+}
+function vAdd(){
+  if(!form)form=makeForm();
+  var f=form,h='<section class="card pad"><form data-form="log" class="stack">';
+  h+='<div class="addbar"><button id="okBtn" class="btn primary" type="submit"'+(formCheck(f).ok?'':' disabled')+'>تأیید</button><h2>'+(f.id?'ویرایش ثبت':'ثبت جدید')+'</h2><button class="btn" type="button" data-act="cancelLog">لغو</button></div>';
+  if(f.confirmCancel)h+='<div class="banner"><span>تغییرات ذخیره‌نشده از بین می‌رود. لغو شود؟</span><div class="actions"><button class="btn danger small" type="button" data-act="cancelYes">بله، لغو کن</button><button class="btn small" type="button" data-act="cancelNo">ادامه‌ی ویرایش</button></div></div>';
+  h+='<label>تاریخ'+dateField('fd',f.date)+'</label>';
+  f.blocks.forEach(function(b,i){h+=blockHtml(f,b,i)});
+  var last=f.blocks[f.blocks.length-1],canAdd=last.kind&&last.tpls.length&&f.blocks.length<kindKeys().length;
+  h+='<button class="btn" type="button" data-act="addBlock"'+(canAdd?'':' disabled')+'>+ دسته‌ی دیگر (در همین مراجعه)</button>';
+  h+='<label>کیلومتر<input id="f_km" type="text" inputmode="numeric" autocomplete="off" value="'+esc(f.kmTxt)+'"><small>عدد کیلومترشمار را بنویسید. مقدار پیش‌فرض تخمینی است.</small></label>';
+  if(costShown())h+='<label>هزینه‌ی کل ('+unitName()+')'+(costRequired()?' — الزامی':' — اختیاری')+'<input id="f_cost" type="text" inputmode="numeric" autocomplete="off" value="'+esc(f.costTxt)+'" placeholder="'+(costRequired()?'مجموع مبلغ پرداختی؛ اگر رایگان بود ۰ بنویسید':'اگر نمی‌خواهید، خالی بگذارید')+'"></label>';
+  var w0=fuelWarn(f);
+  h+='<p id="fmsg" class="banner" hidden></p><p id="fwarn" class="banner"'+(w0?'':' hidden')+'>'+esc(w0)+'</p>';
+  h+='<div class="stack extra"><span class="flbl">اطلاعات تکمیلی</span>'+
+    '<label>مکان<input id="f_place" type="text" autocomplete="off" value="'+esc(f.place)+'" placeholder="مثلاً تعمیرگاه مرکزی"></label>'+
+    '<label>توضیحات<input id="f_title" type="text" autocomplete="off" value="'+esc(f.title)+'" placeholder="جزئیات کار انجام‌شده؛ با «سایر» الزامی است"></label>'+
+    '<label>یادداشت<input id="f_note" type="text" autocomplete="off" value="'+esc(f.note)+'" placeholder="مثلاً روغن ۱۰W40، فاکتور شماره…"></label></div>';
+  if(f.id)h+='<div class="actions"><button class="btn danger" type="button" data-act="delLog">حذف این ثبت</button></div>';
+  return h+'</form></section>';
+}
+function addItem(i){
+  var f=form,b=f.blocks[i],name=(b.newTxt||'').trim();
+  if(!b.kind)return;
+  if(!name){toast('نام مورد جدید را بنویسید');return}
+  var ex=S.templates.filter(function(t){return t.kind===b.kind&&t.name===name})[0],id;
+  if(ex)id=ex.id;else{id='c'+uid();S.templates.push({id:id,name:name,kind:b.kind,km:0,months:0,days:0,on:true,ord:500});commit()}
+  if(b.tpls.indexOf(id)<0)b.tpls.push(id);
+  b.newTxt='';b.ddOpen=true;render();
+}
+function leaveForm(){var back=form&&form.id?'history':'home';form=null;go(back)}
+function saveLog(){
+  var f=form;if(!f||!formCheck(f).ok){toast('همه‌ی موارد لازم را کامل کنید');return}
+  var m=mult(),date=f.date,est=estimate(),km=Math.round(parseNum(f.kmTxt)),allNames=[],tplsAll=[],groups=[];
+  f.blocks.forEach(function(b){
+    var ic={},any=false;
+    if(b.kind==='fuel'){
+      var lit={},price={},gc=0,br=(b.brand||'').trim();
+      b.tpls.forEach(function(id){var t=tplObj(id);if(t&&t.tier){var L=numOrNull(b.lit[id]),pr=priceOf(b,id);lit[id]=L;price[id]=pr;ic[id]=L*pr;gc+=L*pr}else{var c=numOrNull(b.icost[id]);if(c!==null){ic[id]=c/m;gc+=c/m}}});
+      var ev=parseNum(b.every||'');groups.push({kind:'fuel',tpls:b.tpls.slice(),gcost:gc,icost:ic,liters:lit,price:price,brand:br,every:(b.tpls.indexOf('fu_supp')>=0&&isFinite(ev)&&ev>0)?Math.round(ev):0});
+      b.tpls.forEach(function(id){var t=tplObj(id);allNames.push(t&&t.tier?t.name+' '+nf2.format(lit[id])+' لیتر':(t?t.name:'')+(br?' ('+br+')':''));tplsAll.push(id)});
+      return;
+    }
+    b.tpls.forEach(function(id){var c=numOrNull(b.icost[id]);if(c!==null){ic[id]=c/m;any=true}});
+    var g=numOrNull(b.gcostTxt);
+    groups.push({kind:b.kind,tpls:b.tpls.slice(),gcost:g!==null?g/m:null,icost:ic});
+    b.tpls.forEach(function(id){allNames.push(tplName(id));tplsAll.push(id)});
+  });
+  if(!f.id&&est.last&&date>=est.last.date&&km<est.last.km){toast('کیلومتر کمتر از آخرین ثبت ('+fa(est.last.km)+') است. دوباره بررسی کنید.');return}
+  var desc=(f.title||'').trim(),names=allNames.filter(Boolean).join('، ');
+  var title=names&&desc?names+' — '+desc:(names||desc);
+  var log={id:f.id||uid(),date:date,km:km,kind:groups.length>1?'mixed':groups[0].kind,groups:groups,title:title,desc:desc,tpls:tplsAll,cost:(numOrNull(f.costTxt)||0)/m,place:(f.place||'').trim(),note:(f.note||'').trim()};
+  if(f.id)S.logs=S.logs.map(function(l){return l.id===f.id?log:l});else S.logs.push(log);
+  var wasEdit=!!f.id;
+  form=null;commit();toast(wasEdit?'تغییرات ذخیره شد':'ثبت شد');go(wasEdit?'history':'home');
+}
+
+/* ---------- history ---------- */
+function logRow(l,m){
+  return '<button class="log" data-act="editLog" data-id="'+l.id+'"><span class="log-main"><small>'+fmtDate(l.date)+'</small><b>'+esc(l.title)+'</b><small>'+kindLabel(l)+(l.place?' · '+esc(l.place):'')+(l.km!=null?' · '+fa(l.km)+' کیلومتر':'')+'</small></span><span class="log-cost">'+(m?(m.exact>0?money(m.exact)+(m.exact<l.cost?'<small>از '+money(l.cost)+'</small>':''):(m.amb>0?'<small>ریز نامشخص</small>':'')):(l.cost?money(l.cost):''))+'</span></button>';
+}
+function vHistory(){
+  var h='<section class="stack"><h2>سوابق سرویس و تعمیر</h2><div class="stack">'+filterHtml({fk:hf.kind,fi:hf.fi,dd:hf.dd},'data-hk','data-htpl','hItems')+'</div>';
+  h+='<input id="hq" type="search" placeholder="جستجو در شرح، مکان و یادداشت" value="'+esc(hf.q)+'" aria-label="جستجو"><div id="hsum"></div><div id="hlist" class="list"></div></section>';
+  return h;
+}
+function fillHistory(){
+  var q=hf.q.trim(),active=hf.kind!=='all',tot=0,amb=0,amts={};
+  var arr=S.logs.filter(function(l){
+    var m=repMatch(l,hf.kind,hf.fi);if(!m.inc)return false;
+    if(q&&(l.title+' '+l.place+' '+l.note).indexOf(q)<0)return false;
+    amts[l.id]=m;tot+=m.exact;amb+=m.amb;return true;
+  }).sort(function(a,b){return a.date<b.date?1:(a.date>b.date?-1:0)});
+  var sum=$('hsum');
+  if(sum)sum.innerHTML=(active&&arr.length)?'<div class="card pad"><p class="eyebrow">جمع هزینه‌ی '+(hf.fi.length?'موارد انتخاب‌شده':KINDS[hf.kind])+'</p><p class="big">'+fa(tot*mult())+' <span>'+unitName()+'</span></p>'+(amb>0?'<p class="muted">به‌علاوه‌ی '+money(amb)+' هزینه‌ی تقسیم‌نشده در مراجعه‌هایی که این '+(hf.fi.length?'مورد':'دسته')+' هم در آن‌ها بوده (ریز هزینه ثبت نشده).</p>':'')+'</div>':'';
+  $('hlist').innerHTML=arr.length?arr.map(function(l){return logRow(l,active?amts[l.id]:null)}).join(''):'<div class="empty">'+(S.logs.length?'موردی با این فیلتر پیدا نشد.':'هنوز چیزی ثبت نشده. با دکمه‌ی «ثبت» پایین صفحه اولین سرویس را اضافه کنید.')+'</div>';
+}
+
+/* ---------- report ---------- */
+function repRange(){
+  if(rep.mode==='month')return [jToIso(rep.y,rep.m,1),jToIso(rep.y,rep.m,jMonthLen(rep.y,rep.m)),MONTHS[rep.m-1]+' '+faDigits(rep.y)];
+  if(rep.mode==='year')return [jToIso(rep.y,1,1),jToIso(rep.y,12,jMonthLen(rep.y,12)),'سال '+faDigits(rep.y)];
+  if(rep.mode==='range'){var a=rep.from<=rep.to?rep.from:rep.to,b=rep.from<=rep.to?rep.to:rep.from;return [a,b,'از '+fmtDate(a)+' تا '+fmtDate(b)]}
+  return ['0000-01-01','9999-12-31','از ابتدا تا امروز'];
+}
+function repMatch(l,fk0,fi0){
+  var fk=fk0||rep.fk,fi=(fk0?fi0:rep.fi)||[];
+  if(fk==='all')return {inc:true,exact:l.cost||0,amb:0};
+  var inc=groupsOf(l).some(function(g){return g.kind===fk&&(!fi.length||(g.tpls||[]).some(function(id){return fi.indexOf(id)>=0}))});
+  if(!inc)return {inc:false,exact:0,amb:0};
+  var al=allocLog(l),ex=0,amb=0;
+  al.exact.forEach(function(e){if(e.kind===fk&&(!fi.length||fi.indexOf(e.tpl)>=0))ex+=e.amt});
+  al.pools.forEach(function(p){
+    if(p.amt<=0)return;
+    if(!fi.length){if(p.kinds.indexOf(fk)>=0){if(p.kinds.length===1)ex+=p.amt;else amb+=p.amt}}
+    else{var n=p.tpls.filter(function(id){return fi.indexOf(id)>=0}).length;if(n){if(n===p.tpls.length)ex+=p.amt;else amb+=p.amt}}
+  });
+  return {inc:true,exact:ex,amb:amb};
+}
+function filterHtml(st,kAttr,tAttr,id){
+  var h='<select '+kAttr+'="1" aria-label="دسته"><option value="all"'+(st.fk==='all'?' selected':'')+'>همه‌ی دسته‌ها</option>'+kindKeys().map(function(k){return '<option value="'+k+'"'+(st.fk===k?' selected':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select>';
+  if(st.fk!=='all'){
+    var names=st.fi.map(tplLabel).filter(Boolean);
+    h+='<details class="dd" id="'+id+'"'+(st.dd?' open':'')+'><summary>'+(names.length?esc(names.join('، ')):'همه‌ی موارد این دسته')+'</summary><div class="dd-list">'+
+      itemsFor(st.fk).map(function(t){return '<label class="dd-row"><input type="checkbox" '+tAttr+'="'+t.id+'"'+(st.fi.indexOf(t.id)>=0?' checked':'')+'><span><b>'+esc(itemLabel(t))+'</b></span></label>'}).join('')+'</div><div class="dd-foot"><button class="btn small primary" type="button" data-act="ddDone" data-w="'+id.charAt(0)+'">تمام</button></div></details>';
+  }
+  return h;
+}
+function repFilterHtml(){return '<section class="card pad"><span class="flbl">فیلتر گزارش</span>'+filterHtml({fk:rep.fk,fi:rep.fi,dd:rep.dd},'data-rk','data-rtpl','rItems')+'</section>'}
+function vReport(){
+  var r=repRange(),a=r[0],b=r[1],label=r[2],i;
+  var inRange=S.logs.filter(function(l){return l.date>=a&&l.date<=b}).sort(function(x,y){return x.date<y.date?1:-1});
+  var fm=inRange.map(function(l){return {l:l,m:repMatch(l)}}).filter(function(x){return x.m.inc});
+  var logs=fm.map(function(x){return x.l}),amtOf={};fm.forEach(function(x){amtOf[x.l.id]=x.m.exact});
+  var total=0,amb=0;fm.forEach(function(x){total+=x.m.exact;amb+=x.m.amb});
+  var h='<section class="stack"><h2>گزارش هزینه‌ها</h2><div class="seg">'+
+    [['month','ماهانه'],['year','سالانه'],['range','بازه‌ی دلخواه'],['all','همه']].map(function(p){return '<button class="fbtn'+(rep.mode===p[0]?' on':'')+'" data-act="rmode" data-m="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div>';
+  var ys='';for(i=curJ.jy;i>=curJ.jy-10;i--)ys+='<option value="'+i+'"'+(i===rep.y?' selected':'')+'>'+faDigits(i)+'</option>';
+  if(!ys.match('value="'+rep.y+'"'))ys+='<option value="'+rep.y+'" selected>'+faDigits(rep.y)+'</option>';
+  var ms='';for(i=1;i<=12;i++)ms+='<option value="'+i+'"'+(i===rep.m?' selected':'')+'>'+MONTHS[i-1]+'</option>';
+  if(rep.mode==='month')h+='<div class="grid2"><select id="rep_m" aria-label="ماه">'+ms+'</select><select id="rep_y" aria-label="سال">'+ys+'</select></div>';
+  if(rep.mode==='year')h+='<select id="rep_y" aria-label="سال">'+ys+'</select>';
+  if(rep.mode==='range')h+='<div class="grid2"><label>از'+dateField('rf',rep.from)+'</label><label>تا'+dateField('rt',rep.to)+'</label></div>';
+  h+='</section>';
+  h+=repFilterHtml();
+
+  var pts=points().filter(function(p){return p.date>=a&&p.date<=b}),span=pts.length>=2?pts[pts.length-1].km-pts[0].km:0;
+  h+='<section class="card pad"><p class="eyebrow">'+label+'</p><p class="big">'+fa(total*mult())+' <span>'+unitName()+'</span></p>'+(amb>0?'<p class="muted">به‌علاوه‌ی '+money(amb)+' هزینه‌ی تقسیم‌نشده در مراجعه‌هایی که این '+(rep.fi.length?'مورد':'دسته')+' هم در آن‌ها بوده (ریز هزینه ثبت نشده).</p>':'')+'<dl class="kv"><div><dt>تعداد ثبت</dt><dd>'+fa(logs.length)+'</dd></div>';
+  if(span>0)h+='<div><dt>مسافت ثبت‌شده</dt><dd>'+fa(span)+' کیلومتر</dd></div>';
+  if(span>=100&&total>0)h+='<div><dt>هزینه‌ی هر کیلومتر</dt><dd>'+money(total/span)+'</dd></div>';
+  h+='</dl></section>';
+  if(plan()==='gold')h+=goldExtras(a,b,total,span);
+  if(rep.fk==='fuel')h+=fuelStatsHtml(logs);
+  if(!logs.length)return h+'<div class="empty">'+(inRange.length?'با این فیلتر موردی در این بازه نیست.':'در این بازه چیزی ثبت نشده است.')+'</div>';
+
+  var cat={};
+  if(rep.fk==='all')logs.forEach(function(l){var al=allocLog(l);al.exact.forEach(function(e){cat[e.kind]=(cat[e.kind]||0)+e.amt});al.pools.forEach(function(p){var k=p.kinds.length===1?p.kinds[0]:'mixed';cat[k]=(cat[k]||0)+p.amt})});
+  else if(!rep.fi.length)logs.forEach(function(l){var al=allocLog(l);al.exact.forEach(function(e){if(e.kind===rep.fk)cat[e.tpl]=(cat[e.tpl]||0)+e.amt});al.pools.forEach(function(p){if(p.kinds.length===1&&p.kinds[0]===rep.fk){var k=p.tpls.length===1?p.tpls[0]:'_none';cat[k]=(cat[k]||0)+p.amt}})});
+  var ck=Object.keys(cat).filter(function(k){return cat[k]>0}).sort(function(x,y){return cat[y]-cat[x]});
+  var catName=function(k){return rep.fk==='all'?(k==='mixed'?'ترکیبی (بدون ریز هزینه)':KINDS[k]):(k==='_none'?'بدون ریز هزینه‌ی مورد':(tplLabel(k)||'مورد حذف‌شده'))};
+  if(ck.length&&total>0&&!(rep.fk!=='all'&&rep.fi.length)){
+    h+='<section class="card pad"><h2>'+(rep.fk==='all'?'به تفکیک نوع':'به تفکیک مورد')+'</h2><div class="hb">'+ck.map(function(k){
+      var p=cat[k]/total*100;
+      return '<div class="hb-row"><div><span>'+catName(k)+'</span><span>'+money(cat[k])+' · '+faDigits(Math.round(p))+'٪</span></div><div class="hb-bar"><i style="width:'+p.toFixed(1)+'%"></i></div></div>'}).join('')+'</div></section>';
+  }
+  if(rep.mode!=='month'){
+    var mm={},first=null,lastK=null;
+    logs.forEach(function(l){var j=isoToJ(l.date),k=j.jy*100+j.jm;mm[k]=(mm[k]||0)+(amtOf[l.id]||0);if(first===null||k<first)first=k;if(lastK===null||k>lastK)lastK=k});
+    var cols=[],y=Math.floor(first/100),m=first%100;
+    if(rep.mode==='year'){y=rep.y;m=1;lastK=rep.y*100+12}
+    while(y*100+m<=lastK){cols.push({y:y,m:m,s:mm[y*100+m]||0});m++;if(m>12){m=1;y++}}
+    cols=cols.slice(-24);
+    var mx=Math.max.apply(null,cols.map(function(c){return c.s}))||1;
+    if(cols.length>1)h+='<section class="card pad"><h2>روند ماهانه</h2><div class="cols-wrap"><div class="cols">'+cols.map(function(c){
+      var hp=c.s/mx*100;
+      return '<div class="col" title="'+MONTHS[c.m-1]+' '+faDigits(c.y)+': '+money(c.s)+'"><div class="cap"><small>'+(c.s?nf2.format(Math.round(c.s*mult()/10000)/100):'')+'</small></div><div class="stick'+(c.s?'':' z')+'" style="height:'+Math.max(2,Math.round(hp*1.1))+'px"></div><small>'+MONTHS[c.m-1]+'</small></div>'}).join('')+'</div></div><small>ارقام به میلیون '+unitName()+'</small></section>';
+  }
+  h+='<section class="stack"><h2>ثبت‌های این بازه</h2><div class="list">'+logs.slice(0,40).map(logRow).join('')+'</div>'+(logs.length>40?'<small>۴۰ مورد آخر نمایش داده شد. بقیه در بخش سوابق است.</small>':'')+'</section>';
+  return h;
+}
+
+/* ---------- vehicles and templates ---------- */
+var BRANDS={
+ car:{'ایران‌خودرو':['پژو ۲۰۶','پژو ۲۰۷','پژو ۴۰۵','پژو پارس','سمند','دنا','رانا','تارا','سورن'],
+  'سایپا':['پراید ۱۳۱','پراید ۱۱۱','تیبا','ساینا','کوییک','شاهین','اطلس'],
+  'مدیران خودرو':['ام‌وی‌ام ۳۱۵','ام‌وی‌ام ۵۵۰','ایکس ۳۳','ایکس ۲۲'],
+  'بهمن':['دیگنیتی','فیدلیتی'],'کرمان موتور':['جک J4','جک S5','کی‌ام‌سی'],
+  'رنو':['تندر ۹۰ (L90)','ساندرو','کپچر'],'کیا':['سراتو','ریو','اسپورتیج'],'هیوندای':['النترا','i20','تیبورون','توسان'],
+  'تویوتا':['کرولا','کمری','یاریس'],'مزدا':['مزدا ۳','مزدا ۲'],'سایر':[]},
+ moto:{'هوندا':['CG 125','CBR 150','PCX'],'یاماها':['YBR 125','FZ','NMAX'],'سوزوکی':['GN 125','Gixxer','Address'],
+  'باجاج':['پالسار ۱۵۰','پالسار ۲۰۰','بوکسر'],'تی‌وی‌اس':['آپاچی ۱۵۰','آپاچی ۲۰۰'],'کویر موتور':[],'بنلی':[],'پیاجیو':[],'سایر':[]}};
+var CCS={car:[[1000,'تا ۱۰۰۰'],[1300,'۱۰۰۱ تا ۱۳۰۰'],[1600,'۱۳۰۱ تا ۱۶۰۰'],[2000,'۱۶۰۱ تا ۲۰۰۰'],[2500,'بالای ۲۰۰۰']],
+  moto:[[125,'تا ۱۲۵'],[250,'۱۲۶ تا ۲۵۰'],[400,'۲۵۱ تا ۴۰۰'],[600,'بالای ۴۰۰']]};
+var FTYPES=[['petrol','⛽ بنزینی'],['cng','🔥 دوگانه‌سوز (بنزین و CNG)'],['diesel','🛢️ دیزل'],['hybrid','🔋 هیبرید'],['ev','⚡ برقی']];
+EM.chain='⛓️';EM.chainkit='⛓️';EM.valve='🔧';EM.brk='🛑';EM.cng='🔥';EM.cngcyl='🧯';EM.hvb='🔌';
+function vehTpls(type,ft,cc){
+  cc=+cc||0;var L,set=function(id,f){L.forEach(function(t){if(t.id===id)f(t)})},del=function(ids){L=L.filter(function(t){return ids.indexOf(t.id)<0})};
+  if(type==='moto'){
+    L=[T('chain','روغن‌کاری و تنظیم زنجیر','service',500,0,true),T('oil','روغن موتور','service',cc&&cc<=125?2500:(cc<=250?3000:4000),3),T('airf','فیلتر هوا','service',6000,12),T('plug','شمع','service',8000,12),
+      T('brk','بازدید لنت و روغن ترمز','service',10000,12),T('chainkit','زنجیر و دنده‌ها','consumable',15000,0),T('valve','تنظیم سوپاپ','service',10000,0),T('tires','لاستیک','consumable',15000,36),
+      T('battery','باتری','consumable',0,24,false),T('wash','شست‌وشو','service',0,0,true,15),T('inspect','معاینه فنی','document',0,12),T('ins3','بیمه شخص ثالث','document',0,12),T('insb','بیمه بدنه','document',0,12,false)].concat(extraTpls());
+    return L;
+  }
+  L=defaultTpls();
+  var ok=ft==='diesel'?8000:(cc>2000?10000:(cc>1300?7500:5000));
+  if(ft!=='ev'){set('oil',function(t){t.km=ok});set('oilf',function(t){t.km=ok})}
+  if(ft==='cng'){L.push(T('cng','بازدید و تنظیم سیستم گاز (CNG)','service',20000,12,true),T('cngcyl','تست مخزن CNG','document',0,60,true))}
+  if(ft==='diesel'){set('oil',function(t){t.name='روغن موتور (دیزل)'});set('fuelf',function(t){t.name='فیلتر گازوئیل';t.on=true;t.km=20000;t.months=12});del(['plug'])}
+  if(ft==='ev'){del(['oil','oilf','airf','fuelf','plug','timing','gear']);set('battery',function(t){t.name='باتری ۱۲ ولت'});L.push(T('hvb','بازدید باتری و سیستم برقی','service',0,12,true))}
+  return L;
+}
+var LAST_OPTS=[['','فعلاً رد شود'],['15','همین ماه'],['60','۱ تا ۳ ماه پیش'],['135','۳ تا ۶ ماه پیش'],['270','۶ تا ۱۲ ماه پیش'],['450','بیش از یک سال پیش']];
+
+/* ---------- first-run tour ---------- */
+var tour=null;
+function tourNew(){return {i:0,type:'car',brand:'',brandTxt:'',model:'',modelTxt:'',year:'',cc:'',ft:'petrol',km:'',rate:'',plan:'',card:'',bal:{},last:{}}}
+function tourSteps(){var s=['welcome','type','car','engine','km','plan'];if(tour.plan==='gold')s.push('card');s.push('svc');return s}
+function tourCarName(t){var b=t.brand==='سایر'?(t.brandTxt||'').trim():(t.brand||''),m=t.model==='سایر'||(t.brand&&!(BRANDS[t.type][t.brand]||[]).length)?(t.modelTxt||'').trim():(t.model||'');return (b+' '+m).trim()}
+function tourTpls(){return vehTpls(tour.type,tour.ft,tour.cc)}
+function tourSvcList(){return tourTpls().filter(function(t){return t.on&&!/^(r_|oth_|fu_)/.test(t.id)&&(t.km>0||t.months>0||t.days>0)})}
+function chips(k,list,cur){return '<div class="seg">'+list.map(function(p){return '<button type="button" class="fbtn'+(String(cur)===String(p[0])?' on':'')+'" data-act="tSet" data-k="'+k+'" data-v="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div>'}
+function vTour(){
+  if(!tour)tour=tourNew();
+  var st=tourSteps(),s=st[tour.i]||st[0],n=st.length,t=tour,h='',last=tour.i===n-1;
+  h+='<section class="card pad tour"><div class="tprog" aria-hidden="true">'+st.map(function(x,i){return '<i'+(i<=tour.i?' class="on"':'')+'></i>'}).join('')+'</div>';
+  if(s==='welcome')h+='<h2>🚗 به ماشین‌نامه خوش آمدید</h2><p class="muted">چند سؤال کوتاه می‌پرسیم تا برنامه با ماشین و نیاز شما هماهنگ شود: سرویس‌های درست پیشنهاد دهد و فقط چیزهایی را نشان دهد که لازم دارید. همه‌ی پاسخ‌ها بعداً قابل تغییر است.</p><div class="banner tip"><span>قبلاً اطلاعات وارد کرده‌اید؟</span><button class="btn small" type="button" data-go="setup">بازیابی از پشتیبان</button></div>';
+  if(s==='type')h+='<h2>وسیله‌ی شما کدام است؟</h2><div class="plans two"><button type="button" class="plan'+(t.type==='car'?' on':'')+'" data-act="tSet" data-k="type" data-v="car"><span class="pe">🚗</span><b>خودرو</b></button><button type="button" class="plan'+(t.type==='moto'?' on':'')+'" data-act="tSet" data-k="type" data-v="moto"><span class="pe">🏍️</span><b>موتورسیکلت</b></button></div>';
+  if(s==='car'){
+    var bl=Object.keys(BRANDS[t.type]),ml=t.brand&&t.brand!=='سایر'?(BRANDS[t.type][t.brand]||[]):[];
+    h+='<h2>برند، مدل و سال ساخت</h2><div class="stack"><label>برند<select data-t="brand" data-tr="1"><option value="">انتخاب کنید</option>'+bl.map(function(b){return '<option'+(t.brand===b?' selected':'')+'>'+b+'</option>'}).join('')+'</select></label>';
+    if(t.brand==='سایر')h+='<label>نام برند<input type="text" data-t="brandTxt" autocomplete="off" value="'+esc(t.brandTxt)+'"></label>';
+    if(t.brand&&ml.length)h+='<label>مدل<select data-t="model" data-tr="1"><option value="">انتخاب کنید</option>'+ml.map(function(m){return '<option'+(t.model===m?' selected':'')+'>'+m+'</option>'}).join('')+'<option'+(t.model==='سایر'?' selected':'')+'>سایر</option></select></label>';
+    if(t.brand&&(!ml.length||t.model==='سایر'))h+='<label>نام مدل (تایپی)<input type="text" data-t="modelTxt" autocomplete="off" value="'+esc(t.modelTxt)+'"></label>';
+    h+='<label>سال ساخت<input type="text" inputmode="numeric" data-t="year" autocomplete="off" placeholder="'+faDigits(1398)+'" value="'+esc(t.year)+'"></label></div>';
+  }
+  if(s==='engine'){
+    h+='<h2>'+(t.type==='car'?'موتور و سوخت':'ظرفیت موتور')+'</h2><p class="muted">برای انتخاب سرویس‌ها و فاصله‌ی روغن لازم است.</p><div class="stack"><b>ظرفیت موتور (سی‌سی)</b>'+chips('cc',CCS[t.type],t.cc);
+    if(t.type==='car')h+='<b>نوع سوخت</b>'+chips('ft',FTYPES,t.ft);
+    h+='</div>';
+  }
+  if(s==='km')h+='<h2>کیلومتر</h2><div class="stack"><label>عدد فعلی کیلومترشمار<input id="tk_km" type="text" inputmode="numeric" autocomplete="off" data-t="km" value="'+esc(t.km)+'" placeholder="مثلاً ۸۵٬۴۰۰"></label><label>میانگین رانندگی روزانه، حدودی (اختیاری)<input id="tk_rate" type="text" inputmode="numeric" autocomplete="off" data-t="rate" value="'+esc(t.rate)+'" placeholder="مثلاً ۴۰"><small>با ثبت‌های بعدی، برنامه میانگین واقعی شما را یاد می‌گیرد.</small></label></div>';
+  if(s==='plan')h+='<h2>کدام پلن به کار شما می‌آید؟</h2><p class="muted">اگر با وسیله درآمد دارید (اسنپ، تاکسی، پیک، آژانس) طلایی؛ اگر سرویس‌ها و کمی هزینه می‌خواهید نقره‌ای؛ اگر فقط یادآوری سرویس‌ها کافی است برنزی.</p><div class="plans">'+['bronze','silver','gold'].map(function(k){var P=PLANS[k];return '<button type="button" class="plan'+(t.plan===k?' on':'')+'" data-act="tSet" data-k="plan" data-v="'+k+'"><span class="pe">'+P.em+'</span><b>'+P.name+'</b><small>'+P.desc+'</small></button>'}).join('')+'</div>';
+  if(s==='card'){
+    h+='<h2>⛽ کارت سوخت</h2><p class="muted">اگر کارت سوخت دارید، موجودی را یک بار بنویسید؛ بعد از آن برنامه خودش کم و زیاد می‌کند.</p>'+chips('card',[['yes','کارت سوخت دارم'],['no','ندارم']],t.card);
+    if(t.card==='yes')h+='<div class="stack" style="margin-top:10px">'+S.fuel.tiers.filter(function(x){return !x.free}).map(function(x){return '<label>'+esc(emoOf(x.id,'fuel')+' '+x.name)+' (لیتر باقی‌مانده)<input type="text" inputmode="decimal" autocomplete="off" data-tb="'+x.id+'" value="'+esc(t.bal[x.id]||'')+'" placeholder="۰"></label>'}).join('')+'</div>';
+  }
+  if(s==='svc'){
+    h+='<h2>آخرین سرویس‌ها</h2><p class="muted">هر مورد را کی انجام دادید؟ حدودی کافی است. اگر یادتان نیست «فعلاً رد شود» را بگذارید. بازه‌ها مقدار رایج است، نه عین دفترچه، و بعداً قابل ویرایش.</p><div class="stack">'+
+      tourSvcList().map(function(x){return '<label class="svl"><span>'+esc(emoOf(x.id,x.kind)+' '+x.name)+'<small>'+intervalText(x)+'</small></span><select data-tl="'+x.id+'">'+LAST_OPTS.map(function(o){return '<option value="'+o[0]+'"'+((t.last[x.id]||'')===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'}).join('')+'</div>';
+  }
+  h+='<div class="tnav">'+(tour.i>0?'<button type="button" class="btn" data-act="tBack">قبلی</button>':'<span></span>')+'<button type="button" class="btn primary" data-act="'+(last?'tFinish':'tNext')+'">'+(last?'شروع':(tour.i===0?'بزن بریم':'بعدی'))+'</button></div></section>';
+  return h;
+}
+function tourCheck(s){
+  var t=tour;
+  if(s==='car'&&!tourCarName(t)){toast('برند یا مدل را وارد کنید');return false}
+  if(s==='engine'&&!t.cc){toast('ظرفیت موتور را انتخاب کنید');return false}
+  if(s==='km'){var k=parseNum(t.km);if(!isFinite(k)||k<0){toast('عدد کیلومترشمار را وارد کنید');return false}}
+  if(s==='plan'&&!t.plan){toast('یک پلن انتخاب کنید');return false}
+  if(s==='card'&&!t.card){toast('کارت سوخت دارید یا ندارید؟');return false}
+  return true;
+}
+function tourFinish(){
+  var t=tour,km=Math.round(parseNum(t.km)),r=parseNum(t.rate),today=todayIso();
+  S.plan=t.plan;S.car.type=t.type;S.car.brand=t.brand;S.car.model=t.model;S.car.cc=+t.cc||0;S.car.ftype=t.type==='car'?t.ft:'petrol';
+  S.car.name=tourCarName(t)||'ماشین من';S.car.year=(t.year||'').trim();
+  if(isFinite(r)&&r>0)S.fallbackRate=Math.round(r);
+  S.templates=vehTpls(t.type,S.car.ftype,t.cc);
+  if(t.plan==='gold'&&t.card==='yes'){var bal={};S.fuel.tiers.forEach(function(x){if(!x.free){var v=parseNum(t.bal[x.id]||'');bal[x.id]=isFinite(v)&&v>=0?v:0}});S.fuel.bal=bal;S.fuel.init=true;S.fuel.none=false;S.fuel.initDate=today}
+  else S.fuel.none=true;
+  addReading(km);
+  var rate=(isFinite(r)&&r>0)?r:S.fallbackRate,td=isoToJdn(today);
+  S.logs=[];
+  tourSvcList().forEach(function(x){
+    var d=+t.last[x.id];if(!d)return;
+    var iso=jdnToIso(td-d),k=Math.max(0,Math.round(km-d*rate));
+    S.logs.push({id:uid(),date:iso,km:k,kind:x.kind,groups:[{kind:x.kind,tpls:[x.id],gcost:null,icost:{}}],title:x.name,desc:'',tpls:[x.id],cost:0,place:'',note:'تقریبی (از راهنمای شروع)'});
+  });
+  commit();tour=null;view='home';location.hash='home';render();toast('آماده است. پلن '+PLANS[S.plan].name+' فعال شد');
+}
+
+/* ---------- income (gold) ---------- */
+var inc={mode:'today',amt:'',note:'',from:'',to:''};
+function weekStart(iso){var p=iso.split('-'),dw=new Date(+p[0],+p[1]-1,+p[2]).getDay();return jdnToIso(isoToJdn(iso)-((dw+1)%7))}
+function incRange(){
+  var td=todayIso(),j=isoToJ(td);
+  if(inc.mode==='today')return [td,td];
+  if(inc.mode==='yesterday'){var y=jdnToIso(isoToJdn(td)-1);return [y,y]}
+  if(inc.mode==='week')return [weekStart(td),td];
+  if(inc.mode==='month')return [jToIso(j.jy,j.jm,1),td];
+  var a=inc.from||td,b=inc.to||td;return a<=b?[a,b]:[b,a];
+}
+function incIn(e,a,b){
+  var lo=e.from>a?e.from:a,hi=e.to<b?e.to:b;if(lo>hi)return 0;
+  return e.amount*(daysBetween(lo,hi)+1)/(daysBetween(e.from,e.to)+1);
+}
+function incSum(a,b){return S.income.reduce(function(s,e){return s+incIn(e,a,b)},0)}
+function vIncome(){
+  if(!inc.from)inc.from=inc.to=todayIso();
+  var r=incRange(),td=todayIso(),j=isoToJ(td),ms=jToIso(j.jy,j.jm,1);
+  var h='<h2>💰 درآمد</h2><section class="card pad"><p class="muted">درآمد را برای هر بازه‌ای که خواستید ثبت کنید: امروز، دیروز، این هفته، این ماه یا یک بازه‌ی دلخواه. در گزارش، مبلغ به نسبت روزها بین ماه‌ها تقسیم می‌شود. ثبت درآمد اختیاری است.</p>'+
+    '<div class="seg">'+[['today','امروز'],['yesterday','دیروز'],['week','این هفته'],['month','این ماه'],['range','بازه‌ی دلخواه']].map(function(p){return '<button type="button" class="fbtn'+(inc.mode===p[0]?' on':'')+'" data-act="incMode" data-m="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div>'+
+    '<form data-form="income" class="stack" style="margin-top:10px">';
+  if(inc.mode==='range')h+='<div class="grid2"><label>از'+dateField('if',inc.from)+'</label><label>تا'+dateField('it',inc.to)+'</label></div>';
+  else h+='<p class="muted" style="margin:0">بازه: '+(r[0]===r[1]?fmtDate(r[0]):'از '+fmtDate(r[0])+' تا '+fmtDate(r[1]))+'</p>';
+  h+='<label>مبلغ درآمد ('+unitName()+')<input id="inc_amt" type="text" inputmode="numeric" autocomplete="off" value="'+esc(inc.amt)+'" placeholder="مثلاً ۱٬۲۰۰٬۰۰۰"></label>'+
+    '<label>توضیح (اختیاری)<input id="inc_note" type="text" autocomplete="off" value="'+esc(inc.note)+'" placeholder="مثلاً اسنپ"></label>'+
+    '<button class="btn primary" type="submit">ثبت درآمد</button></form></section>';
+  h+='<section class="card pad"><dl class="kv"><div><dt>درآمد '+MONTHS[j.jm-1]+'</dt><dd>'+money(incSum(ms,td))+'</dd></div><div><dt>هزینه '+MONTHS[j.jm-1]+'</dt><dd>'+money(sumCost(S.logs.filter(function(l){return l.date>=ms})))+'</dd></div></dl></section>';
+  var L=S.income.slice().sort(function(x,y){return x.to<y.to?1:-1});
+  h+='<section class="stack"><h2>ثبت‌های درآمد</h2>'+(L.length?'<div class="list">'+L.slice(0,40).map(function(e){return '<div class="trow"><div class="trow-main"><b>'+money(e.amount)+'</b><small>'+(e.from===e.to?fmtDate(e.from):fmtDate(e.from)+' تا '+fmtDate(e.to))+(e.note?' · '+esc(e.note):'')+'</small></div><button class="btn small danger" data-act="incDel" data-id="'+e.id+'">حذف</button></div>'}).join('')+'</div>':'<div class="empty">هنوز درآمدی ثبت نشده است.</div>')+'</section>';
+  return h;
+}
+function goldExtras(a,b,total,span){
+  var td=todayIso(),hi=b<td?b:td,lo=a;
+  if(a<'1300-01-01'){var f=[];S.logs.forEach(function(l){f.push(l.date)});S.income.forEach(function(e){f.push(e.from)});f.sort();lo=f.length?f[0]:td}
+  var income=incSum(lo,hi),days=daysBetween(lo,hi)+1,h='<section class="card pad"><h2>💰 درآمد و سود</h2>';
+  if(rep.fk!=='all')return '';
+  if(income<=0)return h+'<p class="muted">برای این بازه درآمدی ثبت نشده است.</p><button class="btn small" data-go="income">ثبت درآمد</button></section>';
+  h+='<dl class="kv"><div><dt>درآمد</dt><dd>'+money(income)+'</dd></div><div><dt>سود خالص</dt><dd>'+money(income-total)+'</dd></div><div><dt>سهم هزینه از درآمد</dt><dd>'+faDigits(Math.round(total/income*100))+'٪</dd></div>';
+  if(days>=45)h+='<div><dt>میانگین هزینه‌ی ماهانه</dt><dd>'+money(total/(days/30.4))+'</dd></div>';
+  if(span>=100&&total>0)h+='<div><dt>درآمد هر کیلومتر</dt><dd>'+money(income/span)+'</dd></div>';
+  return h+'</dl></section>';
+}
+
+/* ---------- setup ---------- */
+function planCardHtml(){
+  return '<section class="card pad"><h2>پلن استفاده</h2><p class="muted">هر پلن ظاهر و امکانات را با نیاز شما هماهنگ می‌کند. اطلاعاتتان با عوض‌کردن پلن پاک نمی‌شود.</p><div class="plans">'+
+    ['bronze','silver','gold'].map(function(k){var P=PLANS[k];return '<button type="button" class="plan'+(S.plan===k?' on':'')+'" data-act="setPlan" data-p="'+k+'"><span class="pe">'+P.em+'</span><b>'+P.name+'</b><small>'+P.tag+'</small></button>'}).join('')+'</div></section>';
+}
+var setCat='',setDirty=false;
+function setHead(title,withSave){
+  return '<div class="sethead"><'+(withSave?'button class="btn primary small" type="button" data-act="setSave">ذخیره':'button class="btn primary small" type="button" data-act="setBack" data-ok="1">تمام')+'</button><h2>'+title+'</h2>'+(withSave?'<button class="btn small" type="button" data-act="setBack">لغو</button>':'<span></span>')+'</div>';
+}
+function setCats(){
+  var L=[['car','🚗','مشخصات ماشین','نام، سال و پلاک'],['look','🎨','ظاهر برنامه','طرح، رنگ و حالت روشن یا تاریک'],['plan','🏅','پلن استفاده','برنزی، نقره‌ای یا طلایی'],['km','📏','تخمین کیلومتر','یادآوری و میانگین روزانه']];
+  if(costShown())L.push(['money','💵','واحد پول','تومان یا ریال']);
+  if(plan()!=='bronze')L.push(['fuel','⛽','کارت سوخت','موجودی و شارژ ماهانه']);
+  L.push(['svc','🔧','سرویس‌ها و بازه‌ی تعویض','روشن، خاموش و ویرایش'],['backup','💾','پشتیبان‌گیری','ذخیره، کپی و بازیابی']);
+  var h='<h2>تنظیمات</h2><div class="cats">'+L.map(function(c){return '<button type="button" class="cat" data-act="setOpen" data-c="'+c[0]+'"><span class="ce">'+c[1]+'</span><span class="ct"><b>'+c[2]+'</b><small>'+c[3]+'</small></span><span class="cc">‹</span></button>'}).join('')+
+    (cfg.feedbackEmail?'<button type="button" class="cat" data-act="contactOpen"><span class="ce">💬</span><span class="ct"><b>ارتباط با ما</b><small>نظر، پیشنهاد و حمایت</small></span><span class="cc">‹</span></button>':'')+'</div>'+accountCard();
+  return h;
+}
+function vSetup(){
+  var c=S.car,h='';
+  if(!S.plan)setCat='backup';
+  if(!setCat)return setCats();
+  if(setCat==='car')h=setHead('🚗 مشخصات ماشین',true)+'<section class="card pad"><form data-form="car" class="stack"><label>نام یا مدل<input id="c_name" type="text" autocomplete="off" value="'+esc(c.name)+'"></label>'+
+    '<div class="grid2"><label>سال ساخت<input id="c_year" type="text" inputmode="numeric" autocomplete="off" value="'+esc(c.year)+'"></label><label>پلاک<input id="c_plate" type="text" autocomplete="off" value="'+esc(c.plate)+'"></label></div></form></section>';
+  if(setCat==='plan')h=setHead('🏅 پلن استفاده',false)+planCardHtml();
+  if(setCat==='look')h=setHead('🎨 ظاهر برنامه',false)+'<section class="card pad"><h3>حالت نمایش</h3><div class="seg">'+[['system','🌓 خودکار (سیستم)'],['light','☀️ روشن'],['dark','🌙 تاریک']].map(function(p){return '<button type="button" class="fbtn'+(S.look.mode===p[0]?' on':'')+'" data-act="lookMode" data-m="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div><p class="muted">در حالت خودکار، برنامه از تنظیم گوشی پیروی می‌کند: روز روشن و شب تاریک.</p></section>'+
+    '<section class="card pad"><h3>طرح</h3><div class="skins">'+SKINS.map(function(k){return '<button type="button" class="skin'+(S.look.skin===k.id?' on':'')+'" data-act="lookSkin" data-s="'+k.id+'"><span class="sw"><i style="background:'+k.c[0]+'"></i><i style="background:'+k.c[1]+'"></i><i style="background:'+k.c[2]+'"></i><i style="background:'+k.c[3]+'"></i></span><b>'+k.n+'</b><small>'+k.d+'</small></button>'}).join('')+'</div></section>';
+  if(setCat==='money')h=setHead('💵 واحد پول',false)+'<section class="card pad"><p class="muted">همه‌ی مبلغ‌ها و گزارش‌ها با این واحد نشان داده می‌شوند. عددهای قبلی خودکار تبدیل می‌شوند (هر تومان ۱۰ ریال).</p><div class="seg">'+
+    [['toman','تومان'],['rial','ریال']].map(function(p){return '<button class="fbtn'+(S.unit===p[0]?' on':'')+'" data-act="unit" data-u="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div></section>';
+  if(setCat==='km'){
+    var rd=S.readings.slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
+    h=setHead('📏 تخمین کیلومتر',true)+'<section class="card pad"><p class="muted">برنامه از فاصله‌ی ثبت‌های کیلومتر، میانگین رانندگی روزانه را حساب می‌کند. ثبت‌های تازه‌تر وزن بیشتری دارند.</p><form data-form="est" class="stack">'+
+    '<div class="grid2"><label>یادآوری ثبت کیلومتر<select id="e_cal">'+[7,14,21,30].map(function(d){return '<option value="'+d+'"'+(S.calDays===d?' selected':'')+'>هر '+faDigits(d)+' روز</option>'}).join('')+'</select></label>'+
+    '<label>میانگین اولیه (کیلومتر در روز)<input id="e_rate" type="text" inputmode="numeric" autocomplete="off" value="'+faDigits(S.fallbackRate)+'"></label></div></form>'+
+    (rd.length?'<div><h3>آخرین ثبت‌های کیلومتر</h3>'+rd.map(function(r){return '<div class="trow"><div class="trow-main"><b>'+fa(r.km)+' کیلومتر</b><small>'+fmtDate(r.date)+'</small></div><button class="btn small danger" data-act="delRead" data-d="'+r.date+'">حذف</button></div>'}).join('')+'</div>':'')+'</section>';
+  }
+  if(setCat==='fuel')h=setHead('⛽ کارت سوخت',false)+fuelSettingsHtml();
+  if(setCat==='svc'){
+    h=setHead('🔧 سرویس‌ها',false)+'<section class="card pad"><p class="muted">بازه‌ها مقدار رایج است و عین دفترچه‌ی سازنده نیست. با دفترچه‌ی ماشین خودتان مطابقت بدهید و هر مورد را ویرایش، خاموش یا حذف کنید.</p><div>';
+    S.templates.forEach(function(t){
+      if(/^(r_|oth_)/.test(t.id))return;
+      if(tplEdit===t.id)h+=tplForm(t);
+      else h+='<div class="trow"><div class="trow-main'+(t.on?'':' off')+'"><b>'+esc(itemLabel(t))+'</b><small>'+KINDS[t.kind]+' · '+intervalText(t)+'</small></div><div class="tools">'+
+        '<button class="btn small" data-act="tplToggle" data-id="'+t.id+'">'+(t.on?'خاموش':'روشن')+'</button><button class="btn small" data-act="tplEdit" data-id="'+t.id+'">ویرایش</button></div></div>';
+    });
+    h+='</div>'+(tplEdit==='new'?tplForm({id:'',name:'',kind:'service',km:0,months:0}):'<div class="actions"><button class="btn" data-act="tplNew">افزودن مورد جدید</button><button class="btn" data-act="applyPride">اعمال الگوی پراید</button></div>')+'</section>';
+  }
+  if(setCat==='backup'){
+    h=(S.plan?setHead('💾 پشتیبان‌گیری',false):'<button class="btn" data-go="home">بازگشت به راهنمای شروع</button>')+'<section class="card pad"><p class="muted" id="syncNote">'+syncNote()+'</p>'+
+    '<div class="actions"><button class="btn" data-act="dlBackup">ذخیره‌ی فایل پشتیبان</button><button class="btn" data-act="copyBackup">کپی متن پشتیبان</button></div>'+
+    '<label>متن پشتیبان (برای کپی یا چسباندن)<textarea id="bkText" spellcheck="false" placeholder="برای بازیابی، متن پشتیبان را اینجا بچسبانید"></textarea></label>'+
+    '<label>یا فایل پشتیبان را انتخاب کنید<input id="bkFile" type="file" accept=".json,application/json"></label>'+
+    '<div class="actions"><button class="btn" data-act="restoreText">بازیابی از متن</button><button class="btn danger" data-act="resetAll">پاک‌کردن همه‌ی داده‌ها</button></div></section>';
+  }
+  return '<div class="setpage">'+h+'</div>';
+}
+function tplForm(t){
+  return '<form class="tpl-edit" data-form="tpl"><label>نام<input id="tf_name" type="text" autocomplete="off" value="'+esc(t.name)+'"></label>'+
+    '<div class="grid2"><label>نوع<select id="tf_kind">'+kindKeys().map(function(k){return '<option value="'+k+'"'+(t.kind===k?' selected':'')+'>'+KINDS[k]+'</option>'}).join('')+'</select></label>'+
+    '<span></span><label>هر چند کیلومتر (۰ یعنی ندارد)<input id="tf_km" type="text" inputmode="numeric" value="'+faDigits(t.km||0)+'"></label>'+
+    '<label>هر چند ماه (۰ یعنی ندارد)<input id="tf_months" type="text" inputmode="numeric" value="'+faDigits(t.months||0)+'"></label>'+
+    '<label>هر چند روز (۰ یعنی ندارد)<input id="tf_days" type="text" inputmode="numeric" value="'+faDigits(t.days||0)+'"></label></div>'+
+    '<div class="actions"><button class="btn primary" type="submit">ذخیره</button><button class="btn" type="button" data-act="tplCancel">انصراف</button>'+(t.id?'<button class="btn danger" type="button" data-act="tplDel" data-id="'+t.id+'">حذف</button>':'')+'</div></form>';
+}
+
+/* ---------- render / routing ---------- */
+function navActive(){
+  [].forEach.call(document.querySelectorAll('[data-nav]'),function(b){b.classList.toggle('on',b.dataset.nav===view)});
+}
+function render(){
+  var gate=!booted||!me||auth.recovery,navEl=document.querySelector('.nav');
+  document.documentElement.setAttribute('data-plan',plan());
+  if(navEl)navEl.hidden=gate||!S.plan;
+  if(gate){
+    $('view').innerHTML=!booted?'<div class="empty">در حال بارگذاری…</div>':vAuth();
+    renderHeader();return;
+  }
+  document.documentElement.setAttribute('data-plan',plan());
+  if(!S.plan&&view!=='setup')view='home';
+  if(view==='report'&&plan()==='bronze')view='home';
+  if(view==='income'&&plan()!=='gold')view='home';
+  var fn={home:vHome,add:vAdd,history:vHistory,report:vReport,setup:vSetup,income:vIncome}[view]||vHome;
+  $('view').innerHTML=fn();
+  renderHeader();navActive();syncModal();
+  if(view==='history')fillHistory();
+  if(view!=='setup'){setCat='';setDirty=false}
+  if(lastView!==view){try{window.scrollTo(0,0)}catch(e){}lastView=view;var vw=$('view');vw.classList.remove('enter');void vw.offsetWidth;vw.classList.add('enter');clearTimeout(window.__en);window.__en=setTimeout(function(){vw.classList.remove('enter')},900)}
+}
+function route(){var h=location.hash.slice(1);view=VIEWS.indexOf(h)>=0?h:'home';render()}
+function go(v){if(location.hash.slice(1)===v){view=v;render()}else{location.hash=v}}
+window.addEventListener('hashchange',route);
+
+/* ---------- actions ---------- */
+function addReading(km){
+  var d=todayIso();
+  S.readings=S.readings.filter(function(r){return r.date!==d});
+  S.readings.push({date:d,km:km});
+  S.readings.sort(function(a,b){return a.date<b.date?-1:1});
+  if(S.readings.length>400)S.readings=S.readings.slice(-400);
+}
+function saveOdo(raw){
+  var km=parseNum(raw);
+  if(!isFinite(km)||km<0){toast('یک عدد معتبر وارد کنید');return}
+  km=Math.round(km);
+  var est=estimate(),lp=est.last;
+  if(lp&&lp.date<todayIso()&&km<lp.km){toast('این عدد کمتر از آخرین ثبت ('+fa(lp.km)+') است.');return}
+  addReading(km);commit();
+  var e2=estimate();
+  toast(est.km!=null?'تخمین قبلی '+fa(est.km)+' بود (اختلاف '+fa(Math.abs(km-est.km))+' کیلومتر). میانگین جدید: '+fa(e2.rate)+' در روز':'کیلومتر ثبت شد');
+  render();
+}
+function importState(text){
+  var o;try{o=JSON.parse(text)}catch(e){toast('متن پشتیبان معتبر نیست');return}
+  if(!o||!Array.isArray(o.logs)||!Array.isArray(o.templates)){toast('این متن، پشتیبان این برنامه نیست');return}
+  S=migrate(o);commit();toast('بازیابی شد');render();
+}
+function backupJson(){return JSON.stringify(S,null,1)}
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-go]');
+  if(g){if(g.dataset.go==='setup'&&S.plan&&g.dataset.nav==='setup')setCat='';go(g.dataset.go);return}
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var a=b.dataset.act,id=b.dataset.id;
+  if(a==='copyMail'){
+    var em=cfg.feedbackEmail,okm=function(){toast('ایمیل کپی شد')},selm=function(){toast('ایمیل را انتخاب و کپی کنید: '+em)};
+    try{navigator.clipboard.writeText(em).then(okm,selm)}catch(er){selm()}
+    return;
+  }
+  if(a==='qk'){var qk=b.dataset.k;if(qk==='income'){go('income');return}form=null;openAdd({kind:qk});return}
+  if(a==='lookMode'){S.look.mode=b.dataset.m;commit();applyLook();render();return}
+  if(a==='lookSkin'){S.look.skin=b.dataset.s;commit();applyLook();render();return}
+  if(a==='setOpen'){setCat=b.dataset.c;setDirty=false;tplEdit=null;render();return}
+  if(a==='setBack'){if(setDirty&&!b.dataset.ok&&!confirmTwice(b,'تغییرات ذخیره‌نشده از بین می‌رود. لغو؟'))return;setCat='';setDirty=false;tplEdit=null;render();return}
+  if(a==='setSave'){var sf=document.querySelector('.setpage form[data-form]');if(sf){if(sf.requestSubmit)sf.requestSubmit();else sf.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))}return}
+  if(a==='contactOpen'){contactOpen=true;syncModal();return}
+  if(a==='contactClose'){contactOpen=false;syncModal();return}
+  if(a==='donateSoon'){toast('راه حمایت مالی به‌زودی اضافه می‌شود. از محبت شما ممنونیم.');return}
+  if(a==='authMode'){auth.mode=b.dataset.m;auth.msg='';render();return}
+  if(a==='copyRec'){
+    var rc=auth.recovery||'',okc=function(){toast('کد کپی شد')},sel=function(){var el=$('reccode');if(el){var rg=document.createRange();rg.selectNodeContents(el);var sl=getSelection();sl.removeAllRanges();sl.addRange(rg)}toast('کد را انتخاب و کپی کنید')};
+    try{navigator.clipboard.writeText(rc).then(okc,sel)}catch(er){sel()}
+    return;
+  }
+  if(a==='recDone'){var ck=$('rec_ok');if(!ck||!ck.checked){toast('اول کد را ذخیره کنید و تیک را بزنید');return}auth.recovery=null;render();return}
+  if(a==='logout'){if(dirty&&!confirmTwice(b,'تغییرات همگام‌نشده از بین می‌رود. تأیید خروج؟'))return;doLogout();return}
+  if(a==='installApp'){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;render()}return}
+  if(a==='dismissTip'){try{localStorage.setItem('carservice.tip','1')}catch(er){}render();return}
+  if(a==='newLog'){form=null;openAdd();return}
+  if(a==='done'){var t=S.templates.filter(function(x){return x.id===id})[0];openAdd({kind:t.kind,tpls:[id]});return}
+  if(a==='cancelLog'){if(formDirty(form)&&!form.confirmCancel){form.confirmCancel=true;render();return}leaveForm();return}
+  if(a==='cancelYes'){leaveForm();return}
+  if(a==='cancelNo'){form.confirmCancel=false;render();return}
+  if(a==='ddDone'){var w=b.dataset.w;if(w==='b'&&form)form.blocks[+b.dataset.bi].ddOpen=false;if(w==='r')rep.dd=false;if(w==='h')hf.dd=false;render();return}
+  if(a==='setPlan'){var np=b.dataset.p;S.plan=np;if(np==='silver'&&!S.fuel.init)S.fuel.none=true;commit();render();toast('پلن '+PLANS[np].name+' فعال شد');return}
+  if(a==='tSet'){var tk=b.dataset.k;tour[tk]=b.dataset.v;if(tk==='type'){tour.brand=tour.model=tour.cc='';tour.ft='petrol'}render();return}
+  if(a==='tNext'){var sts=tourSteps();if(!tourCheck(sts[tour.i]))return;tour.i++;render();return}
+  if(a==='tBack'){if(tour.i>0)tour.i--;render();return}
+  if(a==='tFinish'){if(!tourCheck('km'))return;tourFinish();return}
+  if(a==='incMode'){if($('inc_amt'))inc.amt=$('inc_amt').value;if($('inc_note'))inc.note=$('inc_note').value;inc.mode=b.dataset.m;render();return}
+  if(a==='incDel'){if(!confirmTwice(b,'حذف شود؟'))return;S.income=S.income.filter(function(e){return e.id!==id});commit();render();return}
+  if(a==='fuelNone'){S.fuel.none=true;commit();render();return}
+  if(a==='fuelHas'){S.fuel.none=false;commit();render();return}
+  if(a==='fuelInit'){var bal={};[].forEach.call(document.querySelectorAll('[data-fi]'),function(e){var v=parseNum(e.value);bal[e.dataset.fi]=isFinite(v)&&v>=0?v:0});S.fuel.bal=bal;S.fuel.init=true;S.fuel.initDate=todayIso();commit();toast('موجودی کارت ثبت شد');render();return}
+  if(a==='addItem'){addItem(+b.dataset.bi);return}
+  if(a==='addBlock'){form.blocks.forEach(function(x){x.ddOpen=false});var nb=newBlock('');form.blocks.push(nb);render();return}
+  if(a==='delBlock'){form.blocks.splice(+b.dataset.bi,1);render();return}
+  if(a==='doUpdate'){location.reload();return}
+  if(a==='newsOk'){try{localStorage.setItem(SEEN_KEY,APP_VERSION)}catch(e){}newsSeen=true;render();return}
+  if(a==='editLog'){var l=S.logs.filter(function(x){return x.id===id})[0];if(l){form=makeForm(l);go('add')}return}
+  if(a==='delLog'){if(!confirmTwice(b,'تأیید حذف؟'))return;S.logs=S.logs.filter(function(x){return x.id!==form.id});form=null;commit();toast('حذف شد');go('history');return}
+  if(a==='hfilter'){hf.kind=b.dataset.k;render();return}
+  if(a==='rmode'){rep.mode=b.dataset.m;render();return}
+  if(a==='unit'){S.unit=b.dataset.u;commit();render();toast('واحد پول: '+unitName());return}
+  if(a==='applyPride'){
+    if(!confirmTwice(b,'جایگزین فهرست فعلی شود؟'))return;
+    var ids={};defaultTpls().forEach(function(t){ids[t.id]=1});
+    S.templates=defaultTpls().concat(S.templates.filter(function(t){return !ids[t.id]&&t.id.charAt(0)==='c'}));
+    commit();render();toast('الگوی پراید اعمال شد');return;
+  }
+  if(a==='tplToggle'){S.templates.forEach(function(t){if(t.id===id)t.on=!t.on});commit();render();return}
+  if(a==='tplEdit'){tplEdit=id;render();return}
+  if(a==='tplNew'){tplEdit='new';render();return}
+  if(a==='tplCancel'){tplEdit=null;render();return}
+  if(a==='tplDel'){if(!confirmTwice(b,'تأیید حذف؟'))return;S.templates=S.templates.filter(function(t){return t.id!==id});tplEdit=null;commit();render();return}
+  if(a==='delRead'){S.readings=S.readings.filter(function(r){return r.date!==b.dataset.d});commit();render();return}
+  if(a==='dlBackup'){
+    try{
+      var blob=new Blob([backupJson()],{type:'application/json'}),url=URL.createObjectURL(blob),an=document.createElement('a');
+      an.href=url;an.download='mashinnameh-backup-'+todayIso()+'.json';document.body.appendChild(an);an.click();an.remove();
+      setTimeout(function(){URL.revokeObjectURL(url)},4000);toast('فایل پشتیبان آماده شد');markBackup();
+    }catch(er){toast('ذخیره‌ی فایل ممکن نشد. از «کپی متن پشتیبان» استفاده کنید.')}
+    return;
+  }
+  if(a==='copyBackup'){
+    var ta=$('bkText'),txt=backupJson();ta.value=txt;
+    var done=function(){markBackup();toast('متن پشتیبان کپی شد. آن را در یادداشت یا پیام به خودتان نگه دارید.')};
+    var fallback=function(){ta.focus();ta.select();toast('متن پشتیبان در کادر آماده است. آن را انتخاب و کپی کنید.')};
+    try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(er){fallback()}
+    return;
+  }
+  if(a==='restoreText'){var tx=val('bkText').trim();if(!tx){toast('اول متن پشتیبان را بچسبانید');return}if(!confirmTwice(b,'جایگزین داده‌های فعلی شود؟'))return;importState(tx);return}
+  if(a==='resetAll'){if(!confirmTwice(b,'مطمئنید؟ همه چیز پاک می‌شود'))return;S=blank();commit();form=null;toast('همه‌ی داده‌ها پاک شد');go('home');return}
+});
+document.addEventListener('submit',function(e){
+  var f=e.target.closest('[data-form]');if(!f)return;
+  e.preventDefault();
+  var k=f.dataset.form;
+  if(k==='login'){auth.email=val('a_email').trim();authCall('/api/login',{email:auth.email,password:val('a_pass')});return}
+  if(k==='signup'){
+    auth.email=val('a_email').trim();auth.prov=val('a_prov');
+    if(!auth.prov){toast('استان را انتخاب کنید');return}
+    if(!$('a_terms').checked){toast('برای ساخت حساب، حریم خصوصی را بپذیرید');return}
+    authCall('/api/signup',{email:auth.email,password:val('a_pass'),province:auth.prov});return;
+  }
+  if(k==='recover'){auth.email=val('a_email').trim();authCall('/api/recover',{email:auth.email,recovery:val('a_rec'),password:val('a_pass')});return}
+  if(k==='prof'){
+    var pv=val('p_prov');if(!pv){toast('استان را انتخاب کنید');return}
+    api('PUT','/api/profile',{province:pv}).then(function(r){if(r.status===200){me=r.data.user;try{localStorage.setItem(USER_KEY,JSON.stringify(me))}catch(er){}toast('ذخیره شد')}else toast((r.data&&r.data.error)||'ذخیره نشد')},function(){toast('ارتباط با سرور برقرار نشد')});
+    return;
+  }
+  if(k==='pw'){
+    api('POST','/api/password',{password:val('pw_cur'),newPassword:val('pw_new')}).then(function(r){
+      if(r.status===200){auth.recovery=r.data.recovery;render()}else toast((r.data&&r.data.error)||'تغییر نکرد');
+    },function(){toast('ارتباط با سرور برقرار نشد')});
+    return;
+  }
+  if(k==='del'){
+    var btn=f.querySelector('button[type=submit]');
+    if(!confirmTwice(btn,'مطمئنید؟ دوباره بزنید'))return;
+    api('DELETE','/api/account',{password:val('del_pass')}).then(function(r){
+      if(r.status===200){clearLocalAll();me=null;auth.mode='login';auth.msg='حساب شما حذف شد.';view='home';render()}
+      else toast((r.data&&r.data.error)||'حذف نشد');
+    },function(){toast('ارتباط با سرور برقرار نشد')});
+    return;
+  }
+  if(k==='onboard'){
+    var km=parseNum(val('ob_km'));
+    if(!isFinite(km)||km<0){toast('عدد کیلومترشمار را وارد کنید');return}
+    S.car.name=val('ob_name').trim()||'ماشین من';S.car.year=val('ob_year').trim();S.car.plate=val('ob_plate').trim();
+    var r=parseNum(val('ob_rate'));if(isFinite(r)&&r>0)S.fallbackRate=Math.round(r);
+    addReading(Math.round(km));commit();render();toast('آماده است. حالا آخرین زمان سرویس‌ها را ثبت کنید.');return;
+  }
+  if(k==='income'){
+    var ia=parseNum(val('inc_amt'));if(!isFinite(ia)||ia<=0){toast('مبلغ درآمد را وارد کنید');return}
+    if(inc.mode==='range'){inc.from=readDate('if');inc.to=readDate('it')}
+    var ir=incRange();S.income.push({id:uid(),from:ir[0],to:ir[1],amount:ia/mult(),note:(val('inc_note')||'').trim()});
+    inc.amt='';inc.note='';commit();toast('درآمد ثبت شد');render();return;
+  }
+  if(k==='odo'){saveOdo(val('qodo'));return}
+  if(k==='log'){saveLog();return}
+  if(k==='car'){S.car.name=val('c_name').trim();S.car.year=val('c_year').trim();S.car.plate=val('c_plate').trim();commit();setCat='';setDirty=false;render();toast('ذخیره شد');return}
+  if(k==='fuelcfg'){
+    S.fuel.tiers.forEach(function(t){
+      var nm=val('fc_'+t.id+'_name').trim(),pr=parseNum(val('fc_'+t.id+'_price'));
+      if(nm)t.name=nm;if(isFinite(pr)&&pr>0)t.price=Math.round(pr);
+      if(!t.free){var qu=parseNum(val('fc_'+t.id+'_quota')),cp=parseNum(val('fc_'+t.id+'_cap'));
+        if(isFinite(qu)&&qu>=0)t.quota=qu;if(isFinite(cp)&&cp>=0)t.cap=cp;if(t.cap<t.quota)t.cap=t.quota}
+    });
+    commit();toast('ذخیره شد');render();return;
+  }
+  if(k==='est'){var rt=parseNum(val('e_rate'));S.calDays=+val('e_cal')||21;if(isFinite(rt)&&rt>0)S.fallbackRate=Math.round(rt);commit();setCat='';setDirty=false;toast('ذخیره شد');render();return}
+  if(k==='tpl'){
+    var name=val('tf_name').trim();if(!name){toast('نام را وارد کنید');return}
+    var km2=parseNum(val('tf_km')),mo=parseNum(val('tf_months')),dy=parseNum(val('tf_days'));
+    var o={name:name,kind:val('tf_kind'),km:isFinite(km2)&&km2>0?Math.round(km2):0,months:isFinite(mo)&&mo>0?Math.round(mo):0,days:isFinite(dy)&&dy>0?Math.round(dy):0};
+    if(tplEdit==='new')S.templates.push(Object.assign({id:'c'+uid(),on:true},o));
+    else S.templates.forEach(function(t){if(t.id===tplEdit)Object.assign(t,o)});
+    tplEdit=null;commit();render();toast('ذخیره شد');return;
+  }
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.dataset&&tour){if(t.dataset.tl!==undefined){tour.last[t.dataset.tl]=t.value;return}if(t.dataset.t!==undefined&&t.dataset.tr){tour[t.dataset.t]=t.value;if(t.dataset.t==='brand')tour.model='';render();return}}
+  if(t.dataset&&t.dataset.df){
+    clampDay(t.dataset.df);
+    if(t.dataset.df==='fd'&&form){form.date=readDate('fd');updateOk()}
+    if(t.dataset.df==='rf'||t.dataset.df==='rt'){rep.from=readDate('rf');rep.to=readDate('rt');render()}
+    return;
+  }
+  if(t.id==='rep_y'||t.id==='rep_m'){rep.y=+val('rep_y');if($('rep_m'))rep.m=+val('rep_m');render();return}
+  if(t.id==='bkFile'&&t.files&&t.files[0]){
+    var rd=new FileReader();
+    rd.onload=function(){$('bkText').value=String(rd.result||'');toast('فایل خوانده شد. برای بازیابی، دکمه‌ی «بازیابی از متن» را بزنید.')};
+    rd.readAsText(t.files[0]);return;
+  }
+  if(t.dataset&&t.dataset.fk!==undefined&&form){var bk=form.blocks[+t.dataset.fk];bk.kind=t.value;bk.tpls=[];bk.icost={};bk.lit={};bk.brand='';bk.price={};autoCost();bk.gcostTxt='';bk.ddOpen=false;form.confirmCancel=false;render();return}
+  if(t.dataset&&t.dataset.hk!==undefined){hf.kind=t.value;hf.fi=[];hf.dd=false;render();return}
+  if(t.dataset&&t.dataset.htpl!==undefined){hf.fi=[].map.call(document.querySelectorAll('[data-htpl]:checked'),function(i){return i.dataset.htpl});hf.dd=true;render();return}
+  if(t.dataset&&t.dataset.rk!==undefined){rep.fk=t.value;rep.fi=[];rep.dd=false;render();return}
+  if(t.dataset&&t.dataset.rtpl!==undefined){rep.fi=[].map.call(document.querySelectorAll('[data-rtpl]:checked'),function(i){return i.dataset.rtpl});rep.dd=true;render();return}
+  if(t.dataset&&t.dataset.tpl&&t.dataset.bi!==undefined&&form){var bb=form.blocks[+t.dataset.bi];bb.tpls=[].map.call(document.querySelectorAll('[data-bi="'+t.dataset.bi+'"][data-tpl]:checked'),function(i){return i.dataset.tpl});Object.keys(bb.icost).forEach(function(k){if(bb.tpls.indexOf(k)<0)delete bb.icost[k]});Object.keys(bb.lit||{}).forEach(function(k){if(bb.tpls.indexOf(k)<0)delete bb.lit[k]});bb.ddOpen=true;autoCost();render();return}
+  if(t.id==='a_prov')auth.prov=t.value;
+  if(t.id==='f_cost'||t.id==='f_km'||isMoneyIn(t)){var n=parseNum(t.value);if(isFinite(n))t.value=fa(n)}
+});
+var FMAP={f_km:'kmTxt',f_cost:'costTxt',f_place:'place',f_note:'note',f_title:'title'};
+function isMoneyIn(t){return t.dataset&&(t.dataset.gc!==undefined||t.dataset.ic!==undefined||t.dataset.grp!==undefined)}
+function syncForm(t){
+  if(!form)return;
+  if(t.id==='f_cost')form.costEdited=String(t.value).trim()!=='';
+  if(FMAP[t.id])form[FMAP[t.id]]=t.value;
+  else if(t.dataset){
+    if(t.dataset.lit!==undefined){var q=t.dataset.lit.split('|');form.blocks[+q[0]].lit[q[1]]=t.value;autoCost();refreshAmts();updateOk();return}
+    if(t.dataset.every!==undefined){form.blocks[+t.dataset.every].every=t.value;return}
+    if(t.dataset.brand!==undefined){form.blocks[+t.dataset.brand].brand=t.value;updateOk();return}
+    if(t.dataset.gc!==undefined)form.blocks[+t.dataset.gc].gcostTxt=t.value;
+    else if(t.dataset.ic!==undefined){var p=t.dataset.ic.split('|');form.blocks[+p[0]].icost[p[1]]=t.value;autoCost()}
+    else if(t.dataset.nt!==undefined){form.blocks[+t.dataset.nt].newTxt=t.value;return}
+  }
+  updateOk();
+}
+var moreOpen=false;
+document.addEventListener('toggle',function(e){if(e.target&&e.target.id==='moreSvc')moreOpen=e.target.open;if(e.target&&e.target.id==='rItems')rep.dd=e.target.open;if(e.target&&e.target.id==='hItems')hf.dd=e.target.open;var tid=e.target&&e.target.id||'',mm=/^(itemsDd|costDd)(\d+)$/.exec(tid);if(mm&&form&&form.blocks[+mm[2]])form.blocks[+mm[2]][mm[1]==='itemsDd'?'ddOpen':'costOpen']=e.target.open;if(tid==='rItems')rep.dd=e.target.open},true);
+document.addEventListener('click',function(e){[].forEach.call(document.querySelectorAll('details.dd[open]'),function(d){if(/^(itemsDd|rItems|hItems)/.test(d.id)&&!d.contains(e.target))d.open=false})});
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.dataset&&e.target.dataset.nt!==undefined){e.preventDefault();if(form)addItem(+e.target.dataset.nt)}});
+var GROUPED=['ob_km','ob_rate','qodo','f_km','f_cost','tf_km','e_rate','tk_km','tk_rate','inc_amt'];
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.dataset&&tour){if(t.dataset.t!==undefined&&!t.dataset.tr)tour[t.dataset.t]=t.value;if(t.dataset.tb!==undefined)tour.bal[t.dataset.tb]=t.value}
+  if(t.closest&&t.closest('.setpage')&&t.closest('form[data-form=car],form[data-form=est]'))setDirty=true;
+  if(t.id==='inc_amt')inc.amt=t.value;if(t.id==='inc_note')inc.note=t.value;
+  syncForm(t);
+  if(t.id==='hq'){hf.q=t.value;fillHistory()}
+  if(t.id==='a_email')auth.email=t.value;
+  if(GROUPED.indexOf(t.id)>=0||isMoneyIn(t)){
+    var v=t.value,c=t.selectionStart==null?v.length:t.selectionStart,digs=0;
+    for(var i=0;i<c;i++)if(/[0-9۰-۹٠-٩]/.test(v.charAt(i)))digs++;
+    var n=parseNum(v);if(!isFinite(n)||n<0||/[.٫]/.test(v))return;
+    var out=fa(n);if(out===v)return;t.value=out;
+    var pos=0,k=0;while(pos<out.length&&k<digs){if(/[۰-۹]/.test(out.charAt(pos)))k++;pos++}
+    try{t.setSelectionRange(pos,pos)}catch(x){}
+    syncForm(t);
+  }
+});
+
+(function(){var h=location.hash.slice(1);if(VIEWS.indexOf(h)>=0)view=h})();
+
+boot();
+})();
+</script>
+</body>
+</html>
