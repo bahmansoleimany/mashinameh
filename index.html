@@ -1231,7 +1231,7 @@ function brandName(c){return (c&&(c.brand==='سایر'?'':c.brand))||((c&&c.name
 function brandBadge(c,sz){
   var b=brandName(c),col=BCOL[b];if(!col){var h=0;for(var i=0;i<b.length;i++)h=(h*31+b.charCodeAt(i))%360;col='hsl('+h+',55%,38%)'}
   var ch=(b||'؟').charAt(0),em=c&&c.type==='moto'?(c.mk==='scooter'||c.mk==='ev'?'🛵':'🏍️'):'🚗';sz=sz||34;
-  var img='';if(c&&c.logo)img='<img class="blogo cus" alt="" src="'+c.logo+'">';else if(BSLUG[b])img='<img class="blogo" alt="" src="logos/'+BSLUG[b]+'.png" onload="this.parentNode.classList.add(\'has\')" onerror="this.remove()">';
+  var img='';if(c&&c.logo)img='<img class="blogo cus" alt="" src="'+c.logo+'">';else if(BSLUG[b])img='<img class="blogo" alt="" src="logo-'+BSLUG[b]+'.png" onload="this.parentNode.classList.add(\'has\')" onerror="this.remove()">';
   return '<span class="bbadge'+(c&&c.logo?' has':'')+'" style="--bs:'+sz+'px;background:'+col+'" title="'+esc(b)+'"><b>'+esc(ch)+'</b>'+img+'<i>'+em+'</i></span>';
 }
 function vStrip(){
