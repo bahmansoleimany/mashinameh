@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#EEF2FA">
 <meta name="color-scheme" content="light dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -586,6 +586,17 @@ html.chgopen body{overflow:hidden}
 .insf>.stack{gap:var(--s2)}
 html[data-motion="0"] *,html[data-motion="0"] *::before,html[data-motion="0"] *::after{animation:none!important;transition:none!important}
 @media (prefers-reduced-motion:reduce){#view.dirL,#view.dirR,.msheet,.mback,#chg,.ibub-in{animation:none!important}}
+
+/* ===== v4.1 ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-x pan-y}
+.wrap{padding-bottom:calc(130px + env(safe-area-inset-bottom,0px))}
+.srch{position:relative}
+.srch input[type=search]{background:var(--surface2);-webkit-appearance:none;appearance:none}
+.srch input::placeholder{opacity:.55}
+.srr{display:flex;flex-direction:column;gap:var(--s1)}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);text-align:start;font:inherit;color:var(--ink);background:var(--surface);border:var(--bw) solid var(--bd);border-radius:var(--r3);padding:var(--s2) var(--s3);cursor:pointer}
+.srow:active{background:var(--surface2)}
+.srow small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -707,8 +718,8 @@ var MR=[['پراید',1372,1401,'j'],['تیبا',1388,1401,'j'],['ساینا',13
  ['پژو206',1380,null,'j'],['پژو207',1388,null,'j'],['پژو405',1374,null,'j'],['پژوپارس',1383,null,'j'],['سمند',1380,null,'j'],['دنا',1391,null,'j'],['رانا',1395,null,'j'],['تارا',1400,null,'j'],['سورن',1387,null,'j'],
  ['تندر90',1385,null,'j'],['ساندرو',1388,null,'j'],
  ['کرولا',1966,null,'g'],['کمری',1982,null,'g'],['یاریس',1999,null,'g'],['سیویک',1972,null,'g'],['آکورد',1976,null,'g'],['النترا',1990,null,'g'],['سراتو',2004,null,'g'],['توسان',2004,null,'g'],['سانتافه',2000,null,'g'],['اسپورتیج',1993,null,'g'],['گلف',1974,null,'g'],['پاسات',1973,null,'g'],['مزدا3',2003,null,'g'],['مزدا6',2002,null,'g']];
-var IRB=['ایران‌خودرو','سایپا','مدیران خودرو','بهمن','کرمان موتور','کویر موتور','رهرو','پیشرو','دایچی','پارس خودرو'];
-var CHB=['چری','جک','بی‌وای‌دی','جیلی','هاوال','چانگان','جی‌ای‌سی (GAC)','ام‌جی (MG)','دانگ‌فنگ','برلیانس','لیفان','بایک (BAIC)','فاو','فوتون'];
+var IRB=['زامیاد','دیار خودرو','ایران‌خودرو','سایپا','مدیران خودرو','بهمن','کرمان موتور','کویر موتور','رهرو','پیشرو','دایچی','پارس خودرو'];
+var CHB=['هایما','چری','جک','بی‌وای‌دی','جیلی','هاوال','چانگان','جی‌ای‌سی (GAC)','ام‌جی (MG)','دانگ‌فنگ','برلیانس','لیفان','بایک (BAIC)','فاو','فوتون'];
 function normN(x){return dg(String(x||'')).replace(/[\s\u200c]/g,'')}
 function modelRange(name){var n=normN(name);for(var i=0;i<MR.length;i++)if(n.indexOf(MR[i][0])>=0)return {a:MR[i][1],b:MR[i][2],cal:MR[i][3]};return null}
 function defCal(brand,type,name){var m=modelRange(name);if(m)return m.cal;if(type==='moto')return 'j';return IRB.indexOf(brand)>=0?'j':'g'}
@@ -806,7 +817,7 @@ function defaultFuel(){return {init:false,none:false,initDate:'',bal:{},tiers:[
   {id:'fu_t3000',name:'بنزین ۳۰۰۰',price:3000,quota:50,cap:50},
   {id:'fu_t10000',name:'بنزین ۱۰۰۰۰',price:10000,quota:50,cap:50},
   {id:'fu_free',name:'بنزین آزاد',price:10000,free:true}]}}
-function blank(){return ensureVs({v:1,tplVer:6,fuel:defaultFuel(),unit:'toman',updated:0,plan:'',look:{skin:'modern',mode:'system',glass:true,digits:'en'},income:[],car:{name:'',plate:'',year:'',type:'car'},calDays:21,fallbackRate:40,readings:[],templates:defaultTpls(),logs:[]})}
+function blank(){return ensureVs({v:1,tplVer:6,fuel:defaultFuel(),unit:'toman',updated:0,plan:'',look:{skin:'modern',mode:'system',glass:true,digits:'en',font:'homa',fv:41},income:[],car:{name:'',plate:'',year:'',type:'car'},calDays:21,fallbackRate:40,readings:[],templates:defaultTpls(),logs:[]})}
 function migrate(o){var b=blank();if(!o.vs){delete b.vs;delete b.cur}for(var k in o){if(Object.prototype.hasOwnProperty.call(o,k))b[k]=o[k]}
   if(!b.car)b.car=blank().car;if(!Array.isArray(b.readings))b.readings=[];if(!Array.isArray(b.logs))b.logs=[];if(!Array.isArray(b.templates))b.templates=defaultTpls();
   if(!o.tplVer){if(!b.logs.length&&!b.readings.length&&!b.car.name)b.templates=defaultTpls();b.tplVer=2}
@@ -818,6 +829,7 @@ function migrate(o){var b=blank();if(!o.vs){delete b.vs;delete b.cur}for(var k i
   if(!b.fuel||!Array.isArray(b.fuel.tiers))b.fuel=defaultFuel();
   if(!Array.isArray(b.income))b.income=[];
   if(!b.look||typeof b.look!=='object')b.look={};
+  if(!(b.look.fv>=41)){if(!b.look.font)b.look.font='homa';b.look.fv=41}
   var lk=b.look;if(!lk.skin)lk.skin='modern';if(!lk.mode)lk.mode='system';if(typeof lk.glass!=='boolean')lk.glass=true;if(lk.digits!=='fa')lk.digits='en';if(typeof lk.font!=='string')lk.font='';
   if(!b.car.type)b.car.type='car';
   if(!b.plan)b.plan=(b.car.name||b.readings.length||b.logs.length)?'gold':'';
@@ -867,9 +879,9 @@ function hasData(){return S.logs.length>0||S.readings.length>0||!!S.car.name}
 function commit(){S.updated=Date.now();saveLocal();schedulePush(false)}
 
 /* ---------- account and cloud sync ---------- */
-var APP_VERSION='4.0.0',SEEN_KEY='carservice.seen',newsSeen=false;
+var APP_VERSION='4.1.0',SEEN_KEY='carservice.seen',newsSeen=false;
 /* نسخه‌گذاری: عدد اول = تغییر بنیادین، عدد دوم = قابلیت تازه، عدد سوم = رفع ایراد و بهبود کوچک. مهم‌ترین مورد اول بیاید. */
-var CHANGES=[{v:'4.0.0',big:['ظاهر یکدست‌شده: قاب‌ها و حاشیه‌ی همه‌ی کارت‌ها، صفحه‌ها و نوار پایین هم‌اندازه و هم‌رنگ شد','اندازه‌ها و فاصله‌ها بر پایه‌ی نسبت طلایی (۴، ۸، ۱۳، ۲۱، ۳۴) و فقط پنج اندازه‌ی نوشته','حرکت‌ها: پنجره‌ها از وسط باز و بسته می‌شوند و با کشیدن انگشت به چپ و راست بین صفحه‌ها می‌روید (از «ظاهر برنامه ← حرکت‌ها» قابل خاموش‌کردن)'],better:['دکمه‌ی گرد «ثبت» از نوار جدا و برجسته‌تر شد','این صفحه‌ی «تازه‌ها»: همه‌ی تغییراتی که از آخرین نسخه‌ی دیده‌شده اضافه شده، دسته‌بندی‌شده','راهنمای شروع: دکمه‌های «قبلی» و «بعدی» بالای صفحه','راهنمای شروع: بیمه‌ی شخص ثالث با انتخاب شرکت از فهرست، تاریخ دقیق شروع و مدت (پیش‌فرض ۱۲ ماه)'],fix:['خط دوتایی دور نوار پایین و کارت بالای صفحه برداشته شد']},{v:'3.4.0',items:['باز شدن سریع‌تر برنامه (حافظه‌ی نهان و فونت‌های جدا)','دو کاشی «تا سرویس بعدی» و «تا بازبینی دوره‌ای» در صفحه‌ی اصلی','بررسی سال ساخت بر پایه‌ی سال تولید هر مدل و انتخاب خودکار شمسی یا میلادی']},{v:'3.3.0',items:['صفحه‌ی «همه» وضعیت رنگی هر وسیله را نشان می‌دهد: قرمز (سرویس گذشته)، نارنجی (نزدیک موعد)، سبز (مرتب)','تنظیمات ظاهر دسته‌بندی شد؛ توضیحات در حباب «i» اختیاری شد','لوگوی دلخواه برای هر وسیله و برندهای تازه (از جمله چینی‌های رایج)','بررسی سال ساخت (شمسی یا میلادی) و قطعات لاستیکی در سرویس‌های دوره‌ای','اصلاح ارسال پشتیبان و نام‌های تازه برای طرح‌ها']},{v:'3.2.0',items:['چند وسیله: چند ماشین و موتور اضافه کنید؛ هر کدام پلن، سوابق و درآمد جدا دارد','صفحه‌ی «همه»: هزینه و درآمد هر وسیله و جمع کل (ماه، سال یا از ابتدا)','نشان رنگی برند و وسیله بالای صفحه','۱۲ فونت فارسی رسمی و کول در تنظیمات ← ظاهر','ارسال فایل پشتیبان از راه پیام‌رسان‌ها و ایمیل']},{v:'3.1.0',items:['ظاهر تازه با لوگوی جدید، کارت بالای صفحه با ثبت سریع و حاشیه‌ی فلزی پلن','۹ طرح رنگی و حالت روشن، تاریک، مثل گوشی یا «شب و روز» ساعتی','جلوه‌ی شیشه‌ای قابل خاموش‌کردن و اعداد با فونت کالیبری (قابل برگشت به فارسی)','دکمه‌ی ثبت وسط برجسته‌تر و بالاتر از نوار پایین']},{v:'2.1.0',items:['تنظیمات دسته‌بندی‌شده شد: هر دسته صفحه‌ی خودش را دارد، با «ذخیره» بالا راست و «لغو» بالا چپ','«ارتباط با ما» کوچک و جمع‌وجور شد و با لمس، پنجره‌ی بازشو نشان می‌دهد','ایمیل واقعی برنامه اضافه شد']},{v:'2.0.0',items:['پلن‌ها: 🥉 برنزی (فقط سرویس‌ها)، 🥈 نقره‌ای (سرویس و هزینه‌ی اختیاری) و 🥇 طلایی (هزینه، کارت سوخت و درآمد)؛ هر پلن رنگ و چیدمان خودش را دارد','راهنمای شروع: نوع وسیله، برند و مدل، ظرفیت موتور و نوع سوخت، و سرویس‌های مناسب همان ماشین یا موتور','پشتیبانی از موتورسیکلت','درآمد در پلن طلایی: امروز، دیروز، هفته، ماه یا بازه‌ی دلخواه، با سود خالص و سهم هزینه در گزارش','کاربران فعلی به‌صورت خودکار روی پلن طلایی می‌مانند؛ از تنظیمات می‌توانید پلن را عوض کنید']},{v:'1.4.1',items:['کسانی که کارت سوخت ندارند می‌توانند «کارت سوخت ندارم» را بزنند و فقط بنزین آزاد ثبت کنند','برای مکمل سوخت، فاصله‌ی پیشنهادی سازنده را (مثلاً ۳٬۰۰۰ کیلومتر) برای هر بار وارد می‌کنید']},{v:'1.4.0',items:['سوخت‌گیری: ثبت بنزین ۱۵۰۰، ۳۰۰۰، ۱۰۰۰۰ و آزاد با لیتر هر پله، موجودی خودکار کارت و شارژ اول هر ماه شمسی','مکمل سوخت با برند و قیمت؛ هر ۳۰۰۰ کیلومتر دوباره در صفحه‌ی اصلی پیشنهاد می‌شود','مصرف سوخت در ۱۰۰ کیلومتر و هزینه‌ی هر کیلومتر در گزارش','ایموجی کنار همه‌ی دسته‌ها و موضوع‌ها']},{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
+var CHANGES=[{v:'4.1.0',big:['لوگوی واقعی برندهای خودرو (پوشه‌ی logos) و برندهای تازه: پارس‌خودرو، زامیاد، هایما، دیار خودرو، لکسوس، ایسوزو','اسکوتر، موتور اتومات و موتور برقی: انتخاب نوع موتور در راهنما، سرویس‌های مخصوص (سرویس اول، بازدید وریاتور و کلاچ، روغن گیربکس) و برندهای تازه (سیم، کیمکو، نیو)','جستجوی سریع هنگام افزودن وسیله (مثلاً «۲۰۷») و هنگام ثبت خدمت (مثلاً «تسمه تایم»)'],better:['اندازه‌ی صفحه ثابت شد و زوم (دو انگشتی یا دابل‌تپ) غیرفعال است','فونت «هما» فونت پیش‌فرض شد'],fix:['آخرین مورد صفحه‌های بلند دیگر زیر نوار پایین نمی‌ماند']},{v:'4.0.0',big:['ظاهر یکدست‌شده: قاب‌ها و حاشیه‌ی همه‌ی کارت‌ها، صفحه‌ها و نوار پایین هم‌اندازه و هم‌رنگ شد','اندازه‌ها و فاصله‌ها بر پایه‌ی نسبت طلایی (۴، ۸، ۱۳، ۲۱، ۳۴) و فقط پنج اندازه‌ی نوشته','حرکت‌ها: پنجره‌ها از وسط باز و بسته می‌شوند و با کشیدن انگشت به چپ و راست بین صفحه‌ها می‌روید (از «ظاهر برنامه ← حرکت‌ها» قابل خاموش‌کردن)'],better:['دکمه‌ی گرد «ثبت» از نوار جدا و برجسته‌تر شد','این صفحه‌ی «تازه‌ها»: همه‌ی تغییراتی که از آخرین نسخه‌ی دیده‌شده اضافه شده، دسته‌بندی‌شده','راهنمای شروع: دکمه‌های «قبلی» و «بعدی» بالای صفحه','راهنمای شروع: بیمه‌ی شخص ثالث با انتخاب شرکت از فهرست، تاریخ دقیق شروع و مدت (پیش‌فرض ۱۲ ماه)'],fix:['خط دوتایی دور نوار پایین و کارت بالای صفحه برداشته شد']},{v:'3.4.0',items:['باز شدن سریع‌تر برنامه (حافظه‌ی نهان و فونت‌های جدا)','دو کاشی «تا سرویس بعدی» و «تا بازبینی دوره‌ای» در صفحه‌ی اصلی','بررسی سال ساخت بر پایه‌ی سال تولید هر مدل و انتخاب خودکار شمسی یا میلادی']},{v:'3.3.0',items:['صفحه‌ی «همه» وضعیت رنگی هر وسیله را نشان می‌دهد: قرمز (سرویس گذشته)، نارنجی (نزدیک موعد)، سبز (مرتب)','تنظیمات ظاهر دسته‌بندی شد؛ توضیحات در حباب «i» اختیاری شد','لوگوی دلخواه برای هر وسیله و برندهای تازه (از جمله چینی‌های رایج)','بررسی سال ساخت (شمسی یا میلادی) و قطعات لاستیکی در سرویس‌های دوره‌ای','اصلاح ارسال پشتیبان و نام‌های تازه برای طرح‌ها']},{v:'3.2.0',items:['چند وسیله: چند ماشین و موتور اضافه کنید؛ هر کدام پلن، سوابق و درآمد جدا دارد','صفحه‌ی «همه»: هزینه و درآمد هر وسیله و جمع کل (ماه، سال یا از ابتدا)','نشان رنگی برند و وسیله بالای صفحه','۱۲ فونت فارسی رسمی و کول در تنظیمات ← ظاهر','ارسال فایل پشتیبان از راه پیام‌رسان‌ها و ایمیل']},{v:'3.1.0',items:['ظاهر تازه با لوگوی جدید، کارت بالای صفحه با ثبت سریع و حاشیه‌ی فلزی پلن','۹ طرح رنگی و حالت روشن، تاریک، مثل گوشی یا «شب و روز» ساعتی','جلوه‌ی شیشه‌ای قابل خاموش‌کردن و اعداد با فونت کالیبری (قابل برگشت به فارسی)','دکمه‌ی ثبت وسط برجسته‌تر و بالاتر از نوار پایین']},{v:'2.1.0',items:['تنظیمات دسته‌بندی‌شده شد: هر دسته صفحه‌ی خودش را دارد، با «ذخیره» بالا راست و «لغو» بالا چپ','«ارتباط با ما» کوچک و جمع‌وجور شد و با لمس، پنجره‌ی بازشو نشان می‌دهد','ایمیل واقعی برنامه اضافه شد']},{v:'2.0.0',items:['پلن‌ها: 🥉 برنزی (فقط سرویس‌ها)، 🥈 نقره‌ای (سرویس و هزینه‌ی اختیاری) و 🥇 طلایی (هزینه، کارت سوخت و درآمد)؛ هر پلن رنگ و چیدمان خودش را دارد','راهنمای شروع: نوع وسیله، برند و مدل، ظرفیت موتور و نوع سوخت، و سرویس‌های مناسب همان ماشین یا موتور','پشتیبانی از موتورسیکلت','درآمد در پلن طلایی: امروز، دیروز، هفته، ماه یا بازه‌ی دلخواه، با سود خالص و سهم هزینه در گزارش','کاربران فعلی به‌صورت خودکار روی پلن طلایی می‌مانند؛ از تنظیمات می‌توانید پلن را عوض کنید']},{v:'1.4.1',items:['کسانی که کارت سوخت ندارند می‌توانند «کارت سوخت ندارم» را بزنند و فقط بنزین آزاد ثبت کنند','برای مکمل سوخت، فاصله‌ی پیشنهادی سازنده را (مثلاً ۳٬۰۰۰ کیلومتر) برای هر بار وارد می‌کنید']},{v:'1.4.0',items:['سوخت‌گیری: ثبت بنزین ۱۵۰۰، ۳۰۰۰، ۱۰۰۰۰ و آزاد با لیتر هر پله، موجودی خودکار کارت و شارژ اول هر ماه شمسی','مکمل سوخت با برند و قیمت؛ هر ۳۰۰۰ کیلومتر دوباره در صفحه‌ی اصلی پیشنهاد می‌شود','مصرف سوخت در ۱۰۰ کیلومتر و هزینه‌ی هر کیلومتر در گزارش','ایموجی کنار همه‌ی دسته‌ها و موضوع‌ها']},{v:'1.3.2',items:['فهرست موارد حالا بسته است؛ با لمس باز می‌شود و با «تمام» یا لمس بیرون از آن بسته می‌شود تا جای صفحه را نگیرد']},{v:'1.3.1',items:['سوابق هم مثل گزارش فیلتر دسته و مورد دارد و جمع هزینه‌ی همان فیلتر را نشان می‌دهد']},{v:'1.3.0',items:['ثبت یک مراجعه با چند دسته (سرویس + تعمیر + لوازم) و یک هزینه‌ی کل؛ ریز هزینه را اگر می‌دانید وارد کنید','گزارش با فیلتر دسته و مورد: مثلاً فقط «تعویض روغن» و جمع هزینه‌هایش','فهرست آماده‌ی تعمیرات و گزینه‌ی «سایر»؛ ثبت هزینه (حتی صفر) الزامی است']},{v:'1.2.0',items:['اعلان نسخه‌ی تازه و به‌روزرسانی با یک لمس؛ دیگر لازم نیست برنامه را پاک و دوباره نصب کنید','در صفحه‌ی شروع، دکمه‌ی بازیابی از پشتیبان برای انتقال اطلاعات به برنامه‌ی نصب‌شده']},{v:'1.1.0',items:['ثبت سرویس تازه: ابتدا دسته‌بندی، بعد مورد از فهرست مرتب‌شده؛ دکمه‌ی تأیید فقط با کامل‌بودن موارد لازم فعال می‌شود','صفحه‌ی اصلی خلوت‌تر: فقط سرویس‌های نزدیک موعد؛ بقیه زیر «همه‌ی سرویس‌ها»','سرویس تازه‌ی «کارواش» (هر ۱۵ روز)','جداکننده‌ی هزار هنگام تایپ اعداد','از ابتدا فقط سرویس‌های اصلی روشن‌اند؛ بقیه را از تنظیمات روشن کنید']},{v:'1.0.0',items:['نخستین نسخه']}];
 (function(){var BIG={'3.4.0':[0],'3.2.0':[0],'3.1.0':[0],'2.0.0':[0,1],'1.4.0':[0]},FIX={'3.3.0':[4],'1.3.2':[0],'1.4.1':[0]};
 CHANGES.forEach(function(c){if(c.items){var b=[],f=[],o=[];c.items.forEach(function(t,i){if((BIG[c.v]||[]).indexOf(i)>=0)b.push(t);else if((FIX[c.v]||[]).indexOf(i)>=0)f.push(t);else o.push(t)});c.big=b;c.better=o;c.fix=f}})})();
 var updAvail=null,lastUpd=0;
@@ -1218,7 +1230,7 @@ var BCOL={'ایران‌خودرو':'#1E40AF','مدیران خودرو':'#0F766E
 function brandName(c){return (c&&(c.brand==='سایر'?'':c.brand))||((c&&c.name||'').split(' ')[0])||''}
 function brandBadge(c,sz){
   var b=brandName(c),col=BCOL[b];if(!col){var h=0;for(var i=0;i<b.length;i++)h=(h*31+b.charCodeAt(i))%360;col='hsl('+h+',55%,38%)'}
-  var ch=(b||'؟').charAt(0),em=c&&c.type==='moto'?'🏍️':'🚗';sz=sz||34;
+  var ch=(b||'؟').charAt(0),em=c&&c.type==='moto'?(c.mk==='scooter'||c.mk==='ev'?'🛵':'🏍️'):'🚗';sz=sz||34;
   var img='';if(c&&c.logo)img='<img class="blogo cus" alt="" src="'+c.logo+'">';else if(BSLUG[b])img='<img class="blogo" alt="" src="logos/'+BSLUG[b]+'.png" onload="this.parentNode.classList.add(\'has\')" onerror="this.remove()">';
   return '<span class="bbadge'+(c&&c.logo?' has':'')+'" style="--bs:'+sz+'px;background:'+col+'" title="'+esc(b)+'"><b>'+esc(ch)+'</b>'+img+'<i>'+em+'</i></span>';
 }
@@ -1449,6 +1461,7 @@ function vAdd(){
   h+='<div class="addbar"><button id="okBtn" class="btn primary" type="submit"'+(formCheck(f).ok?'':' disabled')+'>تأیید</button><h2>'+(f.id?'ویرایش ثبت':'ثبت جدید')+'</h2><button class="btn" type="button" data-act="cancelLog">لغو</button></div>';
   if(f.confirmCancel)h+='<div class="banner"><span>تغییرات ذخیره‌نشده از بین می‌رود. لغو شود؟</span><div class="actions"><button class="btn danger small" type="button" data-act="cancelYes">بله، لغو کن</button><button class="btn small" type="button" data-act="cancelNo">ادامه‌ی ویرایش</button></div></div>';
   h+='<label>تاریخ'+dateField('fd',f.date)+'</label>';
+  if(!f.id)h+='<label class="srch">جستجوی خدمت<input type="search" data-fsq="1" autocomplete="off" placeholder="جستجو… مثلاً تسمه تایم، روغن، لنت"></label><div class="srr" id="fsr"></div>';
   f.blocks.forEach(function(b,i){h+=blockHtml(f,b,i)});
   var last=f.blocks[f.blocks.length-1],canAdd=last.kind&&last.tpls.length&&f.blocks.length<kindKeys().length;
   h+='<button class="btn" type="button" data-act="addBlock"'+(canAdd?'':' disabled')+'>+ دسته‌ی دیگر (در همین مراجعه)</button>';
@@ -1626,21 +1639,23 @@ var BRANDS={
   'رنو':['تندر ۹۰ (L90)','ساندرو','کپچر','داستر','مگان'],'کیا':['سراتو','ریو','اسپورتیج','سورنتو','سپیا','پیکانتو'],'هیوندای':['النترا','i20','i30','تیبورون','توسان','سانتافه','ix35','سوناتا'],
   'تویوتا':['کرولا','کمری','یاریس','لندکروزر','پرادو','هایلوکس','راو ۴'],'مزدا':['مزدا ۳','مزدا ۲','CX-5','مزدا ۶'],'هوندا':['سیویک','آکورد','سیتی','CR-V'],'نیسان':['جوک','قشقایی','ایکس‌تریل','پاترول','ماکسیما'],
   'میتسوبیشی':['اوتلندر','ASX','لنسر','پاجرو'],'سوزوکی':['ویتارا','سوئیفت','ایگنیس'],'مرسدس‌بنز':['C200','E200','E350','GLC'],'بی‌ام‌و':['۳۲۰i','۵۲۸i','X1','X3','X5'],
-  'پژو (وارداتی)':['۳۰۰۸','۲۰۰۸','۵۰۸'],'سیتروئن':['C3','C5','زانتیا'],'فولکس‌واگن':['گلف','پاسات','تیگوان','جتا'],'اپل':['آسترا'],'شورولت':['کروز','اپلندر'],'فورد':['فوکوس','اکسپلورر'],'سایر':[]},
- moto:{'هوندا':['CG 125','CBR 150','PCX','CB 250','Dio'],'یاماها':['YBR 125','FZ','NMAX','R15','MT-15'],'سوزوکی':['GN 125','Gixxer','Address','GSX'],
-  'باجاج':['پالسار ۱۵۰','پالسار ۲۰۰','پالسار NS 200','بوکسر'],'تی‌وی‌اس':['آپاچی ۱۵۰','آپاچی ۲۰۰','آپاچی RTR','جوپیتر'],'کویر موتور':[],'رهرو':[],'پیشرو':[],'دایچی':[],'بنلی':['TNT 150','TNT 25','۳۰۲'],'پیاجیو':['ورسپا','مدلی'],'KTM':['دوک ۲۰۰','دوک ۳۹۰'],'کاوازاکی':['نینجا ۲۵۰','Z250'],'هیرو':[],'سایر':[]}};
-var BSLUG={'ایران‌خودرو':'irankhodro','سایپا':'saipa','مدیران خودرو':'mvm','بهمن':'bahman','کرمان موتور':'kermanmotor','چری':'chery','جک':'jac','بی‌وای‌دی':'byd','جیلی':'geely','هاوال':'haval','چانگان':'changan','جی‌ای‌سی (GAC)':'gac','ام‌جی (MG)':'mg','دانگ‌فنگ':'dongfeng','برلیانس':'brilliance','لیفان':'lifan','بایک (BAIC)':'baic','فاو':'faw','فوتون':'foton','رنو':'renault','کیا':'kia','هیوندای':'hyundai','تویوتا':'toyota','مزدا':'mazda','هوندا':'honda','نیسان':'nissan','میتسوبیشی':'mitsubishi','سوزوکی':'suzuki','مرسدس‌بنز':'mercedes','بی‌ام‌و':'bmw','پژو':'peugeot','پژو (وارداتی)':'peugeot','سیتروئن':'citroen','فولکس‌واگن':'volkswagen','اپل':'opel','شورولت':'chevrolet','فورد':'ford','یاماها':'yamaha','باجاج':'bajaj','تی‌وی‌اس':'tvs','بنلی':'benelli','پیاجیو':'piaggio','KTM':'ktm','کاوازاکی':'kawasaki','هیرو':'hero','کویر موتور':'kavir','رهرو':'rahro','پیشرو':'pishro','دایچی':'daichi'};
+  'پژو (وارداتی)':['۳۰۰۸','۲۰۰۸','۵۰۸'],'سیتروئن':['C3','C5','زانتیا'],'فولکس‌واگن':['گلف','پاسات','تیگوان','جتا'],'اپل':['آسترا'],'شورولت':['کروز','اپلندر'],'فورد':['فوکوس','اکسپلورر'],'پارس خودرو':['تندر ۹۰','ساندرو','وانت نیسان'],'زامیاد':['Z24','وانت نیسان'],'دیار خودرو':[],'هایما':['S5','S7','7X','۸S'],'لکسوس':['RX','NX','ES','IS','GX','LX','UX'],'ایسوزو':['D-Max','NPR','NKR'],'سایر':[]},
+ moto:{'هوندا':['CG 125','CBR 150','PCX','CB 250','Dio','اکتیوا','SH 150','کلیک ۱۲۵','فورزا ۲۵۰'],'یاماها':['YBR 125','FZ','NMAX','R15','MT-15','ایروکس ۱۵۵','XMAX','فاسینو','ری ZR'],'سوزوکی':['GN 125','Gixxer','Address','GSX','برگمن ۱۲۵','برگمن ۲۰۰','اکسس ۱۲۵'],
+  'باجاج':['پالسار ۱۵۰','پالسار ۲۰۰','پالسار NS 200','بوکسر','چتک (برقی)'],'تی‌وی‌اس':['آپاچی ۱۵۰','آپاچی ۲۰۰','آپاچی RTR','جوپیتر','NTORQ 125','اسکوتی'],'کویر موتور':[],'رهرو':[],'پیشرو':[],'دایچی':[],'بنلی':['TNT 150','TNT 25','۳۰۲'],'پیاجیو':['ورسپا','مدلی','لیبرتی','بورلی','زیپ'],'KTM':['دوک ۲۰۰','دوک ۳۹۰'],'کاوازاکی':['نینجا ۲۵۰','Z250'],'هیرو':[],'سیم (SYM)':['سیمفونی','جوی‌راید','مکس‌سیم','فیدل'],'کیمکو':['اجیلیتی','لایک','داون‌تاون','ایکس‌تاون'],'نیو (NIU)':['NQi','MQi','UQi'],'اسکوتر برقی (سایر)':[],'سایر':[]}};
+var BSLUG={'ایران‌خودرو':'irankhodro','سایپا':'saipa','مدیران خودرو':'mvm','بهمن':'bahman','کرمان موتور':'kermanmotor','چری':'chery','جک':'jac','بی‌وای‌دی':'byd','جیلی':'geely','هاوال':'haval','چانگان':'changan','جی‌ای‌سی (GAC)':'gac','ام‌جی (MG)':'mg','دانگ‌فنگ':'dongfeng','برلیانس':'brilliance','لیفان':'lifan','بایک (BAIC)':'baic','فاو':'faw','فوتون':'foton','رنو':'renault','کیا':'kia','هیوندای':'hyundai','تویوتا':'toyota','مزدا':'mazda','هوندا':'honda','نیسان':'nissan','میتسوبیشی':'mitsubishi','سوزوکی':'suzuki','مرسدس‌بنز':'mercedes','بی‌ام‌و':'bmw','پژو':'peugeot','پژو (وارداتی)':'peugeot','سیتروئن':'citroen','فولکس‌واگن':'volkswagen','اپل':'opel','شورولت':'chevrolet','فورد':'ford','یاماها':'yamaha','باجاج':'bajaj','تی‌وی‌اس':'tvs','بنلی':'benelli','پیاجیو':'piaggio','KTM':'ktm','کاوازاکی':'kawasaki','هیرو':'hero','کویر موتور':'kavir','رهرو':'rahro','پیشرو':'pishro','دایچی':'daichi','پارس خودرو':'parskhodro','زامیاد':'zamyad','دیار خودرو':'diar','هایما':'haima','لکسوس':'lexus','ایسوزو':'isuzu','سیم (SYM)':'sym','کیمکو':'kymco','نیو (NIU)':'niu'};
 var CCS={car:[[1000,'تا ۱۰۰۰'],[1300,'۱۰۰۱ تا ۱۳۰۰'],[1600,'۱۳۰۱ تا ۱۶۰۰'],[2000,'۱۶۰۱ تا ۲۰۰۰'],[2500,'بالای ۲۰۰۰']],
   moto:[[125,'تا ۱۲۵'],[250,'۱۲۶ تا ۲۵۰'],[400,'۲۵۱ تا ۴۰۰'],[600,'بالای ۴۰۰']]};
 var FTYPES=[['petrol','⛽ بنزینی'],['cng','🔥 دوگانه‌سوز (بنزین و CNG)'],['diesel','🛢️ دیزل'],['hybrid','🔋 هیبرید'],['ev','⚡ برقی']];
-EM.chain='⛓️';EM.chainkit='⛓️';EM.valve='🔧';EM.brk='🛑';EM.cng='🔥';EM.cngcyl='🧯';EM.hvb='🔌';
-function vehTpls(type,ft,cc){
+EM.chain='⛓️';EM.chainkit='⛓️';EM.valve='🔧';EM.brk='🛑';EM.cng='🔥';EM.cngcyl='🧯';EM.hvb='🔌';EM.cvt='⚙️';EM.gearoil='🛢️';EM.first='🆕';
+function vehTpls(type,ft,cc,mk){
   cc=+cc||0;var L,set=function(id,f){L.forEach(function(t){if(t.id===id)f(t)})},del=function(ids){L=L.filter(function(t){return ids.indexOf(t.id)<0})};
   if(type==='moto'){
     L=[T('chain','روغن‌کاری و تنظیم زنجیر','service',500,0,true),T('oil','روغن موتور','service',cc&&cc<=125?2500:(cc<=250?3000:4000),3),T('airf','فیلتر هوا','service',6000,12),T('plug','شمع','service',8000,12),
       T('brk','بازدید لنت و روغن ترمز','service',10000,12),T('chainkit','زنجیر و دنده‌ها','consumable',15000,0),T('valve','تنظیم سوپاپ','service',10000,0),T('tires','لاستیک','consumable',15000,36),
       T('battery','باتری','consumable',0,24,false),T('wash','شست‌وشو','service',0,0,true,15),T('inspect','معاینه فنی','document',0,12),T('ins3','بیمه شخص ثالث','document',0,12),T('insb','بیمه بدنه','document',0,12,false)].concat(extraTpls());
     L=L.concat(rubberTpls('moto'));
+    if(mk==='scooter'){del(['chain','chainkit']);set('belt_cvt',function(t){t.on=true});L.push(T('cvt','بازدید وریاتور و کلاچ (CVT)','service',12000,12,true),T('gearoil','روغن گیربکس اسکوتر','service',12000,24,true),T('first','سرویس اول (۵۰۰ تا ۱۰۰۰ کیلومتر اول)','service',1000,0,false))}
+    if(mk==='ev'){del(['oil','airf','plug','chain','chainkit','valve','belt_cvt','hose_fuel']);set('battery',function(t){t.name='باتری اصلی و شارژر';t.on=true});L.push(T('hvb','بازدید باتری و سیستم برقی','service',0,12,true))}
     return L;
   }
   L=defaultTpls();
@@ -1655,7 +1670,7 @@ var LAST_OPTS=[['','فعلاً رد شود'],['15','همین ماه'],['60','۱ 
 
 /* ---------- first-run tour ---------- */
 var tour=null;
-function tourNew(){return {ins:{on:'',co:'',coTxt:'',date:'',months:'12',custom:''},ycal:'j',i:0,type:'car',brand:'',brandTxt:'',model:'',modelTxt:'',year:'',cc:'',ft:'petrol',km:'',rate:'',plan:'',card:'',bal:{},last:{}}}
+function tourNew(){return {mk:'geared',ins:{on:'',co:'',coTxt:'',date:'',months:'12',custom:''},ycal:'j',i:0,type:'car',brand:'',brandTxt:'',model:'',modelTxt:'',year:'',cc:'',ft:'petrol',km:'',rate:'',plan:'',card:'',bal:{},last:{}}}
 function tourSteps(){var s=S.vs.length>1?['type','car','engine','km','plan']:['welcome','type','car','engine','km','plan'];if(tour.plan==='gold'&&!S.fuel.init&&!S.fuel.none)s.push('card');s.push('svc');return s}
 var INSURERS=['ایران','آسیا','البرز','دانا','پارسیان','ملت','رازی','معلم','سینا','کارآفرین','نوین','سامان','تعاون','میهن','دی','ما','پاسارگاد','آرمان','تجارت‌نو','کوثر','امید','حافظ','سرمد','آوا','ایران‌معین','متحد','همراه'];
 function insList(){var a=INSURERS.slice();(S.insurers||[]).forEach(function(n){if(a.indexOf(n)<0)a.push(n)});return a}
@@ -1678,7 +1693,7 @@ function tourInsOk(){
   return true;
 }
 function tourCarName(t){var b=t.brand==='سایر'?(t.brandTxt||'').trim():(t.brand||''),m=t.model==='سایر'||(t.brand&&!(BRANDS[t.type][t.brand]||[]).length)?(t.modelTxt||'').trim():(t.model||'');return (b+' '+m).trim()}
-function tourTpls(){return vehTpls(tour.type,tour.ft,tour.cc)}
+function tourTpls(){return vehTpls(tour.type,tour.ft,tour.cc,tour.type==='moto'?tour.mk:'')}
 function tourSvcList(){return tourTpls().filter(function(t){return t.on&&!/^(r_|oth_|fu_)/.test(t.id)&&(t.km>0||t.months>0||t.days>0)})}
 function chips(k,list,cur){return '<div class="seg">'+list.map(function(p){return '<button type="button" class="fbtn'+(String(cur)===String(p[0])?' on':'')+'" data-act="tSet" data-k="'+k+'" data-v="'+p[0]+'">'+p[1]+'</button>'}).join('')+'</div>'}
 function vTour(){
@@ -1689,14 +1704,14 @@ function vTour(){
   if(s==='type')h+='<h2>وسیله‌ی شما کدام است؟</h2><div class="plans two"><button type="button" class="plan'+(t.type==='car'?' on':'')+'" data-act="tSet" data-k="type" data-v="car"><span class="pe">🚗</span><b>خودرو</b></button><button type="button" class="plan'+(t.type==='moto'?' on':'')+'" data-act="tSet" data-k="type" data-v="moto"><span class="pe">🏍️</span><b>موتورسیکلت</b></button></div>';
   if(s==='car'){
     var bl=Object.keys(BRANDS[t.type]),ml=t.brand&&t.brand!=='سایر'?(BRANDS[t.type][t.brand]||[]):[];
-    h+='<h2>برند، مدل و سال ساخت</h2><div class="stack"><label>برند<select data-t="brand" data-tr="1"><option value="">انتخاب کنید</option>'+bl.map(function(b){return '<option'+(t.brand===b?' selected':'')+'>'+b+'</option>'}).join('')+'</select></label>';
+    h+='<h2>برند، مدل و سال ساخت</h2><div class="stack"><label class="srch">جستجوی سریع<input type="search" data-vs="1" autocomplete="off" placeholder="مثلاً ۲۰۷ یا پراید یا ورسپا"></label><div class="srr" id="vsr"></div><label>برند<select data-t="brand" data-tr="1"><option value="">انتخاب کنید</option>'+bl.map(function(b){return '<option'+(t.brand===b?' selected':'')+'>'+b+'</option>'}).join('')+'</select></label>';
     if(t.brand==='سایر')h+='<label>نام برند<input type="text" data-t="brandTxt" autocomplete="off" value="'+esc(t.brandTxt)+'"></label>';
     if(t.brand&&ml.length)h+='<label>مدل<select data-t="model" data-tr="1"><option value="">انتخاب کنید</option>'+ml.map(function(m){return '<option'+(t.model===m?' selected':'')+'>'+m+'</option>'}).join('')+'<option'+(t.model==='سایر'?' selected':'')+'>سایر</option></select></label>';
     if(t.brand&&(!ml.length||t.model==='سایر'))h+='<label>نام مدل (تایپی)<input type="text" data-t="modelTxt" autocomplete="off" value="'+esc(t.modelTxt)+'"></label>';
     h+='<div class="grid2"><label>سال ساخت به<select data-t="ycal" data-ycal="1"><option value="j"'+(t.ycal!=='g'?' selected':'')+'>شمسی</option><option value="g"'+(t.ycal==='g'?' selected':'')+'>میلادی</option></select></label><label>سال ساخت<input type="text" inputmode="numeric" data-t="year" data-yr="1" autocomplete="off" placeholder="'+faDigits(t.ycal==='g'?2019:1398)+'" value="'+esc(t.year)+'"></label></div><small class="yw" id="yw" role="alert">'+dg(yearMsg(t.year,t.ycal)||yearModelMsg(t.year,t.ycal,tourCarName(t),t.brand))+'</small></div>';
   }
   if(s==='engine'){
-    h+='<h2>'+(t.type==='car'?'موتور و سوخت':'ظرفیت موتور')+'</h2><p class="muted">برای انتخاب سرویس‌ها و فاصله‌ی روغن لازم است.</p><div class="stack"><b>ظرفیت موتور (سی‌سی)</b>'+chips('cc',CCS[t.type],t.cc);
+    h+='<h2>'+(t.type==='car'?'موتور و سوخت':'نوع و ظرفیت موتور')+'</h2><p class="muted">برای انتخاب سرویس‌ها و فاصله‌ی روغن لازم است.</p><div class="stack">'+(t.type==='moto'?'<b>نوع موتور</b>'+chips('mk',[['geared','دنده‌ای'],['scooter','اسکوتر / اتومات'],['ev','برقی']],t.mk):'')+((t.type==='moto'&&t.mk==='ev')?'':'<b>ظرفیت موتور (سی‌سی)</b>'+chips('cc',CCS[t.type],t.cc));
     if(t.type==='car')h+='<b>نوع سوخت</b>'+chips('ft',FTYPES,t.ft);
     h+='</div>';
   }
@@ -1717,7 +1732,7 @@ function tourCheck(s){
   var t=tour;
   if(s==='car'&&!tourCarName(t)){toast('برند یا مدل را وارد کنید');return false}
   if(s==='car'&&yearMsg(t.year,t.ycal)){toast(yearMsg(t.year,t.ycal));return false}
-  if(s==='engine'&&!t.cc){toast('ظرفیت موتور را انتخاب کنید');return false}
+  if(s==='engine'&&!t.cc&&!(t.type==='moto'&&t.mk==='ev')){toast('ظرفیت موتور را انتخاب کنید');return false}
   if(s==='km'){var k=parseNum(t.km);if(!isFinite(k)||k<0){toast('عدد کیلومترشمار را وارد کنید');return false}}
   if(s==='plan'&&!t.plan){toast('یک پلن انتخاب کنید');return false}
   if(s==='card'&&!t.card){toast('کارت سوخت دارید یا ندارید؟');return false}
@@ -1725,10 +1740,10 @@ function tourCheck(s){
 }
 function tourFinish(){
   var t=tour,km=Math.round(parseNum(t.km)),r=parseNum(t.rate),today=todayIso();
-  S.plan=t.plan;S.car.type=t.type;S.car.brand=t.brand;S.car.model=t.model;S.car.cc=+t.cc||0;S.car.ftype=t.type==='car'?t.ft:'petrol';
+  S.plan=t.plan;S.car.type=t.type;S.car.brand=t.brand;S.car.model=t.model;S.car.cc=+t.cc||0;S.car.ftype=t.type==='car'?t.ft:'petrol';S.car.mk=t.type==='moto'?t.mk:'';
   S.car.name=tourCarName(t)||'ماشین من';S.car.year=(t.year||'').trim();S.car.ycal=t.ycal==='g'?'g':'j';
   if(isFinite(r)&&r>0)S.fallbackRate=Math.round(r);
-  S.templates=vehTpls(t.type,S.car.ftype,t.cc);
+  S.templates=vehTpls(t.type,S.car.ftype,t.cc,S.car.mk);
   if(t.plan==='gold'&&t.card==='yes'){var bal={};S.fuel.tiers.forEach(function(x){if(!x.free){var v=parseNum(t.bal[x.id]||'');bal[x.id]=isFinite(v)&&v>=0?v:0}});S.fuel.bal=bal;S.fuel.init=true;S.fuel.none=false;S.fuel.initDate=today}
   else if(!S.fuel.init)S.fuel.none=true;
   addReading(km);
@@ -1979,6 +1994,18 @@ function tabOrder(){var a=['home','history'];if(S.plan==='bronze'){if(S.vs.lengt
     go(T[n]);
   },{passive:true});
 })();
+function nrm(x){return String(x||'').toLowerCase().replace(/[۰-۹]/g,function(c){return String(c.charCodeAt(0)-1776)}).replace(/[٠-٩]/g,function(c){return String(c.charCodeAt(0)-1632)}).replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[\u200c\u200d\s\-_.()ـ]/g,'')}
+function qTokens(q){return String(q||'').trim().split(/\s+/).map(nrm).filter(Boolean)}
+var vsList=[];
+function vsFind(q){var tk=qTokens(q);vsList=[];if(!tk.length)return;var all=BRANDS[tour.type]||{};Object.keys(all).forEach(function(b){if(b==='سایر'||/^سایر/.test(b))return;var ms=all[b];var hay0=nrm(b);if(!ms.length){if(tk.every(function(k){return hay0.indexOf(k)>=0}))vsList.push({b:b,m:''});return}ms.forEach(function(m){var h=hay0+nrm(m);if(tk.every(function(k){return h.indexOf(k)>=0}))vsList.push({b:b,m:m})})});vsList=vsList.slice(0,8)}
+function vsHtml(){return vsList.length?vsList.map(function(r,i){return '<button type="button" class="srow" data-act="vsPick" data-i="'+i+'"><b>'+esc(r.m||r.b)+'</b><small>'+(r.m?esc(r.b):'برند')+'</small></button>'}).join(''):''}
+var fsList=[];
+function fsFind(q){var tk=qTokens(q);fsList=[];if(!tk.length)return;S.templates.forEach(function(t){if(t.kind==='fuel')return;var h=nrm(t.name)+nrm(KINDS[t.kind]||'');if(tk.every(function(k){return h.indexOf(k)>=0}))fsList.push(t)});fsList=fsList.slice(0,8)}
+function fsHtml(){return fsList.length?fsList.map(function(t){return '<button type="button" class="srow" data-act="fsPick" data-id="'+esc(t.id)+'"><b>'+esc(itemLabel(t))+'</b><small>'+esc((KINDS[t.kind]||'').replace(/^\S+\s/,''))+'</small></button>'}).join(''):'<small class="muted">موردی پیدا نشد؛ از لیست پایین هم می‌توانید انتخاب کنید.</small>'}
+(function(){
+  document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
+  document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});
+})();
 function route(){var h=location.hash.slice(1);view=VIEWS.indexOf(h)>=0?h:'home';render()}
 function go(v){if(location.hash.slice(1)===v){view=v;render()}else{location.hash=v}}
 window.addEventListener('hashchange',route);
@@ -2071,9 +2098,11 @@ document.addEventListener('click',function(e){
   if(a==='cancelNo'){form.confirmCancel=false;render();return}
   if(a==='ddDone'){var w=b.dataset.w;if(w==='b'&&form)form.blocks[+b.dataset.bi].ddOpen=false;if(w==='r')rep.dd=false;if(w==='h')hf.dd=false;render();return}
   if(a==='setPlan'){var np=b.dataset.p;S.plan=np;if(np==='silver'&&!S.fuel.init)S.fuel.none=true;commit();render();toast('پلن '+PLANS[np].name+' فعال شد');return}
-  if(a==='tSet'){var tk=b.dataset.k;tour[tk]=b.dataset.v;if(tk==='type'){tour.brand=tour.model=tour.cc='';tour.ft='petrol'}render();return}
+  if(a==='tSet'){var tk=b.dataset.k;tour[tk]=b.dataset.v;if(tk==='type'){tour.brand=tour.model=tour.cc='';tour.ft='petrol';tour.mk='geared'}render();return}
   if(a==='tNext'){var sts=tourSteps();if(!tourCheck(sts[tour.i]))return;tour.i++;render();return}
   if(a==='tBack'){if(tour.i>0)tour.i--;render();return}
+  if(a==='vsPick'&&tour){var r=vsList[+b.dataset.i];if(r){tour.brand=r.b;tour.model=r.m;tour.modelTxt='';if(!tour.ycalManual)tour.ycal=defCal(tour.brand,tour.type,tourCarName(tour));vsList=[]}render();return}
+  if(a==='fsPick'&&form){var tp=tplObj(b.dataset.id);if(!tp)return;var bl=form.blocks,tg=bl.filter(function(x){return x.kind===tp.kind})[0]||bl.filter(function(x){return !x.kind})[0];if(!tg){if(bl.length>=kindKeys().length){toast('همه‌ی دسته‌ها پر است');return}tg=newBlock('');bl.push(tg)}if(!tg.kind)tg.kind=tp.kind;if(tg.tpls.indexOf(tp.id)<0)tg.tpls.push(tp.id);form.confirmCancel=false;autoCost();fsList=[];render();toast('«'+tp.name+'» اضافه شد');return}
   if(a==='tIns'){tour.ins[b.dataset.k]=b.dataset.v;render();return}
   if(a==='tFinish'){if(!tourCheck('km')||!tourInsOk())return;tourFinish();return}
   if(a==='incMode'){if($('inc_amt'))inc.amt=$('inc_amt').value;if($('inc_note'))inc.note=$('inc_note').value;inc.mode=b.dataset.m;render();return}
@@ -2239,6 +2268,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.
 var GROUPED=['ob_km','ob_rate','qodo','f_km','f_cost','tf_km','e_rate','tk_km','tk_rate','inc_amt'];
 document.addEventListener('input',function(e){
   var t=e.target;
+  if(t.dataset&&t.dataset.vs&&tour){vsFind(t.value);var o=document.getElementById('vsr');if(o)o.innerHTML=vsHtml();return}
+  if(t.dataset&&t.dataset.fsq&&form){fsFind(t.value);var o2=document.getElementById('fsr');if(o2)o2.innerHTML=t.value.trim()?fsHtml():'';return}
   if(t.dataset&&tour&&t.dataset.ti!==undefined&&t.dataset.ti!=='on'&&t.dataset.ti!=='co'){tour.ins[t.dataset.ti]=t.value}
   if(t.dataset&&tour){if(t.dataset.t!==undefined&&!t.dataset.tr){tour[t.dataset.t]=t.value;if(t.dataset.t==='ycal')tour.ycalManual=true}if(t.dataset.tb!==undefined)tour.bal[t.dataset.tb]=t.value}
   if(t.closest&&t.closest('.setpage')&&t.closest('form[data-form=car],form[data-form=est]'))setDirty=true;
