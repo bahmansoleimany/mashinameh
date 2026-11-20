@@ -1,14 +1,14 @@
 {
-  "name": "ماشین‌نامه",
-  "short_name": "ماشین‌نامه",
-  "description": "دفترچه‌ی هوشمند سرویس و هزینه‌ی خودرو با تقویم شمسی",
+  "name": "همرکاب",
+  "short_name": "همرکاب",
+  "description": "همرکابِ ماشینت؛ دفترچه‌ی هوشمند سرویس و هزینه با تقویم شمسی",
   "lang": "fa",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0F172A",
-  "theme_color": "#0F172A",
+  "background_color": "#102B50",
+  "theme_color": "#102B50",
   "icons": [
     {
       "src": "icon-192.png",

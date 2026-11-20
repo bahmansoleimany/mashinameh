@@ -1,7 +1,7 @@
 'use strict';
 // Fast-open cache for the flat build. Bump VERSION on every release.
-const VERSION = 'mn-flat-4.3.0';
-const SHELL = ['./', 'index.html', 'fonts.css', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+const VERSION = 'mn-flat-4.4.2';
+const SHELL = ['./', 'index.html', 'fonts.css', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'hamrekab-logo.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => null)))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 async function refresh(req, key, notify) {
